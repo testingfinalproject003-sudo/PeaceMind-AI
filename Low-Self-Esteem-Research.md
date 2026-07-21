@@ -20,6 +20,7 @@
 11. [Homework/Task Assignment & Follow-Up](#11-homeworktask-assignment--follow-up)
 12. [Progress Tracking & Report System](#12-progress-tracking--report-system)
 13. [Safety Guardrails](#13-safety-guardrails)
+14. [🩺 Screening Questionnaires](#14-screening-questionnaires)
 
 ---
 
@@ -463,3 +464,106 @@ Most common topic:    Exam stress
 ---
 
 *🌸 This document combines: psychoeducation research, the CBT technique library with real conversation examples, the full onboarding flow, the exercise/task system, homework follow-up, and the progress-report design — everything needed to build the AI self-esteem companion in one place. 🌸*
+
+---
+
+## 14. 🩺 Screening Questionnaires
+
+*Validated screeners for the AI to reference when gauging severity — not shown to the user as a clinical test, just internal signal.*
+
+### 1️⃣ PHQ-9 — Patient Health Questionnaire (Depression Screener)
+
+> *Over the last 2 weeks, how often have you been bothered by any of the following problems?*
+
+| # | Question |
+|---|----------|
+| 1 | 😔 Little interest or pleasure in doing things |
+| 2 | 🌧️ Feeling down, depressed, or hopeless |
+| 3 | 😴 Trouble falling or staying asleep, or sleeping too much |
+| 4 | 🔋 Feeling tired or having little energy |
+| 5 | 🍽️ Poor appetite or overeating |
+| 6 | 💭 Feeling bad about yourself — or that you are a failure, or have let yourself or your family down |
+| 7 | 📖 Trouble concentrating on things, such as reading or watching TV |
+| 8 | 🐢 Moving or speaking noticeably slower than usual, or being fidgety/restless |
+| 9 | ⚠️ Thoughts that you would be better off dead, or of hurting yourself in some way |
+
+**Response scale:**
+
+| Response | Score |
+|----------|:-----:|
+| Not at all | 0 |
+| Several days | 1 |
+| More than half the days | 2 |
+| Nearly every day | 3 |
+
+**📊 Scoring:** Sum all 9 items. Total range **0–27**.
+
+| Score | Severity |
+|:-----:|----------|
+| 0–4 | 🟢 Minimal |
+| 5–9 | 🟡 Mild |
+| 10–14 | 🟠 Moderate |
+| 15–19 | 🔴 Moderately severe |
+| 20–27 | 🔴 Severe |
+
+---
+
+### 2️⃣ GAD-7 — Generalized Anxiety Disorder Screener
+
+> *Over the last 2 weeks, how often have you been bothered by the following?*
+
+| # | Question |
+|---|----------|
+| 1 | 😬 Feeling nervous, anxious, or on edge |
+| 2 | 🌀 Not being able to stop or control worrying |
+| 3 | 🔁 Worrying too much about different things |
+| 4 | 😮‍💨 Trouble relaxing |
+| 5 | 🦵 Being so restless that it is hard to sit still |
+| 6 | 😤 Becoming easily annoyed or irritable |
+| 7 | 😨 Feeling afraid as if something awful might happen |
+
+**Response scale:** same as PHQ-9 (0 = Not at all → 3 = Nearly every day)
+
+**📊 Scoring:** Sum all 7 items. Total range **0–21**.
+
+| Score | Severity |
+|:-----:|----------|
+| 5+ | 🟡 Mild |
+| 10+ | 🟠 Moderate |
+| 15+ | 🔴 Severe |
+
+---
+
+### 3️⃣ PSS — Perceived Stress Scale (short form)
+
+> *In the last month, how often have you felt this way?*
+
+| # | Question | Direction |
+|---|----------|:---------:|
+| 1 | 🌊 Unable to control the important things in your life | negative |
+| 2 | 💪 Confident about your ability to handle personal problems | ✅ positive |
+| 3 | ☀️ Things were going your way | ✅ positive |
+| 4 | 📚 Could not cope with all the things you had to do | negative |
+| 5 | 🗻 Difficulties were piling up so high you could not overcome them | negative |
+
+**Response scale:**
+
+| Response | Score |
+|----------|:-----:|
+| Never | 0 |
+| Almost never | 1 |
+| Sometimes | 2 |
+| Fairly often | 3 |
+| Very often | 4 |
+
+**📊 Scoring:**
+1. Reverse-score items **2 and 3** (they're positively worded): 0→4, 1→3, 2→2, 3→1, 4→0
+2. Sum all 5 item scores. Total range **0–20**.
+
+| Score | Stress Level |
+|:-----:|----------|
+| 0–6 | 🟢 Low stress |
+| 7–13 | 🟡 Moderate stress |
+| 14–20 | 🔴 High stress |
+
+> ℹ️ **Note:** This is a 5-item excerpt of the full 10-item PSS-10. The bands above are a proportional adaptation for this shortened set — not an officially published PSS cutoff. The original has no developer-published severity bands, only a raw sum (0–40 for PSS-10, 0–16 for PSS-4) where higher = more perceived stress.

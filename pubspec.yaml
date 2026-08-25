@@ -1,4 +1,4 @@
-name: flutter_application_1
+name: peace_mind_ai
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0+1
@@ -7,8 +7,21 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
+  audioplayers: ^6.8.1
+  cloud_firestore: ^6.9.0
+  firebase_auth: ^6.6.0
+  firebase_core: ^4.14.0
+  fl_chart: ^1.2.0
   flutter:
     sdk: flutter
+  flutter_local_notifications: ^22.3.0
+  http: ^1.6.0
+  intl: ^0.20.3
+  lottie: ^3.5.1
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.5
+  timezone: ^0.11.1
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +30,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/home/
+    - assets/animations/
+    - assets/audio/

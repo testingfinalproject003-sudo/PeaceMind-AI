@@ -55,18 +55,71 @@ class AuthProvider extends ChangeNotifier {
 
   /// Firestore se user ka document uthata hai. Agar exist nahi karta
   /// (bohot rare case — jaise doc manually delete ho gaya ho) to naya bana deta hai.
-  Future<void> _fetchOrCreateUserDoc(String uid, String email) async {
-    final docRef = _firestore.collection('users').doc(uid);
-    final snapshot = await docRef.get();
+  Future<void> _fetchOrCreateUserDoc(
+  String uid,
+  String email,
+) async {
+  final docRef = _firestore.collection('users').doc(uid);
+  final snapshot = await docRef.get();
 
-    if (snapshot.exists && snapshot.data() != null) {
-      _currentUser = UserModel.fromJson(snapshot.data()!);
-    } else {
-      final newUser = UserModel(uid: uid, name: '', email: email);
-      await docRef.set(newUser.toJson());
-      _currentUser = newUser;
+  final firebaseUser = _auth.currentUser;
+
+  if (snapshot.exists && snapshot.data() != null) {
+    final data = snapshot.data()!;
+
+    final firestoreName =
+        (data['name'] ?? '').toString().trim();
+
+    final firebaseName =
+        (firebaseUser?.displayName ?? '').trim();
+
+    final finalName = firestoreName.isNotEmpty
+        ? firestoreName
+        : firebaseName;
+
+    _currentUser = UserModel(
+      uid: uid,
+      name: finalName,
+      email: (data['email'] ?? email).toString(),
+      mood: (data['mood'] ?? '🙂').toString(),
+      routineCount: data['routineCount'] is int
+          ? data['routineCount'] as int
+          : 0,
+      taskCount: data['taskCount'] is int
+          ? data['taskCount'] as int
+          : 0,
+    );
+
+    // Agar Firestore mein name missing tha,
+    // Firebase name ko Firestore mein save kar do.
+    if (firestoreName.isEmpty && finalName.isNotEmpty) {
+      await docRef.set(
+        {
+          'name': finalName,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
     }
+  } else {
+    final firebaseName =
+        (firebaseUser?.displayName ?? '').trim();
+
+    final newUser = UserModel(
+      uid: uid,
+      name: firebaseName,
+      email: email,
+    );
+
+    await docRef.set({
+      ...newUser.toJson(),
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    _currentUser = newUser;
   }
+}
 
   /// Real Firebase email/password sign-in.
   Future<bool> login({
@@ -124,23 +177,34 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
 
-      final fbUser = credential.user;
-      if (fbUser == null) {
-        throw fb_auth.FirebaseAuthException(code: 'unknown');
-      }
+     final fbUser = credential.user;
 
-      final newUser = UserModel(
-        uid: fbUser.uid,
-        name: name.trim(),
-        email: fbUser.email ?? email.trim(),
-      );
+if (fbUser == null) {
+  throw fb_auth.FirebaseAuthException(code: 'unknown');
+}
 
-      await _firestore
-          .collection('users')
-          .doc(fbUser.uid)
-          .set(newUser.toJson());
+final cleanName = name.trim();
 
-      _currentUser = newUser;
+// Firebase Auth profile
+await fbUser.updateDisplayName(cleanName);
+
+// Firestore profile
+final newUser = UserModel(
+  uid: fbUser.uid,
+  name: cleanName,
+  email: fbUser.email ?? email.trim(),
+);
+
+await _firestore
+    .collection('users')
+    .doc(fbUser.uid)
+    .set({
+  ...newUser.toJson(),
+  'createdAt': FieldValue.serverTimestamp(),
+  'updatedAt': FieldValue.serverTimestamp(),
+});
+
+_currentUser = newUser;
 
       _isLoading = false;
       notifyListeners();
@@ -161,25 +225,43 @@ class AuthProvider extends ChangeNotifier {
 
   /// Sirf name field update karta hai — Firestore mein merge hoti hai,
   /// baaki fields (mood, routineCount, taskCount) untouched rehte hain.
-  Future<void> updateName(String name) async {
-    final cleanName = name.trim();
+ Future<void> updateName(String name) async {
+  final cleanName = name.trim();
 
-    if (cleanName.isEmpty || _currentUser == null) {
-      return;
-    }
-
-    try {
-      await _firestore
-          .collection('users')
-          .doc(_currentUser!.uid)
-          .set({'name': cleanName}, SetOptions(merge: true));
-
-      _currentUser = _currentUser!.copyWith(name: cleanName);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('AuthProvider updateName error: $e');
-    }
+  if (cleanName.isEmpty || _currentUser == null) {
+    return;
   }
+
+  try {
+    final firebaseUser = _auth.currentUser;
+
+    // Firebase Authentication profile
+    if (firebaseUser != null) {
+      await firebaseUser.updateDisplayName(cleanName);
+    }
+
+    // Firestore profile
+    await _firestore
+        .collection('users')
+        .doc(_currentUser!.uid)
+        .set(
+      {
+        'name': cleanName,
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+
+    // Local provider state
+    _currentUser = _currentUser!.copyWith(
+      name: cleanName,
+    );
+
+    notifyListeners();
+  } catch (e) {
+    debugPrint('AuthProvider updateName error: $e');
+  }
+}
 
   Future<void> logout() async {
     try {

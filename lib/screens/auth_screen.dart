@@ -7,7 +7,7 @@ import '../providers/auth_provider.dart';
 
 // 🔴 YEHAN APNAY HOME SCREEN KA IMPORT LAGAO
 import '../screens/home_screen.dart';
-
+import 'onboarding_screen.dart';
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -78,84 +78,112 @@ class _AuthScreenState extends State<AuthScreen>
   // REAL FIREBASE SIGN IN
   // ===========================================================================
 
-  Future<void> _signIn() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    if (!(_signInKey.currentState?.validate() ?? false)) return;
+ Future<void> _signIn() async {
+  FocusManager.instance.primaryFocus?.unfocus();
 
+  if (!(_signInKey.currentState?.validate() ?? false)) return;
+
+  setState(() {
+    _loading = true;
+    _error = null;
+    _success = null;
+  });
+
+  final auth = context.read<AuthProvider>();
+
+  final success = await auth.login(
+    email: _emailCtrl.text.trim(),
+    password: _passCtrl.text,
+  );
+
+  if (!mounted) return;
+
+  if (success) {
     setState(() {
-      _loading = true;
-      _error = null;
+      _loading = false;
+      _success = 'Sign in successful!';
     });
 
-    final auth = context.read<AuthProvider>();
-    final success = await auth.login(
-      email: _emailCtrl.text.trim(),
-      password: _passCtrl.text,
-    );
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
-    if (success) {
-      _goToHome();
-    } else {
-      setState(() {
-        _loading = false;
-        _error = auth.errorMessage ?? 'Invalid credentials.';
-      });
-    }
-  }
-
-  void _goToHome() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) => const HomeScreen(),
-        transitionsBuilder: (_, anim, _, child) =>
-            FadeTransition(opacity: anim, child: child),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const HomeScreen(),
       ),
     );
+  } else {
+    setState(() {
+      _loading = false;
+      _error = auth.errorMessage ?? 'Sign in failed. Please try again.';
+    });
   }
+}
+
+  // void _goToHome() {
+  //   Navigator.of(context).pushReplacement(
+  //     PageRouteBuilder(
+  //       pageBuilder: (_, _, _) => const HomeScreen(),
+  //       transitionsBuilder: (_, anim, _, child) =>
+  //           FadeTransition(opacity: anim, child: child),
+  //     ),
+  //   );
+  // }
 
   // ===========================================================================
   // REAL FIREBASE SIGN UP
   // ===========================================================================
 
-  Future<void> _signUp() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    if (!(_signUpKey.currentState?.validate() ?? false)) return;
-    if (_passCtrl.text != _confirmCtrl.text) {
-      setState(() => _error = 'Passwords do not match');
-      return;
-    }
+ Future<void> _signUp() async {
+  FocusManager.instance.primaryFocus?.unfocus();
 
+  if (!(_signUpKey.currentState?.validate() ?? false)) return;
+
+  if (_passCtrl.text != _confirmCtrl.text) {
+    setState(() => _error = 'Passwords do not match');
+    return;
+  }
+
+  setState(() {
+    _loading = true;
+    _error = null;
+  });
+
+  final auth = context.read<AuthProvider>();
+
+  final success = await auth.signUp(
+    name: _nameCtrl.text.trim(),
+    email: _emailCtrl.text.trim(),
+    password: _passCtrl.text,
+  );
+
+  if (!mounted) return;
+
+  if (success) {
     setState(() {
-      _loading = true;
-      _error = null;
+      _loading = false;
+      _success = 'Account created! Let’s get you started...';
     });
 
-    final auth = context.read<AuthProvider>();
-    final success = await auth.signUp(
-      name: _nameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      password: _passCtrl.text,
-    );
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    if (success) {
-      setState(() {
-        _loading = false;
-        _success = 'Account created! Signing you in...';
-      });
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) _goToHome();
-      });
-    } else {
-      setState(() {
-        _loading = false;
-        _error = auth.errorMessage ?? 'Sign up failed. Please try again.';
-      });
-    }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const OnboardingScreen(),
+        ),
+      );
+    });
+  } else {
+    setState(() {
+      _loading = false;
+      _error = auth.errorMessage ?? 'Sign up failed. Please try again.';
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {

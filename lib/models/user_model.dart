@@ -32,10 +32,10 @@ class UserModel {
       name: (json['name'] ?? '').toString(),
       email: (json['email'] ?? '').toString(),
       mood: (json['mood'] ?? '🙂').toString(),
-      routineCount: (json['routineCount'] is int)
+      routineCount: json['routineCount'] is int
           ? json['routineCount'] as int
           : int.tryParse('${json['routineCount']}') ?? 0,
-      taskCount: (json['taskCount'] is int)
+      taskCount: json['taskCount'] is int
           ? json['taskCount'] as int
           : int.tryParse('${json['taskCount']}') ?? 0,
     );

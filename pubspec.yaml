@@ -14,7 +14,9 @@ dependencies:
   fl_chart: ^1.2.0
   flutter:
     sdk: flutter
+  flutter_animate: ^4.5.2
   flutter_local_notifications: ^22.3.0
+  flutter_tts: ^4.2.5
   http: ^1.6.0
   intl: ^0.20.3
   lottie: ^3.5.1
@@ -35,3 +37,7 @@ flutter:
     - assets/images/home/
     - assets/animations/
     - assets/audio/
+    - assets/images/box_breathing_cover.png
+    - assets/images/grounding_cover.png
+    - assets/images/mindful_walking_cover.png
+    - assets/images/body_scan_cover.png

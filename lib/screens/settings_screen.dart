@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth_provider.dart';
 import 'journal_screen.dart';
 import 'routine_screen.dart';
 import 'history_screen.dart';
-
+import 'auth_screen.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -18,11 +19,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
 
   static const Color background = Color(0xFFF3F6E8);
-
   static const Color darkBlue = Color(0xFF202952);
-
   static const Color darkGreen = Color(0xFF315C53);
-
   static const Color darkText = Color(0xFF303450);
   static const Color greyText = Color(0xFF777B94);
 
@@ -32,102 +30,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   static const Color white = Colors.white;
 
   // ===========================================================================
-  // PROFILE (defaults, jab tak Firestore se load na ho)
+  // STATE
   // ===========================================================================
 
-  String userName = 'Sara';
-  String userMood = '🙂';
-
-  // ===========================================================================
-  // ROUTINE & TASKS (counts only, for subtitle display)
-  // ===========================================================================
-
-  int routineCount = 4;
-  int taskCount = 4;
-
-  // ===========================================================================
-  // FIREBASE
-  // ===========================================================================
-
-  bool _isLoading = true;
   bool _isSaving = false;
-
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
-  late final DocumentReference<Map<String, dynamic>> _userDocRef;
-
-  @override
-  void initState() {
-    super.initState();
-    _userDocRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(_currentUser?.uid);
-    _loadUserData();
-  }
-
-  /// Firestore se user ka data load karta hai.
-  /// Agar document exist nahi karta (yani ye pehli baar app open hua hai),
-  /// to default values ke sath naya document create kar deta hai.
-  Future<void> _loadUserData() async {
-    if (_currentUser == null) {
-      // User signed in nahi hai — Auth pehle setup karni hogi.
-      setState(() => _isLoading = false);
-      return;
-    }
-
-    try {
-      final snapshot = await _userDocRef.get();
-
-      if (snapshot.exists && snapshot.data() != null) {
-        final data = snapshot.data()!;
-        setState(() {
-          userName = data['name'] as String? ?? userName;
-          userMood = data['mood'] as String? ?? userMood;
-          routineCount = data['routineCount'] as int? ?? routineCount;
-          taskCount = data['taskCount'] as int? ?? taskCount;
-          _isLoading = false;
-        });
-      } else {
-        // Pehli dafa — default data ke sath document banao
-        await _userDocRef.set({
-          'name': userName,
-          'mood': userMood,
-          'routineCount': routineCount,
-          'taskCount': taskCount,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-        if (mounted) setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      debugPrint('Error loading user data: $e');
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  /// Sirf diye gaye fields ko update karta hai (merge: true),
-  /// isliye purana document overwrite nahi hota — naya bhi nahi banta.
-  Future<void> _updateUserFields(Map<String, dynamic> fields) async {
-    if (_currentUser == null) return;
-    setState(() => _isSaving = true);
-    try {
-      await _userDocRef.set(
-        {
-          ...fields,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('Error updating user data: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Save failed, please try again.')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
-  }
 
   // ===========================================================================
   // BUILD
@@ -135,11 +41,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
+    final authProvider = context.watch<AuthProvider>();
+    final user = authProvider.currentUser;
+
+    /*
+      AuthProvider Firebase se real user data provide karta hai.
+
+      Agar user name empty ho to AuthProvider ka userName getter
+      "Friend" return karega.
+    */
+    final userName = authProvider.userName;
+
+    final userMood = user?.mood ?? '🙂';
+    final routineCount = user?.routineCount ?? 0;
+    final taskCount = user?.taskCount ?? 0;
+
+    if (authProvider.isLoading) {
+      return const Scaffold(
         backgroundColor: background,
-        body: const Center(
-          child: CircularProgressIndicator(color: darkBlue),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: darkBlue,
+          ),
         ),
       );
     }
@@ -156,7 +79,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
                 children: [
-                  _buildProfileCard(),
+                  _buildProfileCard(
+                    userName: userName,
+                    userMood: userMood,
+                  ),
 
                   const SizedBox(height: 18),
 
@@ -221,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingTile(
                     icon: Icons.bar_chart_rounded,
                     title: 'Report',
-                    subtitle: 'View your wellness progress',
+                    subtitle: '$taskCount completed tasks',
                     onTap: _openReport,
                   ),
 
@@ -231,7 +157,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Information',
                     'Learn more about the app.',
                   ),
+const SizedBox(height: 18),
 
+_buildLogoutButton(),
                   const SizedBox(height: 10),
 
                   _buildSettingTile(
@@ -347,8 +275,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
   // PROFILE CARD
   // ===========================================================================
+Widget _buildLogoutButton() {
+  return GestureDetector(
+    onTap: _confirmLogout,
+    child: Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: const EdgeInsets.all(13),
+      decoration: _glassDecoration(lightLavender),
+      child: Row(
+        children: [
+          Container(
+            width: 43,
+            height: 43,
+            decoration: BoxDecoration(
+              color: lavender,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.logout_rounded,
+              color: darkBlue,
+              size: 20,
+            ),
+          ),
 
-  Widget _buildProfileCard() {
+          const SizedBox(width: 12),
+
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Log out',
+                  style: TextStyle(
+                    color: darkText,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+
+                SizedBox(height: 3),
+
+                Text(
+                  'Sign out of your PeaceMind account',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: greyText,
+                    fontSize: 8,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: greyText,
+            size: 20,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+  Widget _buildProfileCard({
+    required String userName,
+    required String userMood,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -408,6 +402,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 Text(
                   '$userName 🌿',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 19,
@@ -470,7 +466,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // SECTION TITLE
   // ===========================================================================
 
-  Widget _buildSectionTitle(String title, String subtitle) {
+  Widget _buildSectionTitle(
+    String title,
+    String subtitle,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -541,7 +540,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
+
                   const SizedBox(height: 3),
+
                   Text(
                     subtitle,
                     maxLines: 1,
@@ -570,9 +571,80 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
   // PROFILE EDIT
   // ===========================================================================
+Future<void> _confirmLogout() async {
+  final shouldLogout = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        backgroundColor: lightLavender,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+        title: const Text(
+          'Log out?',
+          style: TextStyle(
+            color: darkText,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to log out of your account?',
+          style: TextStyle(
+            color: greyText,
+            fontSize: 11,
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: greyText,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: darkBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Log out'),
+          ),
+        ],
+      );
+    },
+  );
 
+  if (shouldLogout != true || !mounted) {
+    return;
+  }
+
+  // REAL Firebase logout
+  await context.read<AuthProvider>().logout();
+
+  if (!mounted) return;
+
+  // Tumhari actual Auth screen
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(
+      builder: (_) => const AuthScreen(),
+    ),
+    (route) => false,
+  );
+}
   void _editProfile() {
-    final controller = TextEditingController(text: userName);
+    final authProvider = context.read<AuthProvider>();
+
+    final controller = TextEditingController(
+      text: authProvider.userName,
+    );
 
     showDialog(
       context: context,
@@ -614,17 +686,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+
             ElevatedButton(
               onPressed: () async {
                 final newName = controller.text.trim();
-                if (newName.isNotEmpty && newName != userName) {
-                  setState(() {
-                    userName = newName; // UI turant update (optimistic)
-                  });
+
+                if (newName.isEmpty) {
+                  return;
+                }
+
+                if (newName == authProvider.userName) {
                   Navigator.pop(dialogContext);
-                  await _updateUserFields({'name': newName});
-                } else {
-                  Navigator.pop(dialogContext);
+                  return;
+                }
+
+                setState(() {
+                  _isSaving = true;
+                });
+
+                Navigator.pop(dialogContext);
+
+                try {
+                  await context.read<AuthProvider>().updateName(
+                        newName,
+                      );
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isSaving = false;
+                    });
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -637,6 +728,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+
+    controller.addListener(() {});
   }
 
   // ===========================================================================
@@ -697,10 +790,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: darkBlue,
                       size: 20,
                     ),
+
                     SizedBox(width: 10),
+
                     Expanded(
                       child: Text(
-                        'Morning Check-in • 08:00 AM',
+                        'Routine reminders are based on your saved routines.',
                         style: TextStyle(
                           color: darkText,
                           fontSize: 10,
@@ -838,7 +933,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
+
                 SizedBox(height: 3),
+
                 Text(
                   'Small steps are still progress.',
                   style: TextStyle(
@@ -862,7 +959,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       width: 42,
       height: 4,
-      margin: const EdgeInsets.only(top: 8, bottom: 5),
+      margin: const EdgeInsets.only(
+        top: 8,
+        bottom: 5,
+      ),
       decoration: BoxDecoration(
         color: greyText.withValues(alpha: .35),
         borderRadius: BorderRadius.circular(10),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 import '../widgets/glass_container.dart';
-import 'auth_screen.dart';
 
+import 'home_screen.dart';
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -187,7 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               Navigator.of(context).push(
                                 PageRouteBuilder(
                                   pageBuilder: (_, a, _) =>
-                                      const AuthScreen(),
+                                      const HomeScreen(),
                                   transitionsBuilder: (_, a, _, c) =>
                                       FadeTransition(opacity: a, child: c),
                                 ),

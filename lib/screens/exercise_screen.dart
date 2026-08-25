@@ -8,6 +8,62 @@ class ExerciseScreen extends StatelessWidget {
   static const Color darkText = Color(0xFF303450);
   static const Color greyText = Color(0xFF777B94);
 
+  // Sab exercises ki data list
+  static final List<_ExerciseData> _exercises = [
+    _ExerciseData(
+      title: 'Box Breathing',
+      subtitle: '3 cycles • Calm your mind',
+      asset: 'assets/images/box_breathing_cover.png',
+      fallbackIcon: Icons.self_improvement_rounded,
+      color: const Color(0xFFECE8FA),
+      onTap: (context) {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const BoxBreathingScreen()),
+        // );
+      },
+    ),
+    _ExerciseData(
+      title: 'Grounding 5-4-3-2-1',
+      subtitle: 'Reconnect with senses',
+      asset: 'assets/images/grounding_cover.png',
+      fallbackIcon: Icons.spa_rounded,
+      color: const Color(0xFFE5F3EC),
+      onTap: (context) {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const GroundingScreen()),
+        // );
+      },
+    ),
+    _ExerciseData(
+      title: 'Mindful Walking',
+      subtitle: 'Walk with awareness',
+      asset: 'assets/images/mindful_walking_cover.png',
+      fallbackIcon: Icons.directions_walk_rounded,
+      color: const Color(0xFFFDECE3),
+      onTap: (context) {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const MindfulWalkingScreen()),
+        // );
+      },
+    ),
+    _ExerciseData(
+      title: 'Body Scan',
+      subtitle: 'Release tension slowly',
+      asset: 'assets/images/body_scan_cover.png',
+      fallbackIcon: Icons.accessibility_new_rounded,
+      color: const Color(0xFFE8EEF7),
+      onTap: (context) {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const BodyScanScreen()),
+        // );
+      },
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,43 +73,127 @@ class ExerciseScreen extends StatelessWidget {
           children: [
             _buildHeader(context),
             Expanded(
-              child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFECE8FA),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: const Icon(
-                        Icons.self_improvement_rounded,
-                        color: darkBlue,
-                        size: 36,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Exercise 🌱',
-                      style: TextStyle(
-                        color: darkText,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    _buildExerciseGrid(context),
+                    const SizedBox(height: 24),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        'Your exercise & breathing space is coming soon.\nTake a deep breath for now.',
+                        'More exercises coming soon 🌱',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: greyText,
                           fontSize: 12,
                           height: 1.5,
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 2 tiles per row grid
+  Widget _buildExerciseGrid(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _exercises.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
+        childAspectRatio: 0.78,
+      ),
+      itemBuilder: (context, index) {
+        return _buildExerciseTile(context, _exercises[index]);
+      },
+    );
+  }
+
+  Widget _buildExerciseTile(BuildContext context, _ExerciseData data) {
+    return GestureDetector(
+      onTap: () => data.onTap(context),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Full image cover
+            Image.asset(
+              data.asset,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: data.color,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    data.fallbackIcon,
+                    color: darkBlue,
+                    size: 40,
+                  ),
+                );
+              },
+            ),
+            // Gradient overlay at bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0),
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+                padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      data.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                        height: 1.25,
                       ),
                     ),
                   ],
@@ -77,7 +217,7 @@ class ExerciseScreen extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .75),
+                color: const Color(0xFF202952),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: Colors.white.withValues(alpha: .85),
@@ -85,7 +225,7 @@ class ExerciseScreen extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: darkBlue,
+                color: background,
                 size: 17,
               ),
             ),
@@ -105,4 +245,23 @@ class ExerciseScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+// Helper class exercise data hold karne ke liye
+class _ExerciseData {
+  final String title;
+  final String subtitle;
+  final String asset;
+  final IconData fallbackIcon;
+  final Color color;
+  final void Function(BuildContext context) onTap;
+
+  _ExerciseData({
+    required this.title,
+    required this.subtitle,
+    required this.asset,
+    required this.fallbackIcon,
+    required this.color,
+    required this.onTap,
+  });
 }

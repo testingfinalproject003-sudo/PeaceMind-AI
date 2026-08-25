@@ -4,10 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/routine_provider.dart';
-import 'screens/onboarding_screen.dart';
+import 'screens/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,10 +17,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Web par network WebSocket timing issue fix karne ke liye
+  // Web par network WebSocket timing issue fix
   if (kIsWeb) {
     FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: false, // Web disconnect error prevent karta hai
+      persistenceEnabled: false,
       sslEnabled: true,
     );
   }
@@ -32,6 +33,7 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+
   runApp(const PeaceMindApp());
 }
 
@@ -42,7 +44,10 @@ class PeaceMindApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => RoutineProvider()),
+        ChangeNotifierProvider(
+          create: (_) => RoutineProvider(),
+        ),
+
         ChangeNotifierProvider(
           create: (_) => AuthProvider()..loadUser(),
         ),
@@ -50,6 +55,7 @@ class PeaceMindApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'PeaceMind AI',
+
         theme: ThemeData(
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFFE0F7FA),
@@ -59,7 +65,8 @@ class PeaceMindApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
         ),
-        home: const OnboardingScreen(),
+
+        home: const AuthGate(),
       ),
     );
   }

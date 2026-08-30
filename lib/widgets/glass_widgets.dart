@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../model/exercise_models.dart';
 import '../theme/app_theme.dart';
 import '../models/exercise_models.dart';
 

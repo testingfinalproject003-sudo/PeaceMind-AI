@@ -1,4 +1,4 @@
-import '../model/exercise_models.dart';
+
 import '../models/exercise_models.dart';
 
 /// Body Scan (PMR) content — copied verbatim from the original

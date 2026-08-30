@@ -1,4 +1,4 @@
-import '../model/exercise_models.dart';
+
 import '../models/exercise_models.dart';
 
 /// Mind Walking (mindful walking meditation). English narration only for

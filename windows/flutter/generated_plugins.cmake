@@ -3,10 +3,19 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
+=======
+  audioplayers_windows
+  cloud_firestore
+  firebase_auth
+  firebase_core
+>>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
   flutter_tts
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  flutter_local_notifications_windows
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

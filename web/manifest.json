@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "peacemind_ai",
     "short_name": "peacemind_ai",
+=======
+    "name": "peace_mind_ai",
+    "short_name": "peace_mind_ai",
+>>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

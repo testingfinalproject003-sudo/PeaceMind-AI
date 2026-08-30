@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: peacemind_ai
 description: "Guided relaxation exercises"
 # The following line prevents the package from being accidentally published to
@@ -17,6 +18,12 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
+=======
+name: peace_mind_ai
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+>>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
 
 environment:
   sdk: ^3.11.0
@@ -28,8 +35,23 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  audioplayers: ^6.8.1
+  cloud_firestore: ^6.9.0
+  firebase_auth: ^6.6.0
+  firebase_core: ^4.14.0
+  fl_chart: ^1.2.0
   flutter:
     sdk: flutter
+  flutter_animate: ^4.5.2
+  flutter_local_notifications: ^22.3.0
+  flutter_tts: ^4.2.5
+  http: ^1.6.0
+  intl: ^0.20.3
+  lottie: ^3.5.1
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.5
+  timezone: ^0.11.1
+  uuid: ^4.6.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -58,6 +80,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+<<<<<<< HEAD
   assets:
     - assets/images/body_scan.jpg
 
@@ -91,3 +114,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+=======
+
+  assets:
+    - assets/images/home/
+    - assets/animations/
+    - assets/audio/
+    - assets/images/box_breathing_cover.png
+    - assets/images/grounding_cover.png
+    - assets/images/mindful_walking_cover.png
+    - assets/images/body_scan_cover.png
+>>>>>>> a541fff646cde7fea085111aa75f4d58525631ec

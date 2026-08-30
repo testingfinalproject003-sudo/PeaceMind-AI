@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+<<<<<<< HEAD
         android:label="peacemind_ai"
+=======
+        android:label="peace_mind_ai"
+>>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

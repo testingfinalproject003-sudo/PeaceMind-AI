@@ -75,7 +75,7 @@ class _BodyScanStageState extends State<BodyScanStage> with SingleTickerProvider
               // scanning beam
               AnimatedBuilder(
                 animation: _beam,
-                builder: (_, __) {
+                builder: (_, _) {
                   final t = Curves.easeInOut.transform(_beam.value);
                   final top = 0.01 * h + t * (0.92 * h);
                   return Positioned(
@@ -172,7 +172,7 @@ class _PulsingJointState extends State<_PulsingJoint> with SingleTickerProviderS
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) {
+      builder: (_, _) {
         final scale = widget.active ? (1 + _c.value * 0.35) : 1.0;
         return Transform.scale(
           scale: scale,
@@ -223,7 +223,7 @@ class _VoiceBarsState extends State<_VoiceBars> with SingleTickerProviderStateMi
         children: List.generate(5, (i) {
           return AnimatedBuilder(
             animation: _c,
-            builder: (_, __) {
+            builder: (_, _) {
               double phase = ((_c.value + _delays[i]) % 1.0);
               double scale = widget.playing ? (0.4 + 0.6 * (0.5 - 0.5 * (1 - 2 * phase).abs()) * 2).clamp(0.4, 1.0) : 0.3;
               return Container(

@@ -58,7 +58,7 @@ class _GroundingStageState extends State<GroundingStage> with TickerProviderStat
               // slow rotating soft glow backdrop
               AnimatedBuilder(
                 animation: _drift,
-                builder: (_, __) => Transform.rotate(
+                builder: (_, _) => Transform.rotate(
                   angle: _drift.value * 2 * pi,
                   child: Container(
                     alignment: Alignment.center,
@@ -100,7 +100,7 @@ class _GroundingStageState extends State<GroundingStage> with TickerProviderStat
                   top: pos.dy - 34,
                   child: AnimatedBuilder(
                     animation: _pulse,
-                    builder: (_, __) {
+                    builder: (_, _) {
                       final scale = active ? (1 + _pulse.value * 0.12) : 1.0;
                       return Transform.scale(
                         scale: scale,

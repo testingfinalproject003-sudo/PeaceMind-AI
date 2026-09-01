@@ -1,10 +1,10 @@
-﻿name: peace_mind_ai
+name: peace_mind_ai
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: '^3.13.0'
+  sdk: ^3.13.0
 
 dependencies:
   audioplayers: ^6.8.1
@@ -42,3 +42,4 @@ flutter:
     - assets/images/mindful_walking_cover.png
     - assets/images/body_scan_cover.png
     - assets/images/body_scan.jpg
+    

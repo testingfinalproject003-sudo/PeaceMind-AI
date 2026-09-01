@@ -127,7 +127,7 @@ class _CompletionOverlayState extends State<CompletionOverlay> with TickerProvid
                                       alignment: Alignment.centerLeft,
                                       child: AnimatedBuilder(
                                         animation: _bars,
-                                        builder: (_, __) => FractionallySizedBox(
+                                        builder: (_, _) => FractionallySizedBox(
                                           widthFactor: (row.percent / 100) * _bars.value,
                                           child: Container(
                                               decoration:
@@ -322,7 +322,7 @@ class _ConfettiWidgetState extends State<_ConfettiWidget> with SingleTickerProvi
     final w = widget.areaSize.width;
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) {
+      builder: (_, _) {
         final t = _c.value;
         return Positioned(
           left: widget.piece.left * w,

@@ -44,7 +44,7 @@ class _BoxBreathingStageState extends State<BoxBreathingStage> with SingleTicker
           final half = side / 2;
           return AnimatedBuilder(
             animation: _c,
-            builder: (_, __) {
+            builder: (_, _) {
               final t = _c.value; // 0..1 over the full lap
               final phaseIndex = (t * 4).floor().clamp(0, 3);
               final phaseT = (t * 4) - phaseIndex;

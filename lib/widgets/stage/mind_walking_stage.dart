@@ -49,7 +49,7 @@ class MindWalkingStage extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: lit ? AppColors.accent2 : Colors.white24,
                         boxShadow: lit
-                            ? [BoxShadow(color: AppColors.glow.withOpacity(0.7), blurRadius: 10)]
+                            ? [BoxShadow(color: AppColors.glow.withValues(alpha: 0.7), blurRadius: 10)]
                             : null,
                       ),
                     ),
@@ -68,7 +68,7 @@ class MindWalkingStage extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: AppColors.accentGradient,
-                    boxShadow: [BoxShadow(color: AppColors.glow.withOpacity(0.8), blurRadius: 16)],
+                    boxShadow: [BoxShadow(color: AppColors.glow.withValues(alpha: 0.8), blurRadius: 16)],
                   ),
                   child: const Icon(Icons.directions_walk_rounded, color: Colors.white, size: 20),
                 ),
@@ -88,7 +88,7 @@ class _PathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.12)
+      ..color = Colors.white.withValues(alpha: 0.12)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     final path = Path();

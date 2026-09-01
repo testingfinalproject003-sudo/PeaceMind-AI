@@ -68,7 +68,7 @@ class _GroundingStageState extends State<GroundingStage> with TickerProviderStat
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
-                          colors: [AppColors.accent.withOpacity(0.18), Colors.transparent],
+                          colors: [AppColors.accent.withValues(alpha: 0.18), Colors.transparent],
                         ),
                       ),
                     ),
@@ -85,8 +85,8 @@ class _GroundingStageState extends State<GroundingStage> with TickerProviderStat
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08),
-                    border: Border.all(color: AppColors.glassBorder.withOpacity(0.5)),
+                    color: Colors.white.withValues(alpha: 0.08),
+                    border: Border.all(color: AppColors.glassBorder.withValues(alpha: 0.5)),
                   ),
                   child: const Icon(Icons.self_improvement_rounded, color: Color(0xFFDCEFFF), size: 26),
                 ),
@@ -113,11 +113,11 @@ class _GroundingStageState extends State<GroundingStage> with TickerProviderStat
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: active ? AppColors.accentGradient : null,
-                                color: active ? null : Colors.white.withOpacity(0.06),
+                                color: active ? null : Colors.white.withValues(alpha: 0.06),
                                 border: Border.all(
-                                    color: active ? Colors.transparent : AppColors.glassBorder.withOpacity(0.4)),
+                                    color: active ? Colors.transparent : AppColors.glassBorder.withValues(alpha: 0.4)),
                                 boxShadow: active
-                                    ? [BoxShadow(color: AppColors.glow.withOpacity(0.7), blurRadius: 18)]
+                                    ? [BoxShadow(color: AppColors.glow.withValues(alpha: 0.7), blurRadius: 18)]
                                     : null,
                               ),
                               child: Icon(kSenseIcons[keys[i]], color: Colors.white, size: 20),

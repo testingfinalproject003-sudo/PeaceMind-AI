@@ -87,7 +87,7 @@ class _BoxBreathingStageState extends State<BoxBreathingStage> with SingleTicker
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
-                          colors: [AppColors.accent2.withOpacity(0.35), AppColors.accent.withOpacity(0.05)],
+                          colors: [AppColors.accent2.withValues(alpha: 0.35), AppColors.accent.withValues(alpha: 0.05)],
                         ),
                       ),
                     ),
@@ -100,7 +100,7 @@ class _BoxBreathingStageState extends State<BoxBreathingStage> with SingleTicker
                     height: side,
                     child: Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.glassBorder.withOpacity(0.55), width: 2),
+                        border: Border.all(color: AppColors.glassBorder.withValues(alpha: 0.55), width: 2),
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
@@ -131,7 +131,7 @@ class _BoxBreathingStageState extends State<BoxBreathingStage> with SingleTicker
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.glow,
-                        boxShadow: [BoxShadow(color: AppColors.glow.withOpacity(0.8), blurRadius: 14)],
+                        boxShadow: [BoxShadow(color: AppColors.glow.withValues(alpha: 0.8), blurRadius: 14)],
                       ),
                     ),
                   ),

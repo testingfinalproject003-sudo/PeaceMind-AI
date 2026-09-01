@@ -3,13 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-<<<<<<< HEAD
-=======
   audioplayers_windows
   cloud_firestore
   firebase_auth
   firebase_core
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
   flutter_tts
 )
 

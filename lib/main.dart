@@ -1,18 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/audio_call_provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/daily_routine_provider.dart';
 import 'providers/routine_provider.dart';
 import 'screens/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: '.env');
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -43,14 +47,23 @@ class PeaceMindApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // RoutineProvider pehle banao taake AuthProvider user ke
+    // login/logout par usko bindUser() se sync kar sake.
+    final routineProvider = RoutineProvider();
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => RoutineProvider(),
-        ),
+        ChangeNotifierProvider.value(value: routineProvider),
 
         ChangeNotifierProvider(
-          create: (_) => AuthProvider()..loadUser(),
+          create: (_) => AuthProvider(routineProvider: routineProvider)
+            ..loadUser(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AudioCallProvider(routineProvider: routineProvider),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DailyRoutineProvider(routineProvider: routineProvider),
         ),
       ],
       child: MaterialApp(

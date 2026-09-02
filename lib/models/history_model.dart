@@ -4,9 +4,13 @@ class HistoryEntry {
   final String id;
   final String routineId;
   final String routineTitle;
+
+  /// 'task' (routine), 'exercise', 'audio' (NOVA call), 'chat'
   final String category;
   final DateTime completedAt;
-  final int moodScore;
+
+  /// Voice sessions mein mood nahi hota, is liye nullable hai.
+  final int? moodScore;
   final String? notes;
 
   HistoryEntry({
@@ -15,7 +19,7 @@ class HistoryEntry {
     required this.routineTitle,
     required this.category,
     required this.completedAt,
-    required this.moodScore,
+    this.moodScore,
     this.notes,
   });
 
@@ -35,7 +39,9 @@ class HistoryEntry {
     routineTitle: json['routineTitle'],
     category: json['category'],
     completedAt: DateTime.parse(json['completedAt']),
-    moodScore: json['moodScore'],
+    moodScore: json['moodScore'] is int
+        ? json['moodScore'] as int
+        : int.tryParse('${json['moodScore']}'),
     notes: json['notes'],
   );
 

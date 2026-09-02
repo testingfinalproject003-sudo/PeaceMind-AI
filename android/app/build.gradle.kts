@@ -1,23 +1,13 @@
 plugins {
     id("com.android.application")
-<<<<<<< HEAD
     id("kotlin-android")
-=======
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-<<<<<<< HEAD
-    namespace = "com.example.peacemind_ai"
-=======
-    namespace = "com.example.peace_mind_ai"
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.peacemindai"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -31,16 +21,9 @@ android {
     }
 
     defaultConfig {
-<<<<<<< HEAD
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.peacemind_ai"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-=======
-        applicationId = "com.example.peace_mind_ai"
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
+        applicationId = "com.example.peacemindai"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

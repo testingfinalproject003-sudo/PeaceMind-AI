@@ -9,13 +9,17 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../models/routine_model.dart';
+import '../data/exercises.dart';
+import '../models/exercise_models.dart';
 import '../providers/auth_provider.dart';
+import '../providers/daily_routine_provider.dart';
 import '../providers/routine_provider.dart';
 import '../widgets/garden_celebration_card.dart';
 import '../widgets/garden_widget.dart';
 
-import 'call_screen.dart';
+import 'ai_audio_call_screen.dart';
 import 'chat_screen.dart';
+import 'exercise_player_screen.dart';
 import 'exercise_screen.dart';
 import 'journal_screen.dart';
 import 'routine_screen.dart';
@@ -100,6 +104,8 @@ class _HomeScreenState extends State<HomeScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scheduleRoutineNotifications();
       _restoreExerciseCompletions();
+      // Rule 5: auto-generate today's 5 tasks on home load
+      context.read<DailyRoutineProvider>().ensureTodayRoutine();
     });
   }
 
@@ -149,15 +155,24 @@ class _HomeScreenState extends State<HomeScreen>
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
 
+    // Map exercise player IDs to home task IDs
+    const idMap = {
+      'box_breathing': 'ex_breathing',
+      'grounding': 'ex_grounding',
+      'body_scan': 'ex_scan',
+      'mind_walking': 'ex_walking',
+    };
+
     for (final h in provider.history) {
-      if (_isExerciseTask(h.routineId)) {
+      final mappedId = idMap[h.routineId] ?? h.routineId;
+      if (_isExerciseTask(mappedId)) {
         final completedDay = DateTime(
           h.completedAt.year,
           h.completedAt.month,
           h.completedAt.day,
         );
         if (completedDay == todayStart) {
-          _completedExerciseIds.add(h.routineId);
+          _completedExerciseIds.add(mappedId);
         }
       }
     }
@@ -168,6 +183,22 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   bool _isExerciseTask(String id) => id.startsWith('ex_');
+
+  /// Home task id → uska asli guided exercise
+  ExerciseInfo? _exerciseInfoFor(String id) {
+    switch (id) {
+      case 'ex_breathing':
+        return boxBreathingExercise;
+      case 'ex_grounding':
+        return groundingExercise;
+      case 'ex_scan':
+        return bodyScanExercise;
+      case 'ex_walking':
+        return mindWalkingExercise;
+      default:
+        return null;
+    }
+  }
 
   Routine? _getNextRoutine(List<Routine> routines) {
     if (routines.isEmpty) return null;
@@ -197,13 +228,6 @@ class _HomeScreenState extends State<HomeScreen>
     return sorted.first;
   }
 
-  bool _areAllTodayTasksDone(RoutineProvider provider) {
-    final todayRoutines = provider.getTodayRoutines();
-    final userDone = todayRoutines.where((r) => r.isCompleted).length;
-    final exerciseDone = _completedExerciseIds.length;
-    final total = todayRoutines.length + _exerciseTasks.length;
-    return total > 0 && (userDone + exerciseDone) == total;
-  }
 
   _TaskMeta _metaForCategory(String category) {
     switch (category) {
@@ -414,6 +438,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RoutineProvider>();
+    final dailyProvider = context.watch<DailyRoutineProvider>();
     final allRoutines = provider.routines;
     final todayRoutines = provider.getTodayRoutines();
     final streak = provider.getCurrentStreak();
@@ -436,7 +461,8 @@ class _HomeScreenState extends State<HomeScreen>
     ];
 
     final nextRoutine = _getNextRoutine(allUncompleted);
-    final allTodayDone = _areAllTodayTasksDone(provider);
+    // Rule 5: day is "done" when all 5 daily tasks are complete
+    final dailyAllDone = dailyProvider.tasks.isNotEmpty && dailyProvider.allCompleted;
     final pendingTasks = _buildPendingTasks(provider);
 
     return Scaffold(
@@ -466,11 +492,16 @@ class _HomeScreenState extends State<HomeScreen>
                   SliverToBoxAdapter(
                     child: GardenWidget(key: _gardenKey),
                   ),
+                  // Rule 5: Today's Daily 5 auto-generated tasks
+                  if (dailyProvider.tasks.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: _buildDailyFiveSection(dailyProvider),
+                    ),
                   if (allTodayUncompleted.isNotEmpty)
                     SliverToBoxAdapter(
                       child: _buildTodaySchedule(allTodayUncompleted),
                     ),
-                  if (allTodayDone)
+                  if (dailyAllDone)
                     SliverToBoxAdapter(child: _buildYappyCard()),
                   if (pendingTasks.isNotEmpty)
                     SliverToBoxAdapter(
@@ -794,14 +825,18 @@ class _HomeScreenState extends State<HomeScreen>
   }) {
     return GestureDetector(
       onTap: () {
-        // Navigate to exercise screen if it's an exercise task
+        // Exercise task → seedha us exercise ka player khulta hai
+        // (pehle sirf list screen khulti thi)
         if (isExercise) {
+          final info = _exerciseInfoFor(routine.id);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ExerciseScreen()),
-          ).then((_) {
-            setState(() => selectedNavigation = 2);
-          });
+            MaterialPageRoute(
+              builder: (_) => ExercisePlayerScreen(
+                exercise: info ?? boxBreathingExercise,
+              ),
+            ),
+          ).then((_) => setState(() => selectedNavigation = 2));
         } else {
           Navigator.push(
             context,
@@ -1049,6 +1084,192 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  /// Rule 5: Today's Daily 5 — 4 exercises + 1 journal, auto-generated.
+  Widget _buildDailyFiveSection(DailyRoutineProvider dailyProvider) {
+    final tasks = dailyProvider.tasks;
+    final completed = dailyProvider.completedCount;
+    final total = dailyProvider.totalCount;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFECE8FA), Color(0xFFE7F0EC)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
+        boxShadow: [
+          BoxShadow(
+            color: darkBlue.withValues(alpha: 0.07),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  "Today's Daily 5",
+                  style: TextStyle(
+                    color: darkText,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: darkGreen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '$completed / $total done',
+                  style: const TextStyle(
+                    color: darkGreen,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...tasks.map((task) {
+            final isExercise = task.category == 'exercise';
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.70),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: task.isCompleted
+                      ? const Color(0xFF10B981).withValues(alpha: 0.30)
+                      : Colors.white.withValues(alpha: 0.80),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: task.isCompleted
+                          ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                          : (isExercise
+                              ? const Color(0xFFB39DDB).withValues(alpha: 0.18)
+                              : const Color(0xFFE3B15F).withValues(alpha: 0.18)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: task.isCompleted
+                          ? const Icon(Icons.check_rounded, color: Color(0xFF10B981), size: 18)
+                          : Icon(
+                              isExercise ? Icons.self_improvement_rounded : Icons.menu_book_rounded,
+                              color: isExercise ? const Color(0xFF7E57C2) : const Color(0xFFE3B15F),
+                              size: 18,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: task.isCompleted ? const Color(0xFF10B981) : darkText,
+                            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                          ),
+                        ),
+                        if (task.subtitle.isNotEmpty)
+                          Text(
+                            task.subtitle,
+                            style: const TextStyle(fontSize: 10, color: greyText),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (isExercise && !task.isCompleted && task.exerciseInfo != null)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ExercisePlayerScreen(exercise: task.exerciseInfo!),
+                          ),
+                        ).then((_) {
+                          if (mounted) {
+                            setState(() {});
+                            _restoreExerciseCompletions();
+                            dailyProvider.ensureTodayRoutine();
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7E57C2).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Start',
+                          style: TextStyle(
+                            color: Color(0xFF7E57C2),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (task.category == 'journal' && !task.isCompleted)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const JournalScreen()),
+                        ).then((_) {
+                          if (mounted) {
+                            dailyProvider.ensureTodayRoutine();
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3B15F).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Open',
+                          style: TextStyle(
+                            color: Color(0xFFE3B15F),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTodaySchedule(List<Routine> routines) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -1152,7 +1373,29 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => _showMoodPicker(context, r.id),
+                          onTap: () {
+                            // Rule 4: exercise tap → only open player screen.
+                            // Completion fires from inside ExercisePlayerScreen's
+                            // _finishSession(), not from this tap handler.
+                            if (_isExerciseTask(r.id)) {
+                              final info = _exerciseInfoFor(r.id);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ExercisePlayerScreen(
+                                    exercise: info ?? boxBreathingExercise,
+                                  ),
+                                ),
+                              ).then((_) {
+                                if (mounted) {
+                                  setState(() {});
+                                  _restoreExerciseCompletions();
+                                }
+                              });
+                            } else {
+                              _showMoodPicker(context, r.id);
+                            }
+                          },
                           child: Container(
                             width: 32,
                             height: 32,
@@ -1231,31 +1474,18 @@ class _HomeScreenState extends State<HomeScreen>
                   final completedTitle =
                       _getRoutineTitle(provider, routineId);
 
-                  // Complete exercise task
+                  // Rule 4: Exercises complete ONLY from their own
+                  // player screen (_finishSession), never from here.
                   if (_isExerciseTask(routineId)) {
-                    if (mounted) {
-                      setState(
-                        () =>
-                            _completedExerciseIds.add(routineId),
-                      );
-                    }
-
-                    try {
-                      provider.completeRoutine(
-                        routineId,
-                        selectedMoodScore,
-                      );
-                    } catch (e) {
-                      debugPrint(
-                          'Exercise completion error: $e');
-                    }
-                  } else {
-                    // Complete user routine
-                    provider.completeRoutine(
-                      routineId,
-                      selectedMoodScore,
-                    );
+                    Navigator.pop(ctx);
+                    return;
                   }
+
+                  // Complete user routine (non-exercise)
+                  provider.completeRoutine(
+                    routineId,
+                    selectedMoodScore,
+                  );
 
                   if (!mounted) return;
 
@@ -1870,7 +2100,7 @@ class _HomeScreenState extends State<HomeScreen>
       case 3: // Call
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const CallScreen()),
+          MaterialPageRoute(builder: (_) => const AiAudioCallScreen()),
         ).then((_) => setState(() => selectedNavigation = 2));
         break;
 

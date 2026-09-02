@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../data/exercises.dart';
+import 'exercise_player_screen.dart';
+
 class ExerciseScreen extends StatelessWidget {
   const ExerciseScreen({super.key});
 
@@ -16,12 +19,7 @@ class ExerciseScreen extends StatelessWidget {
       asset: 'assets/images/box_breathing_cover.png',
       fallbackIcon: Icons.self_improvement_rounded,
       color: const Color(0xFFECE8FA),
-      onTap: (context) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const BoxBreathingScreen()),
-        // );
-      },
+      exerciseInfo: boxBreathingExercise,
     ),
     _ExerciseData(
       title: 'Grounding 5-4-3-2-1',
@@ -29,12 +27,7 @@ class ExerciseScreen extends StatelessWidget {
       asset: 'assets/images/grounding_cover.png',
       fallbackIcon: Icons.spa_rounded,
       color: const Color(0xFFE5F3EC),
-      onTap: (context) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const GroundingScreen()),
-        // );
-      },
+      exerciseInfo: groundingExercise,
     ),
     _ExerciseData(
       title: 'Mindful Walking',
@@ -42,12 +35,7 @@ class ExerciseScreen extends StatelessWidget {
       asset: 'assets/images/mindful_walking_cover.png',
       fallbackIcon: Icons.directions_walk_rounded,
       color: const Color(0xFFFDECE3),
-      onTap: (context) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const MindfulWalkingScreen()),
-        // );
-      },
+      exerciseInfo: mindWalkingExercise,
     ),
     _ExerciseData(
       title: 'Body Scan',
@@ -55,12 +43,7 @@ class ExerciseScreen extends StatelessWidget {
       asset: 'assets/images/body_scan_cover.png',
       fallbackIcon: Icons.accessibility_new_rounded,
       color: const Color(0xFFE8EEF7),
-      onTap: (context) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const BodyScanScreen()),
-        // );
-      },
+      exerciseInfo: bodyScanExercise,
     ),
   ];
 
@@ -122,7 +105,14 @@ class ExerciseScreen extends StatelessWidget {
 
   Widget _buildExerciseTile(BuildContext context, _ExerciseData data) {
     return GestureDetector(
-      onTap: () => data.onTap(context),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ExercisePlayerScreen(exercise: data.exerciseInfo),
+          ),
+        );
+      },
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -254,7 +244,7 @@ class _ExerciseData {
   final String asset;
   final IconData fallbackIcon;
   final Color color;
-  final void Function(BuildContext context) onTap;
+  final dynamic exerciseInfo;
 
   _ExerciseData({
     required this.title,
@@ -262,6 +252,6 @@ class _ExerciseData {
     required this.asset,
     required this.fallbackIcon,
     required this.color,
-    required this.onTap,
+    required this.exerciseInfo,
   });
 }

@@ -6,8 +6,6 @@ import '../widgets/password_validator.dart';
 import '../providers/auth_provider.dart';
 
 // 🔴 YEHAN APNAY HOME SCREEN KA IMPORT LAGAO
-import '../screens/home_screen.dart';
-import 'onboarding_screen.dart';
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -104,16 +102,8 @@ class _AuthScreenState extends State<AuthScreen>
       _success = 'Sign in successful!';
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const HomeScreen(),
-      ),
-    );
+    // Koi manual navigation nahi — AuthGate reactive hai aur
+    // login/onboarding status ke hisaab se screen khud switch karta hai.
   } else {
     setState(() {
       _loading = false;
@@ -167,16 +157,7 @@ class _AuthScreenState extends State<AuthScreen>
       _success = 'Account created! Let’s get you started...';
     });
 
-    Future.delayed(const Duration(seconds: 1), () {
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const OnboardingScreen(),
-        ),
-      );
-    });
+    // AuthGate naye user ke liye OnboardingScreen dikhayega.
   } else {
     setState(() {
       _loading = false;

@@ -1,33 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/routine_provider.dart';
-import '../../models/history_model.dart';
+import '../providers/routine_provider.dart';
+import '../models/history_model.dart';
 
 // ═══════════════════════════════════════════════════════════════
-//  FAKE SESSIONS MODEL (Chat / Audio) — future mein real hoga
-// ═══════════════════════════════════════════════════════════════
-class FakeSession {
-  final String id;
-  final String title;
-  final String type; // 'chat' | 'audio'
-  final DateTime completedAt;
-  final String transcriptSnippet;
-
-  FakeSession({
-    required this.id,
-    required this.title,
-    required this.type,
-    required this.completedAt,
-    required this.transcriptSnippet,
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  SCREEN
+//  HISTORY / PROGRESS REPORT SCREEN
+//  Sirf REAL data — routines, exercises aur NOVA voice calls.
+//  Sab kuch RoutineProvider (local + Firestore sync) se aata hai.
 // ═══════════════════════════════════════════════════════════════
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -37,58 +19,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  // ── fake chat / audio sessions (future mein API se ayega) ──
-  late final List<FakeSession> _fakeSessions;
-
-  // ── FILTER STATE ──
-  String _filter = 'all'; // 'all' | 'task' | 'chat' | 'audio'
-
-  @override
-  void initState() {
-    super.initState();
-    _fakeSessions = _generateFakeSessions();
-  }
-
-  List<FakeSession> _generateFakeSessions() {
-    final now = DateTime.now();
-    return [
-      FakeSession(
-        id: 'c1',
-        title: 'Chat Session #1',
-        type: 'chat',
-        completedAt: now.subtract(const Duration(hours: 2)),
-        transcriptSnippet: 'Hey, I have been feeling a bit anxious lately...',
-      ),
-      FakeSession(
-        id: 'a1',
-        title: 'Audio Session #1',
-        type: 'audio',
-        completedAt: now.subtract(const Duration(hours: 5)),
-        transcriptSnippet: 'Let us try a quick breathing exercise together...',
-      ),
-      FakeSession(
-        id: 'c2',
-        title: 'Chat Session #2',
-        type: 'chat',
-        completedAt: now.subtract(const Duration(days: 1, hours: 3)),
-        transcriptSnippet: 'Today felt a little better after the walk...',
-      ),
-      FakeSession(
-        id: 'a2',
-        title: 'Audio Session #2',
-        type: 'audio',
-        completedAt: now.subtract(const Duration(days: 2, hours: 4)),
-        transcriptSnippet: 'You are doing great. Keep showing up for yourself...',
-      ),
-      FakeSession(
-        id: 'c3',
-        title: 'Chat Session #3',
-        type: 'chat',
-        completedAt: now.subtract(const Duration(days: 3, hours: 1)),
-        transcriptSnippet: 'I managed to complete my morning routine today!',
-      ),
-    ];
-  }
+  // 'all' | 'task' | 'exercise' | 'audio'
+  String _filter = 'all';
 
   // ── helpers ──
   Color _catColor(String cat) {
@@ -97,8 +29,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
       case 'afternoon': return const Color(0xFF2C9BD6);
       case 'evening':   return const Color(0xFFB9A8DD);
       case 'night':     return const Color(0xFF063A5E);
-      case 'chat':      return const Color(0xFF8B5CF6);
-      case 'audio':     return const Color(0xFF10B981);
+      case 'exercise':  return const Color(0xFF10B981);
+      case 'audio':     return const Color(0xFF8B5CF6);
+      case 'chat':      return const Color(0xFF0EA5E9);
       default:          return const Color(0xFF0B6FA8);
     }
   }
@@ -109,9 +42,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
       case 'afternoon': return '☀️';
       case 'evening':   return '🌇';
       case 'night':     return '🌙';
-      case 'chat':      return '💬';
+      case 'exercise':  return '🧘';
       case 'audio':     return '🎙️';
+      case 'chat':      return '💬';
       default:          return '✨';
+    }
+  }
+
+  String _catLabel(String cat) {
+    switch (cat) {
+      case 'morning':   return 'Morning';
+      case 'afternoon': return 'Afternoon';
+      case 'evening':   return 'Evening';
+      case 'night':     return 'Night';
+      case 'exercise':  return 'Exercise';
+      case 'audio':     return 'Voice Call';
+      case 'chat':      return 'Chat';
+      default:          return 'Task';
+    }
+  }
+
+  /// Filter groups — har entry ek group mein aati hai
+  String _filterGroup(String category) {
+    switch (category) {
+      case 'exercise':
+      case 'audio':
+      case 'chat':
+        return category;
+      default:
+        return 'task'; // morning / afternoon / evening / night
     }
   }
 
@@ -146,23 +105,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RoutineProvider>();
-    final realHistory = provider.history;
-    final last7Real = provider.getHistoryForLastDays(7);
+    final history = provider.history; // newest first
 
-    // ── REAL stats (sirf routine se) ──
+    // ── REAL stats ──
     final streak = provider.getCurrentStreak();
     final catCounts = provider.getCategoryCounts();
     final daily = provider.getDailyCompletionCounts();
+    final taskCount = history.length;
 
-    // ── TASK COUNTING (real routines only) ──
-    final taskCount = realHistory.length;
-
-    // ── OVERALL PERFORMANCE ──
-    // Performance = avg mood + (streak * 5), capped at 100
-    final avgMood = realHistory.isEmpty
+    // Mood wali entries ka average (voice calls mein mood nahi hota)
+    final moodEntries = history.where((h) => h.moodScore != null).toList();
+    final avgMood = moodEntries.isEmpty
         ? 0.0
-        : realHistory.map((h) => h.moodScore).reduce((a, b) => a + b) / realHistory.length;
-    final performance = realHistory.isEmpty
+        : moodEntries.map((h) => h.moodScore!).reduce((a, b) => a + b) /
+            moodEntries.length;
+    final performance = moodEntries.isEmpty
         ? 0
         : ((avgMood + (streak * 5)).clamp(0, 100)).toInt();
 
@@ -172,7 +129,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return DateTime(now.year, now.month, now.day).subtract(Duration(days: 6 - i));
     });
 
-    // ── bar chart data (REAL routine data only) ──
+    // ── bar chart data: har dinn ki total activities ──
+    // maxY dynamic hai taake 5+ activities par overflow na ho
+    final maxDaily = daily.values.isEmpty
+        ? 0
+        : daily.values.reduce((a, b) => a > b ? a : b);
+    final barMaxY = (maxDaily + 1).clamp(5, 50).toDouble();
+
     final barGroups = weekDays.asMap().entries.map((e) {
       final count = daily[e.value] ?? 0;
       return BarChartGroupData(
@@ -185,7 +148,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
             backDrawRodData: BackgroundBarChartRodData(
               show: true,
-              toY: 5,
+              toY: barMaxY,
               color: const Color(0xFFF1ECFA),
             ),
           ),
@@ -193,50 +156,56 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
     }).toList();
 
-    // ── line chart data: REAL avg mood per day ──
-    final moodSpots = weekDays.asMap().entries.map((e) {
-      final dayEntries = last7Real.where((h) {
-        final hd = DateTime(h.completedAt.year, h.completedAt.month, h.completedAt.day);
-        return hd == e.value;
-      }).toList();
-      final avg = dayEntries.isEmpty
-          ? 0.0
-          : dayEntries.map((h) => h.moodScore).reduce((a, b) => a + b) / dayEntries.length;
-      return FlSpot(e.key.toDouble(), avg);
-    }).toList();
+    // ── line chart data: sirf mood wali entries ──
+    final hasMoodData = moodEntries.any((h) {
+      final d = DateTime(h.completedAt.year, h.completedAt.month, h.completedAt.day);
+      return weekDays.contains(d);
+    });
 
-    // ── pie chart data (REAL routine categories only) ──
+    final moodSpots = <FlSpot>[];
+    if (hasMoodData) {
+      for (var i = 0; i < weekDays.length; i++) {
+        final dayEntries = history.where((h) {
+          final hd = DateTime(h.completedAt.year, h.completedAt.month, h.completedAt.day);
+          return hd == weekDays[i] && h.moodScore != null;
+        }).toList();
+        final avg = dayEntries.isEmpty
+            ? 0.0
+            : dayEntries.map((h) => h.moodScore!).reduce((a, b) => a + b) /
+                dayEntries.length;
+        moodSpots.add(FlSpot(i.toDouble(), avg));
+      }
+    }
+
+    // ── pie chart data (categories) ──
+    final catKeys = catCounts.keys.toList();
+    final pieColors = <Color>[
+      const Color(0xFFE3B15F),
+      const Color(0xFF2C9BD6),
+      const Color(0xFFB9A8DD),
+      const Color(0xFF10B981),
+      const Color(0xFF8B5CF6),
+      const Color(0xFF063A5E),
+    ];
     final pieSections = catCounts.entries.toList().asMap().entries.map((e) {
-      final colors = [
-        const Color(0xFFE3B15F),
-        const Color(0xFF2C9BD6),
-        const Color(0xFFB9A8DD),
-        const Color(0xFF063A5E),
-      ];
+      final count = e.value.value;
       return PieChartSectionData(
-        color: colors[e.key % colors.length],
-        value: e.value.value.toDouble(),
-        title: '${e.value.value}',
-        radius: 50,
+        color: pieColors[e.key % pieColors.length],
+        value: count.toDouble(),
+        title: '$count',
+        radius: 44,
         titleStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
       );
     }).toList();
 
-    // ── MIXED recent sessions (real + fake) ──
-    final mixedSessions = _buildMixedSessions(realHistory, _fakeSessions);
-
     // ── FILTERED sessions ──
-    final filteredSessions = mixedSessions.where((item) {
-      if (_filter == 'all') return true;
-      if (_filter == 'task') return item is HistoryEntry;
-      // if (_filter == 'chat') return item is FakeSession && (item as FakeSession).type == 'chat';
-      // if (_filter == 'audio') return item is FakeSession && (item as FakeSession).type == 'audio';
-      return true;
-    }).toList();
+    final filteredSessions = history
+        .where((h) => _filter == 'all' || _filterGroup(h.category) == _filter)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBF9F4),
@@ -253,7 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
       ),
-      body: realHistory.isEmpty && _fakeSessions.isEmpty
+      body: history.isEmpty
           ? _buildEmptyState(context)
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -274,7 +243,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(width: 10),
                       _StatCard(
                         icon: '✅',
-                        label: 'Tasks',
+                        label: 'Activities',
                         value: '$taskCount',
                         color: const Color(0xFF2C9BD6),
                       ),
@@ -291,7 +260,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   const SizedBox(height: 22),
 
                   // ═══════════════════════════════════════
-                  //  WEEKLY ACTIVITY BAR CHART (REAL)
+                  //  WEEKLY ACTIVITY BAR CHART
                   // ═══════════════════════════════════════
                   const _SectionTitle('Weekly Activity'),
                   const SizedBox(height: 8),
@@ -299,10 +268,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     height: 180,
                     child: BarChart(
                       BarChartData(
-                        maxY: 5,
+                        maxY: barMaxY,
                         barTouchData: BarTouchData(
                           touchTooltipData: BarTouchTooltipData(
                             getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                              if (group.x < 0 || group.x >= weekDays.length) {
+                                return null;
+                              }
                               final date = weekDays[group.x];
                               return BarTooltipItem(
                                 '${DateFormat.E().format(date)}\n${rod.toY.toInt()} done',
@@ -319,12 +291,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
+                              reservedSize: 22,
                               getTitlesWidget: (v, _) {
-                                final d = weekDays[v.toInt()];
+                                final idx = v.toInt();
+                                if (idx < 0 || idx >= weekDays.length) {
+                                  return const SizedBox();
+                                }
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 6),
                                   child: Text(
-                                    DateFormat.E().format(d)[0],
+                                    DateFormat.E().format(weekDays[idx])[0],
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: Color(0xFF7C8A90),
@@ -354,90 +330,107 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   const SizedBox(height: 22),
 
                   // ═══════════════════════════════════════
-                  //  MOOD TREND LINE CHART (REAL)
+                  //  MOOD TREND LINE CHART (sirf mood data)
                   // ═══════════════════════════════════════
                   const _SectionTitle('Mood Trend'),
                   const SizedBox(height: 8),
                   _ChartCard(
                     height: 180,
-                    child: LineChart(
-                      LineChartData(
-                        minY: 0,
-                        maxY: 100,
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                          horizontalInterval: 25,
-                          getDrawingHorizontalLine: (_) => const FlLine(
-                            color: Color(0xFFF1ECFA),
-                            strokeWidth: 1,
-                          ),
-                        ),
-                        titlesData: FlTitlesData(
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (v, _) {
-                                if (v.toInt() < 0 || v.toInt() >= weekDays.length) {
-                                  return const SizedBox();
-                                }
-                                final d = weekDays[v.toInt()];
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    DateFormat.E().format(d)[0],
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF7C8A90),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              interval: 25,
-                              getTitlesWidget: (v, _) => Text(
-                                v.toInt().toString(),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF7C8A90),
+                    child: hasMoodData
+                        ? LineChart(
+                            LineChartData(
+                              minY: 0,
+                              maxY: 100,
+                              gridData: FlGridData(
+                                show: true,
+                                drawVerticalLine: false,
+                                horizontalInterval: 25,
+                                getDrawingHorizontalLine: (_) => const FlLine(
+                                  color: Color(0xFFF1ECFA),
+                                  strokeWidth: 1,
                                 ),
                               ),
-                              reservedSize: 28,
+                              titlesData: FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 22,
+                                    getTitlesWidget: (v, _) {
+                                      final idx = v.toInt();
+                                      if (idx < 0 || idx >= weekDays.length) {
+                                        return const SizedBox();
+                                      }
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 6),
+                                        child: Text(
+                                          DateFormat.E().format(weekDays[idx])[0],
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xFF7C8A90),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    interval: 25,
+                                    reservedSize: 28,
+                                    getTitlesWidget: (v, _) => Text(
+                                      v.toInt().toString(),
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: Color(0xFF7C8A90),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: moodSpots,
+                                  isCurved: true,
+                                  color: const Color(0xFF0B6FA8),
+                                  barWidth: 3,
+                                  belowBarData: BarAreaData(
+                                    show: true,
+                                    color: const Color(0xFF0B6FA8)
+                                        .withValues(alpha: 0.1),
+                                  ),
+                                  dotData: const FlDotData(show: true),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                'No mood data yet.\nComplete a routine with a mood to see your trend.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF7C8A90),
+                                  height: 1.5,
+                                ),
+                              ),
                             ),
                           ),
-                          topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: moodSpots,
-                            isCurved: true,
-                            color: const Color(0xFF0B6FA8),
-                            barWidth: 3,
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: const Color(0xFF0B6FA8).withValues(alpha: 0.1),
-                            ),
-                            dotData: const FlDotData(show: true),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
 
                   const SizedBox(height: 22),
 
                   // ═══════════════════════════════════════
-                  //  CATEGORY BREAKDOWN (PIE) — REAL only
+                  //  CATEGORY BREAKDOWN (PIE)
                   // ═══════════════════════════════════════
                   if (catCounts.isNotEmpty) ...[
                     const _SectionTitle('By Category'),
@@ -447,58 +440,61 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       child: Row(
                         children: [
                           Expanded(
+                            flex: 5,
                             child: PieChart(
                               PieChartData(
                                 sectionsSpace: 2,
-                                centerSpaceRadius: 28,
+                                centerSpaceRadius: 26,
                                 sections: pieSections,
                               ),
                             ),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: catCounts.entries.map((e) {
-                              final colors = [
-                                const Color(0xFFE3B15F),
-                                const Color(0xFF2C9BD6),
-                                const Color(0xFFB9A8DD),
-                                const Color(0xFF063A5E),
-                              ];
-                              final idx = catCounts.keys.toList().indexOf(e.key);
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: BoxDecoration(
-                                        color: colors[idx % colors.length],
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${_catEmoji(e.key)} ${e.key[0].toUpperCase()}${e.key.substring(1)}  ',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${e.value}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF7C8A90),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
                           const SizedBox(width: 8),
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: catKeys.map((key) {
+                                final idx = catKeys.indexOf(key);
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 3),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: pieColors[idx % pieColors.length],
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          '${_catEmoji(key)} ${_catLabel(key)}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${catCounts[key]}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF7C8A90),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -516,7 +512,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       children: [
                         _buildFilterChip('All', 'all', '🔍'),
                         _buildFilterChip('Tasks', 'task', '✅'),
-                        _buildFilterChip('Chat', 'chat', '💬'),
+                        _buildFilterChip('Exercises', 'exercise', '🧘'),
                         _buildFilterChip('Calls', 'audio', '🎙️'),
                       ],
                     ),
@@ -547,16 +543,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: filteredSessions.length > 30 ? 30 : filteredSessions.length,
-                      itemBuilder: (_, i) {
-                        final item = filteredSessions[i];
-                        if (item is HistoryEntry) {
-                          return _buildRealHistoryTile(item);
-                        } else if (item is FakeSession) {
-                          return _buildFakeSessionTile(item);
-                        }
-                        return const SizedBox.shrink();
-                      },
+                      itemCount: filteredSessions.length > 30
+                          ? 30
+                          : filteredSessions.length,
+                      itemBuilder: (_, i) =>
+                          _buildHistoryTile(filteredSessions[i]),
                     ),
                   const SizedBox(height: 20),
                 ],
@@ -565,24 +556,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // ── Mix real + fake sessions, sorted by date ──
-  List<dynamic> _buildMixedSessions(
-    List<HistoryEntry> real,
-    List<FakeSession> fake,
-  ) {
-    final mixed = <dynamic>[];
-    mixed.addAll(real);
-    mixed.addAll(fake);
-    mixed.sort((a, b) {
-      final da = a is HistoryEntry ? a.completedAt : (a as FakeSession).completedAt;
-      final db = b is HistoryEntry ? b.completedAt : (b as FakeSession).completedAt;
-      return db.compareTo(da); // newest first
-    });
-    return mixed;
-  }
+  // ── Real history tile (task / exercise / voice call) ──
+  Widget _buildHistoryTile(HistoryEntry h) {
+    final isVoiceCall = h.category == 'audio';
 
-  // ── Real routine history tile ──
-  Widget _buildRealHistoryTile(HistoryEntry h) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -609,7 +586,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${_catEmoji(h.category)} ${h.category[0].toUpperCase()}${h.category.substring(1)}',
+                  '${_catEmoji(h.category)} ${_catLabel(h.category)}',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -618,133 +595,68 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
               const Spacer(),
-              Text(
-                DateFormat('MMM d, h:mm a').format(h.completedAt),
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF7C8A90),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            h.routineTitle,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF233238),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _MoodBadge(score: h.moodScore),
-              if (h.notes != null && h.notes!.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    h.notes!,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF7C8A90),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Fake chat/audio session tile ──
-  Widget _buildFakeSessionTile(FakeSession s) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _catColor(s.type).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              Flexible(
                 child: Text(
-                  '${_catEmoji(s.type)} ${s.type[0].toUpperCase()}${s.type.substring(1)}',
-                  style: TextStyle(
+                  DateFormat('MMM d, h:mm a').format(h.completedAt),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: _catColor(s.type),
+                    color: Color(0xFF7C8A90),
                   ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                DateFormat('MMM d, h:mm a').format(s.completedAt),
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF7C8A90),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            s.title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF233238),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F7FC),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.format_quote,
-                  size: 14,
-                  color: Color(0xFF7C8A90),
+          Row(
+            children: [
+              if (isVoiceCall)
+                Icon(
+                  Icons.mic_rounded,
+                  size: 16,
+                  color: _catColor(h.category),
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    s.transcriptSnippet,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF7C8A90),
-                      fontStyle: FontStyle.italic,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+              if (isVoiceCall) const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  h.routineTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF233238),
                   ),
                 ),
+              ),
+            ],
+          ),
+          if (h.moodScore != null || (h.notes?.isNotEmpty ?? false)) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                if (h.moodScore != null) ...[
+                  _MoodBadge(score: h.moodScore!),
+                ],
+                if (h.notes != null && h.notes!.isNotEmpty) ...[
+                  if (h.moodScore != null) const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      h.notes!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF7C8A90),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -752,42 +664,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('📊', style: TextStyle(fontSize: 56)),
-          const SizedBox(height: 16),
-          const Text(
-            'No history yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF233238),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Complete routines to see your progress here.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF7C8A90)),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0B6FA8),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('📊', style: TextStyle(fontSize: 56)),
+            const SizedBox(height: 16),
+            const Text(
+              'No history yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF233238),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
             ),
-            child: const Text(
-              'Go to Routine',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(height: 8),
+            const Text(
+              'Complete routines, exercises or a NOVA call to see your progress here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Color(0xFF7C8A90)),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0B6FA8),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              ),
+              child: const Text(
+                'Go Back',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -857,7 +772,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(16),
@@ -868,6 +783,8 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -877,6 +794,8 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 11, color: Color(0xFF7C8A90)),
             ),
           ],

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
-import '../widgets/glass_container.dart';
+import 'package:provider/provider.dart';
 
-import 'home_screen.dart';
+import '../providers/auth_provider.dart';
+import '../widgets/glass_container.dart';
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -184,14 +185,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 curve: Curves.easeInOutCubic,
                               );
                             } else {
-                              Navigator.of(context).push(
-                                PageRouteBuilder(
-                                  pageBuilder: (_, a, _) =>
-                                      const HomeScreen(),
-                                  transitionsBuilder: (_, a, _, c) =>
-                                      FadeTransition(opacity: a, child: c),
-                                ),
-                              );
+                              // Flag AuthProvider mein save hota hai —
+                              // AuthGate reactive switch kar dega.
+                              context.read<AuthProvider>().completeOnboarding();
                             }
                           },
                           child: Container(

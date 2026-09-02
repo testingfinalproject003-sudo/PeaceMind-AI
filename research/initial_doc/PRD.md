@@ -280,7 +280,7 @@ DoctorBooking (premium)
 Your proposed structure is a solid base (clean layering, feature-grouped screens). Senior-dev refinements below: separate `services` (raw Firebase/Hive I/O) from a new `repositories` layer (business-facing data access used by providers) so providers never touch Firestore/Hive directly; add `utils/` and `l10n/` (PRD requires English/Urdu/Roman Urdu); add missing models (`task`, `safety_flag`, `doctor_booking`) to match Section 5's data model; rename `call_screen` → `voice_call_screen` (video is deferred); move screen-only widgets into their screen folder, keep `widgets/` for truly shared components.
 
 ```
-peacemind_ai/
+Peace Mind AI/
 ├── lib/
 │   ├── main.dart
 │   ├── app.dart

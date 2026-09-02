@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 
 import '../theme/app_theme.dart';
 import '../models/exercise_models.dart';
 import '../widgets/glass_widgets.dart';
 import '../widgets/completion_overlay.dart';
+import '../providers/routine_provider.dart';
+import '../providers/daily_routine_provider.dart';
 
 class ExercisePlayerScreen extends StatefulWidget {
   final ExerciseInfo exercise;
@@ -28,12 +31,13 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   bool _showOverlay = false;
   AppLang _lang = AppLang.en;
   Duration _sessionElapsed = Duration.zero;
+  bool _sessionCompleted = false;
+
+  /// History sirf pehli completion par save hoti hai —
+  /// "Start New Cycle" par duplicate entry nahi banti.
+  bool _historySaved = false;
 
   // --- voice/script sync state ---
-  // Characters revealed so far, driven by the TTS engine's own word-timing
-  // callback (setProgressHandler) rather than a guessed fixed duration.
-  // Stays 0 on platforms/voices that don't report progress, in which case
-  // we fall back to the old proportional-by-duration reveal.
   int _revealChars = 0;
   bool _speechDone = false;
   bool _pendingAdvance = false;
@@ -49,15 +53,11 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       ..addListener(() => setState(() {}));
     _sessionStopwatch.start();
 
-    // Reveal the script in step with the words the engine is actually
-    // speaking (fires per-word on Android/iOS with character offsets).
     _tts.setProgressHandler((text, start, end, word) {
       if (!mounted) return;
       setState(() => _revealChars = end);
     });
 
-    // Only truly advance to the next step once the voice has actually
-    // finished the sentence — never cut narration off mid-word.
     _tts.setCompletionHandler(() {
       if (!mounted) return;
       setState(() {
@@ -74,7 +74,6 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _stepCtrl.forward();
       _speak();
     });
-    // Periodically refresh the session-total label.
     _tickTotal();
   }
 
@@ -88,15 +87,18 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
 
   void _onStepAnimStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed && _playing) {
-      // The timer bar reaching the end is only a rough estimate of how
-      // long the sentence takes to say. If the voice is muted (no TTS to
-      // wait for) or has already finished speaking, advance right away.
-      // Otherwise wait for the completion handler to tell us the voice is
-      // actually done, so narration is never cut off mid-sentence.
       if (_muted || _speechDone) {
         _advanceAfterStep();
       } else {
         _pendingAdvance = true;
+        // Safety: agar TTS complete na ho (device par voice missing)
+        // to 3 second buffer ke baad advance — stage stuck nahi hota.
+        Future.delayed(const Duration(seconds: 3), () {
+          if (!mounted || !_pendingAdvance) return;
+          _pendingAdvance = false;
+          _speechDone = true;
+          _advanceAfterStep();
+        });
       }
     }
   }
@@ -117,11 +119,20 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _pendingAdvance = false;
     });
     if (_muted || !_playing) return;
-    await _tts.stop();
-    await _tts.setLanguage(_lang.ttsLocale);
-    await _tts.setSpeechRate(0.42);
-    await _tts.setPitch(1.0);
-    await _tts.speak(_step.textFor(_lang));
+    try {
+      await _tts.stop();
+      await _tts.setLanguage(_lang.ttsLocale);
+      await _tts.setSpeechRate(0.42);
+      await _tts.setPitch(1.0);
+      final result = await _tts.speak(_step.textFor(_lang));
+      // speak fail hua (voice/engine missing) — script timer ke sath
+      // sync chalta rahe aur stage aage badhta rahe
+      if (result != 1 && mounted) {
+        setState(() => _speechDone = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _speechDone = true);
+    }
   }
 
   void _goToStep(int index) {
@@ -179,9 +190,32 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   }
 
   void _finishSession() {
+    if (_sessionCompleted) return;
+    _sessionCompleted = true;
+    
     _stepCtrl.stop();
     _sessionStopwatch.stop();
     _tts.stop();
+    
+    // Mark exercise as complete in routine provider (sirf ek dafa)
+    if (mounted && !_historySaved) {
+      _historySaved = true;
+      final routineProvider = context.read<RoutineProvider>();
+      routineProvider.completeExercise(
+        exerciseId: widget.exercise.id,
+        exerciseTitle: widget.exercise.brandTitle,
+        duration: _sessionElapsed,
+        cycles: _cycles,
+      );
+
+      // Rule 5: also notify DailyRoutineProvider so the daily task
+      // is marked complete in the auto-generated 5-task set.
+      final dailyTaskId = DailyRoutineProvider.exerciseIdToTaskId(widget.exercise.id);
+      if (dailyTaskId != null) {
+        context.read<DailyRoutineProvider>().markTaskComplete(dailyTaskId);
+      }
+    }
+    
     setState(() => _showOverlay = true);
   }
 
@@ -190,6 +224,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _cycles++;
       _showOverlay = false;
       _current = 0;
+      _sessionCompleted = false;
     });
     _sessionStopwatch.reset();
     _sessionStopwatch.start();
@@ -214,11 +249,6 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   @override
   Widget build(BuildContext context) {
     final fullText = _step.textFor(_lang);
-    // Prefer the TTS engine's own word-progress offsets so the text on
-    // screen tracks what's actually being said. If the platform/voice
-    // never reports progress (some web/desktop voices don't), _revealChars
-    // stays 0 and we fall back to the old estimated-duration reveal so the
-    // script still animates instead of sitting blank.
     final progressReveal = _revealChars.clamp(0, fullText.length);
     final fallbackReveal = (fullText.length * _stepCtrl.value).round().clamp(0, fullText.length);
     final revealCount = (!_muted && progressReveal > 0) ? progressReveal : fallbackReveal;
@@ -290,6 +320,10 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.ink),
+          onPressed: () => Navigator.pop(context),
+        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(top: 4),

@@ -5,7 +5,6 @@ import '../providers/auth_provider.dart';
 import 'journal_screen.dart';
 import 'routine_screen.dart';
 import 'history_screen.dart';
-import 'auth_screen.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -626,18 +625,9 @@ Future<void> _confirmLogout() async {
     return;
   }
 
-  // REAL Firebase logout
+  // Firebase logout — local state clear hone par AuthGate khud
+  // AuthScreen dikha deta hai (reactive), manual navigation nahi chahiye.
   await context.read<AuthProvider>().logout();
-
-  if (!mounted) return;
-
-  // Tumhari actual Auth screen
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(
-      builder: (_) => const AuthScreen(),
-    ),
-    (route) => false,
-  );
 }
   void _editProfile() {
     final authProvider = context.read<AuthProvider>();

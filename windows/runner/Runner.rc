@@ -91,12 +91,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
 <<<<<<< HEAD
-            VALUE "FileDescription", "peacemind_ai" "\0"
+            VALUE "FileDescription", "Peace Mind AI" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "peacemind_ai" "\0"
+            VALUE "InternalName", "Peace Mind AI" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "peacemind_ai.exe" "\0"
-            VALUE "ProductName", "peacemind_ai" "\0"
+            VALUE "OriginalFilename", "Peace Mind AI.exe" "\0"
+            VALUE "ProductName", "Peace Mind AI" "\0"
 =======
             VALUE "FileDescription", "peace_mind_ai" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"

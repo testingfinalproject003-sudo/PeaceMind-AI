@@ -1,16 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user_model.dart';
+import 'routine_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
+  AuthProvider({this.routineProvider}) {
+    // Firebase session bahar se change ho (jaise signOut) to
+    // provider state automatically sync ho jaye.
+    _auth.authStateChanges().listen(_onAuthStateChanged);
+  }
+
   final fb_auth.FirebaseAuth _auth = fb_auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final RoutineProvider? routineProvider;
 
   UserModel? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _onboardingCompleted = false;
 
   UserModel? get currentUser => _currentUser;
 
@@ -30,6 +40,18 @@ class AuthProvider extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
+  bool get onboardingCompleted => _onboardingCompleted;
+
+  void _onAuthStateChanged(fb_auth.User? user) {
+    // Sign-out Firebase side se hua ho to local state clear karo.
+    if (user == null && _currentUser != null) {
+      _currentUser = null;
+      _onboardingCompleted = false;
+      routineProvider?.bindUser(null);
+      notifyListeners();
+    }
+  }
+
   /// App start hote hi call hota hai. Dekhta hai ke Firebase mein pehle se
   /// koi session saved hai ya nahi (Firebase khud session persist karta hai).
   Future<void> loadUser() async {
@@ -41,8 +63,12 @@ class AuthProvider extends ChangeNotifier {
 
       if (fbUser != null) {
         await _fetchOrCreateUserDoc(fbUser.uid, fbUser.email ?? '');
+        await _loadOnboardingFlag(fbUser.uid);
+        await routineProvider?.bindUser(fbUser.uid);
       } else {
         _currentUser = null;
+        _onboardingCompleted = false;
+        await routineProvider?.bindUser(null);
       }
     } catch (e) {
       debugPrint('AuthProvider loadUser error: $e');
@@ -50,6 +76,31 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> _loadOnboardingFlag(String uid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _onboardingCompleted = prefs.getBool('onboarding_completed_$uid') ?? false;
+    } catch (e) {
+      debugPrint('AuthProvider onboarding flag error: $e');
+      _onboardingCompleted = false;
+    }
+  }
+
+  /// OnboardingScreen final page par ye call karta hai.
+  /// Flag save hota hai aur AuthGate turant HomeScreen dikha deta hai.
+  Future<void> completeOnboarding() async {
+    final uid = _currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('onboarding_completed_$uid', true);
+    } catch (e) {
+      debugPrint('AuthProvider completeOnboarding error: $e');
+    }
+    _onboardingCompleted = true;
     notifyListeners();
   }
 
@@ -142,6 +193,8 @@ class AuthProvider extends ChangeNotifier {
       }
 
       await _fetchOrCreateUserDoc(fbUser.uid, fbUser.email ?? '');
+      await _loadOnboardingFlag(fbUser.uid);
+      await routineProvider?.bindUser(fbUser.uid);
 
       _isLoading = false;
       notifyListeners();
@@ -206,6 +259,10 @@ await _firestore
 
 _currentUser = newUser;
 
+// Naya user — onboarding abhi complete nahi hua
+await _loadOnboardingFlag(fbUser.uid);
+await routineProvider?.bindUser(fbUser.uid);
+
       _isLoading = false;
       notifyListeners();
       return true;
@@ -263,14 +320,20 @@ _currentUser = newUser;
   }
 }
 
+  /// Logout — Firebase signOut ke baad local state hamesha clear
+  /// hota hai (chahe signOut error de de). AuthGate khud AuthScreen
+  /// dikha deta hai, kisi manual navigation ki zaroorat nahi.
   Future<void> logout() async {
     try {
       await _auth.signOut();
-      _currentUser = null;
-      notifyListeners();
     } catch (e) {
       debugPrint('AuthProvider logout error: $e');
     }
+
+    _currentUser = null;
+    _onboardingCompleted = false;
+    await routineProvider?.bindUser(null);
+    notifyListeners();
   }
 
   String _mapAuthError(fb_auth.FirebaseAuthException e) {

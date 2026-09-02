@@ -1,16 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/routine_model.dart';
 import '../models/history_model.dart';
+import '../services/history_service.dart';
 import 'dart:math';
 
 class RoutineProvider extends ChangeNotifier {
   List<Routine> _routines = [];
   List<HistoryEntry> _history = [];
   final _uuid = const Uuid();
-  static const _routineKey = 'peacemind_routines';
-  static const _historyKey = 'peacemind_history';
+  final HistoryService _historyService = HistoryService();
+
+  // Legacy (single-user) keys — migration ke liye
+  static const _legacyRoutineKey = 'peacemind_routines';
+  static const _legacyHistoryKey = 'peacemind_history';
+
+  String? _boundUid;
+  String get _routineKey => 'peacemind_routines_${_boundUid ?? 'guest'}';
+  String get _historyKey => 'peacemind_history_${_boundUid ?? 'guest'}';
 
   List<Routine> get routines => _routines;
   List<HistoryEntry> get history => _history;
@@ -19,13 +28,84 @@ class RoutineProvider extends ChangeNotifier {
     _loadData();
   }
 
+  /// AuthProvider user login/logout par ye call karta hai.
+  /// User badalne par us user ka data load hota hai (per-user keys)
+  /// aur Firestore se history merge ho jati hai.
+  Future<void> bindUser(String? uid) async {
+    if (_boundUid == uid) return;
+    _boundUid = uid;
+    await _loadData();
+    if (uid != null) {
+      await _syncHistoryWithCloud();
+    }
+    if (hasListeners) notifyListeners();
+  }
+
+  /// Cloud history fetch kar ke local se merge karta hai
+  /// (union by id — koi duplicate nahi), phir dono taraf save.
+  Future<void> _syncHistoryWithCloud() async {
+    try {
+      final cloudEntries = await _historyService.fetchEntries();
+      if (cloudEntries.isEmpty) {
+        // Local-only entries cloud par push karo
+        for (final entry in _history) {
+          await _historyService.saveEntry(entry);
+        }
+        return;
+      }
+
+      final byId = <String, HistoryEntry>{};
+      for (final e in _history) {
+        byId[e.id] = e;
+      }
+      var changed = false;
+      for (final e in cloudEntries) {
+        if (!byId.containsKey(e.id)) {
+          byId[e.id] = e;
+          changed = true;
+        }
+      }
+      if (changed) {
+        _history = byId.values.toList()
+          ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
+        await _saveHistory();
+      }
+      // Local-only entries cloud par push karo
+      final cloudIds = cloudEntries.map((e) => e.id).toSet();
+      for (final entry in _history) {
+        if (!cloudIds.contains(entry.id)) {
+          await _historyService.saveEntry(entry);
+        }
+      }
+    } catch (e) {
+      debugPrint('RoutineProvider cloud sync error: $e');
+    }
+  }
+
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    final routineStr = prefs.getString(_routineKey);
-    final historyStr = prefs.getString(_historyKey);
+
+    var routineStr = prefs.getString(_routineKey);
+    var historyStr = prefs.getString(_historyKey);
+
+    // One-time migration: pehle sab users shared keys use karte the
+    if (_boundUid != null &&
+        routineStr == null &&
+        historyStr == null &&
+        prefs.containsKey(_legacyHistoryKey)) {
+      routineStr = prefs.getString(_legacyRoutineKey);
+      historyStr = prefs.getString(_legacyHistoryKey);
+      if (routineStr != null) {
+        await prefs.setString(_routineKey, routineStr);
+      }
+      if (historyStr != null) {
+        await prefs.setString(_historyKey, historyStr);
+      }
+    }
 
     if (routineStr != null) _routines = Routine.listFromJson(routineStr);
     if (historyStr != null) _history = HistoryEntry.listFromJson(historyStr);
+    _history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
     notifyListeners();
   }
 
@@ -37,6 +117,16 @@ class RoutineProvider extends ChangeNotifier {
   Future<void> _saveHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_historyKey, HistoryEntry.listToJson(_history));
+  }
+
+  /// Public: NOVA call / chat jaisi bahar ki activities history mein
+  /// add karne ke liye. Local + Firestore dono mein save hota hai.
+  void addHistoryEntry(HistoryEntry entry) {
+    _history.add(entry);
+    _history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
+    _saveHistory();
+    _historyService.saveEntry(entry);
+    notifyListeners();
   }
 
   // ── Today's routines ──
@@ -101,27 +191,84 @@ class RoutineProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Home screen ke built-in exercise tasks ke friendly titles
+  String _taskTitleFor(String id) {
+    switch (id) {
+      case 'ex_breathing':
+        return 'Breathing Exercise';
+      case 'ex_grounding':
+        return 'Grounding Exercise';
+      case 'ex_scan':
+        return 'Body Scan';
+      case 'ex_walking':
+        return 'Walking Meditation';
+      default:
+        return 'Wellbeing Task';
+    }
+  }
+
   void completeRoutine(String id, int moodScore, {String? notes}) {
     final idx = _routines.indexWhere((r) => r.id == id);
-    if (idx == -1) return;
 
-    final routine = _routines[idx];
-    routine.isCompleted = true;
-    routine.completedAt = DateTime.now();
-    routine.moodScore = moodScore;
+    HistoryEntry entry;
 
-    _history.add(HistoryEntry(
-      id: _uuid.v4(),
-      routineId: routine.id,
-      routineTitle: routine.title,
-      category: routine.category,
-      completedAt: DateTime.now(),
-      moodScore: moodScore,
-      notes: notes,
-    ));
+    if (idx != -1) {
+      final routine = _routines[idx];
+      routine.isCompleted = true;
+      routine.completedAt = DateTime.now();
+      routine.moodScore = moodScore;
 
-    _saveRoutines();
+      entry = HistoryEntry(
+        id: _uuid.v4(),
+        routineId: routine.id,
+        routineTitle: routine.title,
+        category: routine.category,
+        completedAt: DateTime.now(),
+        moodScore: moodScore,
+        notes: notes,
+      );
+      _saveRoutines();
+    } else {
+      // Home screen ke built-in exercise tasks routines list mein
+      // nahi hote — magar unki history zaroor save hoti hai.
+      final isExercise = id.startsWith('ex_');
+      entry = HistoryEntry(
+        id: _uuid.v4(),
+        routineId: id,
+        routineTitle: _taskTitleFor(id),
+        category: isExercise ? 'exercise' : 'task',
+        completedAt: DateTime.now(),
+        moodScore: moodScore,
+        notes: notes,
+      );
+    }
+
+    _history.add(entry);
+
     _saveHistory();
+    _historyService.saveEntry(entry); // Firebase backup
+    notifyListeners();
+  }
+
+  void completeExercise({
+    required String exerciseId,
+    required String exerciseTitle,
+    required Duration duration,
+    required int cycles,
+  }) {
+    final entry = HistoryEntry(
+      id: _uuid.v4(),
+      routineId: exerciseId,
+      routineTitle: exerciseTitle,
+      category: 'exercise',
+      completedAt: DateTime.now(),
+      moodScore: 80,
+      notes:
+          'Completed in ${duration.inMinutes}m ${duration.inSeconds % 60}s ($cycles cycles)',
+    );
+    _history.add(entry);
+    _saveHistory();
+    _historyService.saveEntry(entry); // Firebase backup
     notifyListeners();
   }
 

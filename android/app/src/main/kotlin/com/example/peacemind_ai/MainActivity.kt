@@ -1,4 +1,4 @@
-package com.example.peacemind_ai
+package com.example.peacemindai
 
 import io.flutter.embedding.android.FlutterActivity
 

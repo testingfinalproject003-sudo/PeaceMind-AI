@@ -13,6 +13,8 @@ import 'providers/daily_routine_provider.dart';
 import 'providers/garden_provider.dart';
 import 'providers/journal_provider.dart';
 import 'providers/routine_provider.dart';
+import 'providers/chat_provider.dart';
+
 import 'screens/auth_gate.dart';
 
 void main() async {
@@ -73,6 +75,10 @@ class PeaceMindApp extends StatelessWidget {
           create: (_) => JournalProvider(),
         ),
         ChangeNotifierProvider.value(value: gardenProvider),
+
+         ChangeNotifierProvider(
+          create: (_) => ChatProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

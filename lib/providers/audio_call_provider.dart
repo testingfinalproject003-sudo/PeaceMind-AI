@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../logic/audio_call_session_logic.dart';
 import '../models/audio_call_session_model.dart';
 import '../models/history_model.dart';
+import '../services/api_chat_service.dart';
 import '../services/audio_call_service.dart';
 import '../services/language_detection_service.dart';
 import '../services/session_memory_service.dart';
@@ -58,6 +59,7 @@ class AudioCallProvider extends ChangeNotifier {
   final AudioCallService _audioCallService;
   final SpeechToTextService _speechToTextService;
   final SessionMemoryService _sessionMemory;
+  final ApiChatService _apiChatService = ApiChatService();
   final RoutineProvider? routineProvider;
   final LanguageDetectionService _langDetector = const LanguageDetectionService();
 
@@ -72,6 +74,9 @@ class AudioCallProvider extends ChangeNotifier {
   final String _sessionId = const Uuid().v4();
   String _sessionSummary = '';
   String _lastSubmittedTranscript = '';
+
+  /// Profile name from the existing user profile (Firestore / Firebase Auth).
+  String? _userName;
 
   /// Current detected language code ('en', 'ur', 'pa', 'hinglish')
   String _detectedLang = 'en';
@@ -130,7 +135,8 @@ class AudioCallProvider extends ChangeNotifier {
       return;
     }
 
-    _sessionSummary = await _sessionMemory.fetchLatestSummary();
+    _sessionSummary = await _sessionMemory.buildMemoryContext();
+    _userName = await _sessionMemory.fetchUserName();
     _sessionStartTime = DateTime.now();
     _turnCount = 0;
     _historySaved = false;
@@ -302,6 +308,7 @@ class AudioCallProvider extends ChangeNotifier {
         cleanText,
         _sessionSummary,
         detectedLang: langName,
+        userName: _userName,
       );
     } catch (_) {
       response = null;
@@ -398,9 +405,56 @@ class AudioCallProvider extends ChangeNotifier {
     _statusText = 'Ending session...';
     notifyListeners();
 
-    final finalSummary = _lastTranscript.isNotEmpty
+    var finalSummary = _lastTranscript.isNotEmpty
         ? 'User shared: $_lastTranscript. NOVA response: $_lastNovaResponse.'
         : _sessionSummary;
+
+    // ── AI session summary for better cross-session memory ──
+    // Reuses ApiChatService's summarizer (same engine as chat) so voice
+    // sessions also leave topics/insights/facts behind. Falls back to the
+    // plain transcript snippet when the API is unavailable.
+    if (_apiChatService.isConfigured && _sessionTranscript.length >= 2) {
+      try {
+        var history = _sessionTranscript
+            .map((t) => {
+                  'sender': (t['role'] ?? '') == 'user' ? 'user' : 'nova',
+                  'text': (t['text'] ?? '').toString(),
+                })
+            .toList();
+        // Cost guard: summarize at most the last 40 turns.
+        if (history.length > 40) {
+          history = history.sublist(history.length - 40);
+        }
+
+        final data = await _apiChatService.generateSessionSummary(
+          conversationHistory: history,
+          personalityTag: null,
+        );
+
+        // 'userFacts' is only present when the AI extraction succeeded.
+        if (data.containsKey('userFacts')) {
+          final topics = List<String>.from(data['topicsDiscussed'] ?? []);
+          final unresolved = (data['unresolved'] ?? '').toString();
+          final helped = (data['helped'] ?? '').toString();
+          final parts = <String>[
+            if (topics.isNotEmpty) 'Topics discussed: ${topics.join(', ')}.',
+            (data['keyInsights'] ?? '').toString(),
+            if (unresolved.isNotEmpty) 'Unresolved: $unresolved.',
+            if (helped.isNotEmpty) 'What helped: $helped.',
+          ].where((p) => p.trim().isNotEmpty).toList();
+
+          if (parts.isNotEmpty) finalSummary = parts.join(' ');
+
+          final facts = List<String>.from(data['userFacts'] ?? []);
+          final corrections = List<String>.from(data['corrections'] ?? []);
+          if (facts.isNotEmpty || corrections.isNotEmpty) {
+            await _sessionMemory.mergeUserFacts(facts, corrections: corrections);
+          }
+        }
+      } catch (_) {
+        // Keep the fallback summary — memory must never break call end.
+      }
+    }
 
     // Rule 3: save summary to shared cross-session memory store
     await _sessionMemory.saveSummary(

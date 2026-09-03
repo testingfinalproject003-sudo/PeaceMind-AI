@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
@@ -6,11 +9,9 @@ import '../theme/app_theme.dart';
 import '../models/exercise_models.dart';
 import '../widgets/glass_widgets.dart';
 import '../widgets/completion_overlay.dart';
-import '../widgets/garden_celebration_card.dart';
 import '../providers/routine_provider.dart';
 import '../providers/daily_routine_provider.dart';
 import '../providers/garden_provider.dart';
-import '../providers/auth_provider.dart';
 
 class ExercisePlayerScreen extends StatefulWidget {
   final ExerciseInfo exercise;
@@ -44,7 +45,28 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   // --- voice/script sync state ---
   int _revealChars = 0;
   bool _speechDone = false;
-  bool _pendingAdvance = false;
+
+  /// Generation token — incremented on every action that invalidates
+  /// pending TTS callbacks (step change, mute, pause, lang change, etc.).
+  /// Stale callbacks whose captured generation doesn't match are ignored.
+  int _stepGeneration = 0;
+
+  /// Prevents _advanceAfterStep from firing twice for the same step.
+  bool _stepAdvanced = false;
+
+  /// Per-language narration pace. Google's Urdu voices speak faster
+  /// than the English voice at the same rate value, so Urdu uses a
+  /// slightly slower setting — calm, but not unnaturally slow.
+  static const _ttsRate = {
+    AppLang.en: 0.45,
+    AppLang.ur: 0.42,
+    AppLang.urRoman: 0.45,
+    AppLang.pa: 0.45,
+  };
+
+  /// Best Urdu voice found on this device (cached after first lookup).
+  Map<String, String>? _urduVoice;
+  bool _urduVoiceChecked = false;
 
   List<ExerciseStep> get _steps => widget.exercise.steps;
   ExerciseStep get _step => _steps[_current];
@@ -52,10 +74,10 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   @override
   void initState() {
     super.initState();
+    // AnimationController: visual progress indicator ONLY.
+    // It does NOT drive step advancement — TTS completion does.
     _stepCtrl = AnimationController(vsync: this, duration: _step.duration)
-      ..addStatusListener(_onStepAnimStatus)
       ..addListener(() => setState(() {}));
-    _sessionStopwatch.start();
 
     _tts.setProgressHandler((text, start, end, word) {
       if (!mounted) return;
@@ -68,16 +90,23 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
         _revealChars = _step.textFor(_lang).length;
         _speechDone = true;
       });
-      if (_pendingAdvance) {
-        _pendingAdvance = false;
-        _advanceAfterStep();
+      // TTS completed → advance to next step (if this generation is current).
+      _tryAdvance();
+    });
+
+    _tts.setCancelHandler(() {
+      // TTS was stopped externally. If this is the current generation
+      // and speech hasn't been marked done, use fallback timer so the
+      // step doesn't get stuck.
+      if (!mounted) return;
+      if (!_speechDone) {
+        _speechDone = true;
+        _startFallbackTimer();
       }
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _stepCtrl.forward();
-      _speak();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _beginStep());
+    _sessionStopwatch.start();
     _tickTotal();
   }
 
@@ -89,26 +118,36 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     }
   }
 
-  void _onStepAnimStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed && _playing) {
-      if (_muted || _speechDone) {
-        _advanceAfterStep();
-      } else {
-        _pendingAdvance = true;
-        // Safety: agar TTS complete na ho (device par voice missing)
-        // to 8 second buffer ke baad advance — stage stuck nahi hota.
-        Future.delayed(const Duration(seconds: 8), () {
-          if (!mounted || !_pendingAdvance) return;
-          _pendingAdvance = false;
-          _speechDone = true;
-          _advanceAfterStep();
-        });
-      }
+  // ── Step lifecycle ───────────────────────────────────────────────────
+
+  /// Begin narration for the current step. Resets text-reveal state,
+  /// invalidates stale TTS callbacks, and starts TTS (or fallback
+  /// timer when muted / TTS unavailable).
+  void _beginStep() {
+    _stepGeneration++;
+    _stepAdvanced = false;
+    setState(() {
+      _revealChars = 0;
+      _speechDone = false;
+    });
+    if (_muted || !_playing) {
+      // No TTS — use configured step duration as fallback timing.
+      _startFallbackTimer();
+      return;
     }
+    _speak();
+  }
+
+  /// Attempt to advance to the next step. Guarded against duplicate
+  /// calls from overlapping TTS completion + fallback timer.
+  void _tryAdvance() {
+    if (!mounted || !_playing || _sessionCompleted) return;
+    if (_stepAdvanced) return;
+    _stepAdvanced = true;
+    _advanceAfterStep();
   }
 
   void _advanceAfterStep() {
-    if (!mounted || !_playing) return;
     if (_current < _steps.length - 1) {
       _goToStep(_current + 1);
     } else {
@@ -116,44 +155,128 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     }
   }
 
+  /// Fallback timer: advances the step after [_step.duration] if TTS
+  /// completion never fires (engine failure, muted, or voice missing).
+  /// This is NOT a sync buffer — it's a safety net for when the TTS
+  /// engine provides no completion signal at all.
+  void _startFallbackTimer() {
+    final gen = _stepGeneration;
+    Future.delayed(_step.duration, () {
+      if (!mounted || gen != _stepGeneration) return;
+      if (_stepAdvanced || _sessionCompleted || !_playing) return;
+      setState(() => _speechDone = true);
+      _tryAdvance();
+    });
+  }
+
+  /// Urdu voice-quality tuning (Android only).
+  ///
+  /// Google's TTS engine ships two kinds of Urdu voices: an offline
+  /// one that sounds robotic, and a far more natural online "network"
+  /// voice that flutter_tts does not select by default. This looks up
+  /// the available voices once, prefers a Pakistani (ur-PK) network
+  /// voice, and re-applies it before every Urdu step (setLanguage
+  /// resets the active voice each time). Every failure path is silent:
+  /// devices, engines, or platforms without voice lists simply keep
+  /// the voice chosen by setLanguage. No timing logic lives here —
+  /// step advancement stays driven by the TTS completion handler.
+  Future<void> _tuneUrduVoice() async {
+    if (_lang != AppLang.ur) return;
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    if (_urduVoice != null) {
+      try {
+        await _tts.setVoice(_urduVoice!);
+      } catch (_) {}
+      return;
+    }
+    if (_urduVoiceChecked) return; // no better voice found earlier
+    _urduVoiceChecked = true;
+    try {
+      final voices = await _tts.getVoices; // getter in flutter_tts 4.x
+      if (voices is! List) return;
+      Map<String, String>? best;
+      var bestScore = -1;
+      for (final v in voices) {
+        if (v is! Map) continue;
+        final localeTag = '${v['locale']}';
+        final locale = localeTag.toLowerCase();
+        if (!locale.startsWith('ur')) continue;
+        final name = '${v['name']}';
+        final lower = name.toLowerCase();
+        var score = 0;
+        if (locale.contains('pk')) score += 2; // Pakistani pronunciation
+        if (lower.contains('network') || v['network'] == true) {
+          score += 3; // online voices sound far more natural
+        }
+        if (!lower.contains('local')) score += 1;
+        if (score > bestScore) {
+          bestScore = score;
+          best = {'name': name, 'locale': localeTag};
+        }
+      }
+      if (best != null) {
+        _urduVoice = best;
+        await _tts.setVoice(best);
+      }
+    } catch (_) {
+      // Voice listing unsupported here — default voice stays active.
+    }
+  }
+
+  /// Start TTS narration for the current step.
+  /// On engine failure, falls back to the configured step duration.
+  /// Does NOT increment _stepGeneration — the caller (_beginStep)
+  /// has already set the generation for this narration cycle.
   Future<void> _speak() async {
+    final gen = _stepGeneration;
     setState(() {
       _revealChars = 0;
       _speechDone = false;
-      _pendingAdvance = false;
     });
-    if (_muted || !_playing) return;
+    if (_muted || !_playing) {
+      _startFallbackTimer();
+      return;
+    }
     try {
       await _tts.stop();
+      // Guard: a newer step/speak was started while awaiting stop.
+      if (!mounted || gen != _stepGeneration) return;
       await _tts.setLanguage(_lang.ttsLocale);
-      // Dynamic speech rate: calculate so TTS finishes close to step duration.
-      // ~150 words/min at rate 0.5 is baseline; adjust per step.
-      final wordCount = _step.textFor(_lang).split(RegExp(r'\s+')).length;
-      final durationSec = _step.duration.inMilliseconds / 1000.0;
-      final targetRate = (wordCount / durationSec / 2.8).clamp(0.32, 0.58);
-      await _tts.setSpeechRate(targetRate);
+      if (!mounted || gen != _stepGeneration) return;
+      // Prefer the device's most natural Urdu voice before speaking.
+      await _tuneUrduVoice();
+      if (!mounted || gen != _stepGeneration) return;
+      // Natural speech rate — let actual TTS duration control step timing.
+      // Urdu voices speak faster at the same value, so they use a slightly
+      // calmer rate for guided-meditation pacing.
+      await _tts.setSpeechRate(_ttsRate[_lang] ?? 0.45);
       await _tts.setPitch(1.0);
       final result = await _tts.speak(_step.textFor(_lang));
-      // speak fail hua (voice/engine missing) — script timer ke sath
-      // sync chalta rahe aur stage aage badhta rahe
-      if (result != 1 && mounted) {
+      if (!mounted || gen != _stepGeneration) return;
+      // speak() failed (voice/engine missing) — use fallback timer
+      // so the step doesn't get stuck.
+      if (result != 1) {
         setState(() => _speechDone = true);
+        _startFallbackTimer();
       }
     } catch (_) {
-      if (mounted) setState(() => _speechDone = true);
+      if (!mounted || gen != _stepGeneration) return;
+      setState(() => _speechDone = true);
+      _startFallbackTimer();
     }
   }
 
   void _goToStep(int index) {
+    // Invalidate any pending TTS callbacks from the previous step.
+    _stepGeneration++;
+    _stepAdvanced = false;
     setState(() {
       _current = index;
     });
     _stepCtrl.duration = _step.duration;
     _stepCtrl.value = 0;
-    if (_playing) {
-      _stepCtrl.forward();
-      _speak();
-    }
+    if (_playing) _stepCtrl.forward();
+    _beginStep();
   }
 
   void _onPrev() {
@@ -173,10 +296,13 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     if (_playing) {
       _stepCtrl.forward();
       _sessionStopwatch.start();
-      _speak();
+      // Resume: restart narration with fresh generation.
+      _beginStep();
     } else {
       _stepCtrl.stop();
       _sessionStopwatch.stop();
+      // Pause: invalidate stale TTS callbacks and stop speech.
+      _stepGeneration++;
       _tts.stop();
     }
   }
@@ -184,9 +310,14 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   void _onMute() {
     setState(() => _muted = !_muted);
     if (_muted) {
+      // Mute: stop TTS. No completion callback will fire for this step.
+      // Fall back to configured step duration for advancement.
+      _stepGeneration++;
       _tts.stop();
+      _startFallbackTimer();
     } else {
-      _speak();
+      // Unmute: restart narration with fresh generation.
+      _beginStep();
     }
   }
 
@@ -195,13 +326,15 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _lang = lang;
       _showLangMenu = false;
     });
-    _speak();
+    // Language change: stop old narration, start new cleanly.
+    _beginStep();
   }
 
   void _finishSession() {
     if (_sessionCompleted) return;
     _sessionCompleted = true;
-    
+    // Invalidate any pending TTS callbacks.
+    _stepGeneration++;
     _stepCtrl.stop();
     _sessionStopwatch.stop();
     _tts.stop();
@@ -229,50 +362,39 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     }
     
     setState(() => _showOverlay = true);
-
-    // Show garden celebration dialog
-    if (mounted) {
-      _showExerciseCelebration();
-    }
   }
 
-  Future<void> _showExerciseCelebration() async {
-    final userName = context.read<AuthProvider>().userName;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (dialogContext) {
-        return GardenCelebrationCard(
-          userName: userName,
-          taskTitle: widget.exercise.brandTitle,
-          onContinue: () => Navigator.of(dialogContext).pop(),
-        );
-      },
-    );
-  }
-
-  void _onRestart() {
+  void _onRestart() async {
+    // Full reset: TTS state, progress, pending advance, generation token,
+    // session timer, step index.
+    _stepGeneration++;
     setState(() {
       _previousCycles = _cycles;
       _cycles++;
       _showOverlay = false;
       _current = 0;
       _sessionCompleted = false;
+      _stepAdvanced = false;
+      _revealChars = 0;
+      _speechDone = false;
     });
+    await _tts.stop();
+    if (!mounted) return;
     _sessionStopwatch.reset();
     _sessionStopwatch.start();
     _stepCtrl.duration = _step.duration;
     _stepCtrl.value = 0;
     _playing = true;
     _stepCtrl.forward();
-    _speak();
+    _beginStep();
   }
 
   void _onClose() {
-    // Back to home garden — result=true tells the caller (HomeScreen)
-    // to play the yappy celebration song and show the newly grown tree.
-    Navigator.of(context).pop(_historySaved);
+    // Pass exercise title back to HomeScreen so it can show the
+    // Yappy celebration card. Null means exercise was not completed.
+    Navigator.of(context).pop(
+      _historySaved ? widget.exercise.brandTitle : null,
+    );
   }
 
   @override
@@ -290,7 +412,12 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     final revealCount = (!_muted && progressReveal > 0) ? progressReveal : fallbackReveal;
     final visibleText = fullText.substring(0, revealCount);
     final typingDone = revealCount >= fullText.length;
-    final stepElapsed = _step.duration * _stepCtrl.value;
+    // Visual step progress driven by AnimationController.
+    // Configured _step.duration is a visual estimate — actual narration
+    // duration is controlled by TTS completion.
+    final stepElapsed = Duration(
+      milliseconds: (_step.duration.inMilliseconds * _stepCtrl.value).round(),
+    );
 
     return Scaffold(
       body: Container(

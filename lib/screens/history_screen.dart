@@ -25,40 +25,64 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // ── helpers ──
   Color _catColor(String cat) {
     switch (cat) {
-      case 'morning':   return const Color(0xFFE3B15F);
-      case 'afternoon': return const Color(0xFF2C9BD6);
-      case 'evening':   return const Color(0xFFB9A8DD);
-      case 'night':     return const Color(0xFF063A5E);
-      case 'exercise':  return const Color(0xFF10B981);
-      case 'audio':     return const Color(0xFF8B5CF6);
-      case 'chat':      return const Color(0xFF0EA5E9);
-      default:          return const Color(0xFF0B6FA8);
+      case 'morning':
+        return const Color(0xFFE3B15F);
+      case 'afternoon':
+        return const Color(0xFF2C9BD6);
+      case 'evening':
+        return const Color(0xFFB9A8DD);
+      case 'night':
+        return const Color(0xFF063A5E);
+      case 'exercise':
+        return const Color(0xFF10B981);
+      case 'audio':
+        return const Color(0xFF8B5CF6);
+      case 'chat':
+        return const Color(0xFF0EA5E9);
+      default:
+        return const Color(0xFF0B6FA8);
     }
   }
 
   String _catEmoji(String cat) {
     switch (cat) {
-      case 'morning':   return '🌅';
-      case 'afternoon': return '☀️';
-      case 'evening':   return '🌇';
-      case 'night':     return '🌙';
-      case 'exercise':  return '🧘';
-      case 'audio':     return '🎙️';
-      case 'chat':      return '💬';
-      default:          return '✨';
+      case 'morning':
+        return '🌅';
+      case 'afternoon':
+        return '☀️';
+      case 'evening':
+        return '🌇';
+      case 'night':
+        return '🌙';
+      case 'exercise':
+        return '🧘';
+      case 'audio':
+        return '🎙️';
+      case 'chat':
+        return '💬';
+      default:
+        return '✨';
     }
   }
 
   String _catLabel(String cat) {
     switch (cat) {
-      case 'morning':   return 'Morning';
-      case 'afternoon': return 'Afternoon';
-      case 'evening':   return 'Evening';
-      case 'night':     return 'Night';
-      case 'exercise':  return 'Exercise';
-      case 'audio':     return 'Voice Call';
-      case 'chat':      return 'Chat';
-      default:          return 'Task';
+      case 'morning':
+        return 'Morning';
+      case 'afternoon':
+        return 'Afternoon';
+      case 'evening':
+        return 'Evening';
+      case 'night':
+        return 'Night';
+      case 'exercise':
+        return 'Exercise';
+      case 'audio':
+        return 'Voice Call';
+      case 'chat':
+        return 'Chat';
+      default:
+        return 'Task';
     }
   }
 
@@ -93,7 +117,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
           side: BorderSide(
-            color: isSelected ? const Color(0xFF0B6FA8) : const Color(0xFFE0E0E0),
+            color: isSelected
+                ? const Color(0xFF0B6FA8)
+                : const Color(0xFFE0E0E0),
           ),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -118,7 +144,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final avgMood = moodEntries.isEmpty
         ? 0.0
         : moodEntries.map((h) => h.moodScore!).reduce((a, b) => a + b) /
-            moodEntries.length;
+              moodEntries.length;
     final performance = moodEntries.isEmpty
         ? 0
         : ((avgMood + (streak * 5)).clamp(0, 100)).toInt();
@@ -126,7 +152,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // ── last 7 days list (today → 6 days ago) ──
     final now = DateTime.now();
     final weekDays = List.generate(7, (i) {
-      return DateTime(now.year, now.month, now.day).subtract(Duration(days: 6 - i));
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: 6 - i));
     });
 
     // ── bar chart data: har dinn ki total activities ──
@@ -158,7 +188,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     // ── line chart data: sirf mood wali entries ──
     final hasMoodData = moodEntries.any((h) {
-      final d = DateTime(h.completedAt.year, h.completedAt.month, h.completedAt.day);
+      final d = DateTime(
+        h.completedAt.year,
+        h.completedAt.month,
+        h.completedAt.day,
+      );
       return weekDays.contains(d);
     });
 
@@ -166,13 +200,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (hasMoodData) {
       for (var i = 0; i < weekDays.length; i++) {
         final dayEntries = history.where((h) {
-          final hd = DateTime(h.completedAt.year, h.completedAt.month, h.completedAt.day);
+          final hd = DateTime(
+            h.completedAt.year,
+            h.completedAt.month,
+            h.completedAt.day,
+          );
           return hd == weekDays[i] && h.moodScore != null;
         }).toList();
         final avg = dayEntries.isEmpty
             ? 0.0
             : dayEntries.map((h) => h.moodScore!).reduce((a, b) => a + b) /
-                dayEntries.length;
+                  dayEntries.length;
         moodSpots.add(FlSpot(i.toDouble(), avg));
       }
     }
@@ -363,7 +401,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       return Padding(
                                         padding: const EdgeInsets.only(top: 6),
                                         child: Text(
-                                          DateFormat.E().format(weekDays[idx])[0],
+                                          DateFormat.E().format(
+                                            weekDays[idx],
+                                          )[0],
                                           style: const TextStyle(
                                             fontSize: 11,
                                             color: Color(0xFF7C8A90),
@@ -403,8 +443,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   barWidth: 3,
                                   belowBarData: BarAreaData(
                                     show: true,
-                                    color: const Color(0xFF0B6FA8)
-                                        .withValues(alpha: 0.1),
+                                    color: const Color(
+                                      0xFF0B6FA8,
+                                    ).withValues(alpha: 0.1),
                                   ),
                                   dotData: const FlDotData(show: true),
                                 ),
@@ -458,14 +499,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               children: catKeys.map((key) {
                                 final idx = catKeys.indexOf(key);
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 3,
+                                  ),
                                   child: Row(
                                     children: [
                                       Container(
                                         width: 10,
                                         height: 10,
                                         decoration: BoxDecoration(
-                                          color: pieColors[idx % pieColors.length],
+                                          color:
+                                              pieColors[idx % pieColors.length],
                                           shape: BoxShape.circle,
                                         ),
                                       ),
@@ -514,6 +558,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         _buildFilterChip('Tasks', 'task', '✅'),
                         _buildFilterChip('Exercises', 'exercise', '🧘'),
                         _buildFilterChip('Calls', 'audio', '🎙️'),
+                        _buildFilterChip('Chat', 'chat', '💬'),
                       ],
                     ),
                   ),
@@ -580,7 +625,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: _catColor(h.category).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -612,11 +660,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Row(
             children: [
               if (isVoiceCall)
-                Icon(
-                  Icons.mic_rounded,
-                  size: 16,
-                  color: _catColor(h.category),
-                ),
+                Icon(Icons.mic_rounded, size: 16, color: _catColor(h.category)),
               if (isVoiceCall) const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -636,9 +680,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                if (h.moodScore != null) ...[
-                  _MoodBadge(score: h.moodScore!),
-                ],
+                if (h.moodScore != null) ...[_MoodBadge(score: h.moodScore!)],
                 if (h.notes != null && h.notes!.isNotEmpty) ...[
                   if (h.moodScore != null) const SizedBox(width: 8),
                   Expanded(
@@ -694,7 +736,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'Go Back',

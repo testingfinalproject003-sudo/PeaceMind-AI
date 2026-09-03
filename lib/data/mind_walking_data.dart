@@ -14,7 +14,7 @@ final List<ExerciseStep> mindWalkingSteps = [
       AppLang.en:
       'Welcome. Find a quiet stretch of space, indoors or out, where you can take a few slow steps back and forth. Begin standing still. Feel your feet rooted into the ground beneath you, your weight evenly balanced. Take a slow breath in... and out. There is nowhere to rush to — this walk has no destination except this present moment.',
       AppLang.ur:
-      'خوش آمدید۔ ایک پرسکون جگہ تلاش کریں، اندر یا باہر، جہاں آپ چند آہستہ قدم آگے پیچھے لے سکیں۔ ساکن کھڑے ہوں۔ اپنے پاؤں زمین میں جڑے ہوئے محسوس کریں، وزن برابر تقسیم ہو۔ آہستہ سانس اندر لیں... اور باہر۔ کہیں جلدی نہیں — اس چہل قدمی کا مقصد صرف یہ لمحہ ہے۔',
+      'خوش آمدید۔ ایک پرسکون جگہ ڈھونڈیں، گھر کے اندر یا باہر، جہاں آپ چند آہستہ قدم، آگے اور پیچھے، لے سکیں۔ پہلے، پرسکون کھڑے ہو جائیں۔ محسوس کریں کہ آپ کے پاؤں زمین سے جڑے ہوئے ہیں، اور آپ کا وزن دونوں پاؤں پر برابر ہے۔ ایک آہستہ سانس اندر لیں... اور آہستہ سے باہر۔ کہیں جانے کی جلدی نہیں ہے... اس چہل قدمی کا کوئی اور مقصد نہیں، سوائے اسی لمحے کے۔',
       AppLang.urRoman:
       'Khush aamdeed. Aik pur-sakoon jagah talash karein, andar ya bahar, jahan aap chand aahista qadam aage peeche le sakein. Saakin kharay hon. Apne paon zameen mein jure huay mehsoos karein, wazan barabar taqseem ho. Aahista saans andar lein... aur bahar. Kahin jaldi nahi — is chehal qadmi ka maqsad sirf yeh lamha hai.',
       AppLang.pa:
@@ -33,7 +33,7 @@ final List<ExerciseStep> mindWalkingSteps = [
       AppLang.en:
       'Begin walking, slower than usual. With each step, notice the lifting of your heel, the shifting of your weight, the gentle placement of your foot back on the ground. Feel the ground rising to meet you. If your mind wanders to your to-do list or the past, gently guide it back to the simple sensation of walking, one step at a time.',
       AppLang.ur:
-      'چلنا شروع کریں، معمول سے آہستہ۔ ہر قدم کے ساتھ محسوس کریں کہ ایڑی کیسے اٹھتی ہے، وزن کیسے منتقل ہوتا ہے، پاؤں آہستہ سے زمین پر واپس آتا ہے۔ اگر ذہن کام کی فہرست یا ماضی کی طرف بھٹکے، نرمی سے اسے چلنے کے سادہ احساس پر واپس لائیں، ایک قدم ایک وقت میں۔',
+      'اب چلنا شروع کریں... اپنی معمول کی رفتار سے بھی آہستہ۔ ہر قدم کے ساتھ محسوس کریں... ایڑی کیسے اٹھتی ہے، وزن کیسے آگے منتقل ہوتا ہے، اور پاؤں کیسے، نرمی سے، زمین پر واپس لگتا ہے۔ محسوس کریں کہ زمین آپ کو سہارا دے رہی ہے۔ اگر ذہن کام کی فہرست یا ماضی کی طرف بھٹکنے لگے، تو کوئی بات نہیں... نرمی سے اسے واپس چلنے کے سادہ احساس پر لے آئیں۔ ایک قدم پر ایک قدم... بس اسی پر توجہ رکھیں۔',
       AppLang.urRoman:
       'Chalna shuru karein, mamool se aahista. Har qadam ke saath mehsoos karein ke airi kaise uthti hai, wazan kaise muntaqil hota hai, paon aahista se zameen par wapas aata hai. Agar zehn kaam ki fehrist ya maazi ki taraf bhatake, narami se usay chalne ke saada ehsaas par wapas layein, aik qadam aik waqt mein.',
       AppLang.pa:
@@ -52,7 +52,7 @@ final List<ExerciseStep> mindWalkingSteps = [
       AppLang.en:
       'Now widen your awareness. Notice the gentle swing of your arms, the rhythm of your breath matching your steps, the air moving past your skin. Notice any sounds around you without needing to name them. With every step, imagine you are placing a little more calm into the ground beneath you, leaving tension behind with each footprint.',
       AppLang.ur:
-      'اب اپنی آگاہی وسعت دیں۔ بازوؤں کی نرم حرکت محسوس کریں، سانس کی تال قدموں سے ملتی ہے، ہوا جلد سے گزر رہی ہے۔ اردگرد کی آوازیں سنیں بغیر نام دیے۔ ہر قدم کے ساتھ تصور کریں کہ آپ زمین میں تھوڑا سا سکون رکھ رہے ہیں، ہر نقش قدم کے ساتھ تناؤ پیچھے چھوڑ رہے ہیں۔',
+      'اب اپنی آگاہی کو تھوڑا وسیع کریں۔ محسوس کریں... بازوؤں کی نرم نرم حرکت... سانس کی تال، جو آہستہ آہستہ آپ کے قدموں سے میل کھا رہی ہے... اور جلد پر سے گزرتی ہوئی ہوا۔ ارد گرد کی آوازیں بھی سنیں... بغیر ان کے نام لگائے، بس آنے دیں، اور جانے دیں۔ اور ہر قدم کے ساتھ تصور کریں، آپ زمین پر تھوڑا سا سکون رکھ رہے ہیں... اور قدموں کے ہر نشان کے ساتھ، تھوڑا سا تناؤ پیچھے چھوڑ رہے ہیں۔',
       AppLang.urRoman:
       'Ab apni aagahi wusat dein. Baazuon ki naram harkat mehsoos karein, saans ki taal qadmon se milti hai, hawa jild se guzar rahi hai. Ird-gird ki aawazein sunein baghair naam diye. Har qadam ke saath tasawwur karein ke aap zameen mein thora sa sukoon rakh rahe hain, har naqsh-e-qadam ke saath tanao peeche chor rahe hain.',
       AppLang.pa:
@@ -71,7 +71,7 @@ final List<ExerciseStep> mindWalkingSteps = [
       AppLang.en:
       'Beautifully done. Come to a gentle stop and stand still once more. Feel the difference in your body — more grounded, more present, more here. Take one final breath in... and out. Carry this unhurried, attentive pace with you as you continue through your day.',
       AppLang.ur:
-      'بہت خوب۔ آہستہ سے رکیں اور ایک بار پھر ساکن کھڑے ہوں۔ جسم میں فرق محسوس کریں — زیادہ مضبوط، زیادہ حاضر، زیادہ یہاں۔ ایک آخری سانس اندر لیں... اور باہر۔ اس بلا جلدی، پوری توجہ والی رفتار کو اپنے ساتھ اپنے دن میں لے کر چلیں۔',
+      'بہت خوب۔ اب آہستہ سے رکیں... اور ایک بار پھر، پرسکون کھڑے ہو جائیں۔ جسم میں آنے والے فرق کو محسوس کریں... زیادہ جڑا ہوا، زیادہ حاضر، اس لمحے میں مزید مکمل۔ ایک آخری سانس اندر لیں... اور آہستہ سے باہر چھوڑ دیں۔ اپنے دن میں واپس جاتے ہوئے، یہی بلا جلدی، پوری توجہ والی رفتار، اپنے ساتھ ساتھ رکھیں۔',
       AppLang.urRoman:
       'Bohat khoob. Aahista se rukein aur aik baar phir saakin kharay hon. Jism mein farq mehsoos karein — zyada mazboot, zyada haazir, zyada yahan. Aik aakhri saans andar lein... aur bahar. Is bila jaldi, poori tawajjo wali raftaar ko apne saath apne din mein le kar chalein.',
       AppLang.pa:

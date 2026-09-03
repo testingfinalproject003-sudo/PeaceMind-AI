@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class GardenCelebrationCard extends StatelessWidget {
   final String userName;
@@ -25,17 +26,12 @@ class GardenCelebrationCard extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF174A45),
-                    Color(0xFF0B6FA8),
-                  ],
+                  colors: [Color(0xFF174A45), Color(0xFF0B6FA8)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.25),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.20),
@@ -80,15 +76,24 @@ class GardenCelebrationCard extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.16),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: const Color(0xFF3ECF7A)
-                                  .withValues(alpha: 0.40),
+                              color: const Color(
+                                0xFF3ECF7A,
+                              ).withValues(alpha: 0.40),
                               width: 2,
                             ),
                           ),
-                          child: const Center(
-                            child: Text(
-                              '🌳',
-                              style: TextStyle(fontSize: 42),
+                          child: Center(
+                            child: Lottie.asset(
+                              'assets/animations/garden_tree_growing.json',
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.contain,
+                              repeat: false,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Text(
+                                    '🌳',
+                                    style: TextStyle(fontSize: 42),
+                                  ),
                             ),
                           ),
                         ),
@@ -137,12 +142,15 @@ class GardenCelebrationCard extends StatelessWidget {
                   // ── Growth message ──
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.12)),
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -173,9 +181,7 @@ class GardenCelebrationCard extends StatelessWidget {
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF174A45),
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),

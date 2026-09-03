@@ -90,21 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-<<<<<<< HEAD
             VALUE "FileDescription", "Peace Mind AI" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "Peace Mind AI" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "Peace Mind AI.exe" "\0"
             VALUE "ProductName", "Peace Mind AI" "\0"
-=======
-            VALUE "FileDescription", "peace_mind_ai" "\0"
-            VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "peace_mind_ai" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "peace_mind_ai.exe" "\0"
-            VALUE "ProductName", "peace_mind_ai" "\0"
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

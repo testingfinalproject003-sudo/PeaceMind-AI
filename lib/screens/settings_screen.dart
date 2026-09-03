@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import 'journal_screen.dart';
 import 'routine_screen.dart';
 import 'history_screen.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -51,18 +52,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     */
     final userName = authProvider.userName;
 
-    final userMood = user?.mood ?? '🙂';
     final routineCount = user?.routineCount ?? 0;
-    final taskCount = user?.taskCount ?? 0;
+    // final taskCount = user?.taskCount ?? 0;
 
     if (authProvider.isLoading) {
       return const Scaffold(
         backgroundColor: background,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: darkBlue,
-          ),
-        ),
+        body: Center(child: CircularProgressIndicator(color: darkBlue)),
       );
     }
 
@@ -78,10 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
                 children: [
-                  _buildProfileCard(
-                    userName: userName,
-                    userMood: userMood,
-                  ),
+                  _buildProfileCard(userName: userName),
 
                   const SizedBox(height: 18),
 
@@ -146,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingTile(
                     icon: Icons.bar_chart_rounded,
                     title: 'Report',
-                    subtitle: '$taskCount completed tasks',
+                    subtitle: 'View your wellness report',
                     onTap: _openReport,
                   ),
 
@@ -156,9 +149,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Information',
                     'Learn more about the app.',
                   ),
-const SizedBox(height: 18),
+                  const SizedBox(height: 18),
 
-_buildLogoutButton(),
+                  _buildLogoutButton(),
                   const SizedBox(height: 10),
 
                   _buildSettingTile(
@@ -207,9 +200,7 @@ _buildLogoutButton(),
               decoration: BoxDecoration(
                 color: white.withValues(alpha: .75),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: .85),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: .85)),
               ),
               child: const Icon(
                 Icons.arrow_back_ios_new_rounded,
@@ -274,82 +265,70 @@ _buildLogoutButton(),
   // ===========================================================================
   // PROFILE CARD
   // ===========================================================================
-Widget _buildLogoutButton() {
-  return GestureDetector(
-    onTap: _confirmLogout,
-    child: Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.all(13),
-      decoration: _glassDecoration(lightLavender),
-      child: Row(
-        children: [
-          Container(
-            width: 43,
-            height: 43,
-            decoration: BoxDecoration(
-              color: lavender,
-              borderRadius: BorderRadius.circular(14),
+  Widget _buildLogoutButton() {
+    return GestureDetector(
+      onTap: _confirmLogout,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.all(13),
+        decoration: _glassDecoration(lightLavender),
+        child: Row(
+          children: [
+            Container(
+              width: 43,
+              height: 43,
+              decoration: BoxDecoration(
+                color: lavender,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: darkBlue,
+                size: 20,
+              ),
             ),
-            child: const Icon(
-              Icons.logout_rounded,
-              color: darkBlue,
-              size: 20,
-            ),
-          ),
 
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Log out',
-                  style: TextStyle(
-                    color: darkText,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Log out',
+                    style: TextStyle(
+                      color: darkText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 3),
+                  SizedBox(height: 3),
 
-                Text(
-                  'Sign out of your PeaceMind account',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: greyText,
-                    fontSize: 8,
+                  Text(
+                    'Sign out of your PeaceMind account',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: greyText, fontSize: 8),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: greyText,
-            size: 20,
-          ),
-        ],
+            const Icon(Icons.chevron_right_rounded, color: greyText, size: 20),
+          ],
+        ),
       ),
-    ),
-  );
-}
-  Widget _buildProfileCard({
-    required String userName,
-    required String userMood,
-  }) {
+    );
+  }
+
+  Widget _buildProfileCard({required String userName}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF202952),
-            Color(0xFF365A91),
-          ],
+          colors: [Color(0xFF202952), Color(0xFF365A91)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -371,14 +350,10 @@ Widget _buildLogoutButton() {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: .20),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: .40),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: .40)),
             ),
             child: const CircleAvatar(
-              backgroundImage: AssetImage(
-                'assets/images/home/profile.jpg',
-              ),
+              backgroundImage: AssetImage('assets/images/home/profile.jpg'),
             ),
           ),
 
@@ -411,14 +386,6 @@ Widget _buildLogoutButton() {
                 ),
 
                 const SizedBox(height: 3),
-
-                Text(
-                  'Current mood $userMood',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 9,
-                  ),
-                ),
               ],
             ),
           ),
@@ -426,16 +393,11 @@ Widget _buildLogoutButton() {
           GestureDetector(
             onTap: _editProfile,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 11,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: .15),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: .20),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: .20)),
               ),
               child: _isSaving
                   ? const SizedBox(
@@ -465,10 +427,7 @@ Widget _buildLogoutButton() {
   // SECTION TITLE
   // ===========================================================================
 
-  Widget _buildSectionTitle(
-    String title,
-    String subtitle,
-  ) {
+  Widget _buildSectionTitle(String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -481,13 +440,7 @@ Widget _buildLogoutButton() {
           ),
         ),
         const SizedBox(height: 3),
-        Text(
-          subtitle,
-          style: const TextStyle(
-            color: greyText,
-            fontSize: 8,
-          ),
-        ),
+        Text(subtitle, style: const TextStyle(color: greyText, fontSize: 8)),
       ],
     );
   }
@@ -518,11 +471,7 @@ Widget _buildLogoutButton() {
                 color: lavender,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                icon,
-                color: darkBlue,
-                size: 20,
-              ),
+              child: Icon(icon, color: darkBlue, size: 20),
             ),
 
             const SizedBox(width: 12),
@@ -546,10 +495,7 @@ Widget _buildLogoutButton() {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: greyText,
-                      fontSize: 8,
-                    ),
+                    style: const TextStyle(color: greyText, fontSize: 8),
                   ),
                 ],
               ),
@@ -570,71 +516,58 @@ Widget _buildLogoutButton() {
   // ===========================================================================
   // PROFILE EDIT
   // ===========================================================================
-Future<void> _confirmLogout() async {
-  final shouldLogout = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) {
-      return AlertDialog(
-        backgroundColor: lightLavender,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        title: const Text(
-          'Log out?',
-          style: TextStyle(
-            color: darkText,
-            fontWeight: FontWeight.w900,
+  Future<void> _confirmLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: lightLavender,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
           ),
-        ),
-        content: const Text(
-          'Are you sure you want to log out of your account?',
-          style: TextStyle(
-            color: greyText,
-            fontSize: 11,
-            height: 1.4,
+          title: const Text(
+            'Log out?',
+            style: TextStyle(color: darkText, fontWeight: FontWeight.w900),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, false);
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: greyText,
+          content: const Text(
+            'Are you sure you want to log out of your account?',
+            style: TextStyle(color: greyText, fontSize: 11, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancel', style: TextStyle(color: greyText)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: darkBlue,
+                foregroundColor: Colors.white,
               ),
+              child: const Text('Log out'),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: darkBlue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Log out'),
-          ),
-        ],
-      );
-    },
-  );
+          ],
+        );
+      },
+    );
 
-  if (shouldLogout != true || !mounted) {
-    return;
+    if (shouldLogout != true || !mounted) {
+      return;
+    }
+
+    // Firebase logout — local state clear hone par AuthGate khud
+    // AuthScreen dikha deta hai (reactive), manual navigation nahi chahiye.
+    await context.read<AuthProvider>().logout(context);
   }
 
-  // Firebase logout — local state clear hone par AuthGate khud
-  // AuthScreen dikha deta hai (reactive), manual navigation nahi chahiye.
-  await context.read<AuthProvider>().logout();
-}
   void _editProfile() {
     final authProvider = context.read<AuthProvider>();
 
-    final controller = TextEditingController(
-      text: authProvider.userName,
-    );
+    final controller = TextEditingController(text: authProvider.userName);
 
     showDialog(
       context: context,
@@ -646,10 +579,7 @@ Future<void> _confirmLogout() async {
           ),
           title: const Text(
             'Edit Profile',
-            style: TextStyle(
-              color: darkText,
-              fontWeight: FontWeight.w900,
-            ),
+            style: TextStyle(color: darkText, fontWeight: FontWeight.w900),
           ),
           content: TextField(
             controller: controller,
@@ -669,12 +599,7 @@ Future<void> _confirmLogout() async {
               onPressed: () {
                 Navigator.pop(dialogContext);
               },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: greyText,
-                ),
-              ),
+              child: const Text('Cancel', style: TextStyle(color: greyText)),
             ),
 
             ElevatedButton(
@@ -697,9 +622,7 @@ Future<void> _confirmLogout() async {
                 Navigator.pop(dialogContext);
 
                 try {
-                  await context.read<AuthProvider>().updateName(
-                        newName,
-                      );
+                  await context.read<AuthProvider>().updateName(newName);
                 } finally {
                   if (mounted) {
                     setState(() {
@@ -735,9 +658,7 @@ Future<void> _confirmLogout() async {
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
           decoration: const BoxDecoration(
             color: background,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(30),
-            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -760,11 +681,7 @@ Future<void> _confirmLogout() async {
               const Text(
                 'You will receive a reminder when it is time for an enabled routine.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: greyText,
-                  fontSize: 9,
-                  height: 1.4,
-                ),
+                style: TextStyle(color: greyText, fontSize: 9, height: 1.4),
               ),
 
               const SizedBox(height: 18),
@@ -810,9 +727,7 @@ Future<void> _confirmLogout() async {
   void _openReport() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const HistoryScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const HistoryScreen()),
     );
   }
 
@@ -865,11 +780,7 @@ Future<void> _confirmLogout() async {
                 'build healthy routines, complete daily '
                 'tasks and celebrate small progress.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: greyText,
-                  fontSize: 10,
-                  height: 1.5,
-                ),
+                style: TextStyle(color: greyText, fontSize: 10, height: 1.5),
               ),
 
               const SizedBox(height: 12),
@@ -902,12 +813,7 @@ Future<void> _confirmLogout() async {
       ),
       child: const Row(
         children: [
-          Text(
-            '🌱',
-            style: TextStyle(
-              fontSize: 25,
-            ),
-          ),
+          Text('🌱', style: TextStyle(fontSize: 25)),
 
           SizedBox(width: 10),
 
@@ -928,10 +834,7 @@ Future<void> _confirmLogout() async {
 
                 Text(
                   'Small steps are still progress.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 8,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 8),
                 ),
               ],
             ),
@@ -949,10 +852,7 @@ Future<void> _confirmLogout() async {
     return Container(
       width: 42,
       height: 4,
-      margin: const EdgeInsets.only(
-        top: 8,
-        bottom: 5,
-      ),
+      margin: const EdgeInsets.only(top: 8, bottom: 5),
       decoration: BoxDecoration(
         color: greyText.withValues(alpha: .35),
         borderRadius: BorderRadius.circular(10),

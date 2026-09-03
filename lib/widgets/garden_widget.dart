@@ -3,7 +3,6 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/garden_provider.dart';
-import '../theme/app_theme.dart';
 import 'skeleton.dart';
 
 class GardenWidget extends StatelessWidget {
@@ -12,7 +11,7 @@ class GardenWidget extends StatelessWidget {
   static const String _gardenBackground =
       'assets/images/home/garden_background.jpg';
   static const String _staticTree = 'assets/animations/garden_tree_static.json';
-  static const String _growingTree = 'assets/animations/garden_tree_growing.json';
+  // static const String _growingTree = 'assets/animations/garden_tree_growing.json';
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +65,7 @@ class GardenWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(
                   6,
-                  (_) => const SkeletonBlock(
-                    width: 40,
-                    height: 40,
-                    radius: 20,
-                  ),
+                  (_) => const SkeletonBlock(width: 40, height: 40, radius: 20),
                 ),
               ),
               const SizedBox(height: 18),
@@ -117,9 +112,7 @@ class GardenWidget extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
-                  shadows: [
-                    Shadow(color: Colors.black45, blurRadius: 4),
-                  ],
+                  shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
                 ),
               ),
               const SizedBox(height: 4),
@@ -131,9 +124,7 @@ class GardenWidget extends StatelessWidget {
                   color: Colors.white70,
                   fontSize: 9.5,
                   fontWeight: FontWeight.w700,
-                  shadows: [
-                    Shadow(color: Colors.black38, blurRadius: 3),
-                  ],
+                  shadows: [Shadow(color: Colors.black38, blurRadius: 3)],
                 ),
               ),
             ],
@@ -166,9 +157,7 @@ class GardenWidget extends StatelessWidget {
               color: Colors.white,
               fontSize: 13,
               fontWeight: FontWeight.w900,
-              shadows: [
-                Shadow(color: Colors.black38, blurRadius: 2),
-              ],
+              shadows: [Shadow(color: Colors.black38, blurRadius: 2)],
             ),
           ),
         ],
@@ -192,71 +181,14 @@ class GardenWidget extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final hasTree = index < garden.treeCount;
-          final isNewlyGrown = index == garden.lastGrownIndex && hasTree;
-          return _buildTreeSlot(hasTree, isNewlyGrown);
+          return _buildTreeSlot(hasTree);
         },
       ),
     );
   }
 
-  Widget _buildTreeSlot(bool hasTree, bool isNewlyGrown) {
-    return ClipRect(
-      child: hasTree
-          ? (isNewlyGrown
-              ? _buildGrowingTreeAnimation()
-              : _buildStaticTree())
-          : _buildEmptySlot(),
-    );
-  }
-
-  Widget _buildGrowingTreeAnimation() {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 1200),
-      curve: Curves.elasticOut,
-      builder: (context, scale, child) {
-        return Transform.scale(
-          scale: scale,
-          child: child,
-        );
-      },
-      child: Center(
-        child: SizedBox(
-          width: 58,
-          height: 58,
-          child: Lottie.asset(
-            _growingTree,
-            animate: true,
-            repeat: false,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              // Fallback: show static tree with glow
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: AppColors.green.withValues(alpha: 0.20),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.green.withValues(alpha: 0.30),
-                          blurRadius: 14,
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Text('🌳', style: TextStyle(fontSize: 32)),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
+  Widget _buildTreeSlot(bool hasTree) {
+    return ClipRect(child: hasTree ? _buildStaticTree() : _buildEmptySlot());
   }
 
   Widget _buildStaticTree() {
@@ -287,9 +219,7 @@ class GardenWidget extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white.withValues(alpha: 0.08),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.12),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
         ),
         child: const Center(
           child: Text(
@@ -327,16 +257,12 @@ class GardenWidget extends StatelessWidget {
                   tween: Tween(begin: 0.0, end: frac),
                   duration: const Duration(milliseconds: 800),
                   curve: Curves.easeOutCubic,
-                  builder: (context, value, _) =>
-                      FractionallySizedBox(
+                  builder: (context, value, _) => FractionallySizedBox(
                     widthFactor: value,
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF3ECF7A),
-                            Color(0xFF2A9D5C),
-                          ],
+                          colors: [Color(0xFF3ECF7A), Color(0xFF2A9D5C)],
                         ),
                         borderRadius: BorderRadius.circular(5),
                       ),
@@ -353,9 +279,7 @@ class GardenWidget extends StatelessWidget {
               color: Colors.white,
               fontSize: 9,
               fontWeight: FontWeight.w700,
-              shadows: [
-                Shadow(color: Colors.black38, blurRadius: 2),
-              ],
+              shadows: [Shadow(color: Colors.black38, blurRadius: 2)],
             ),
           ),
         ],

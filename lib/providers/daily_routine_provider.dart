@@ -72,7 +72,8 @@ class DailyRoutineProvider extends ChangeNotifier {
   int get completedCount => _tasks.where((t) => t.isCompleted).length;
   int get totalCount => _tasks.length;
 
-  DailyRoutineProvider({required this._routineProvider});
+  DailyRoutineProvider({required RoutineProvider routineProvider})
+      : _routineProvider = routineProvider;
 
   /// Call this on app start and on every resume to check for date change.
   Future<void> ensureTodayRoutine() async {

@@ -1,18 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-<<<<<<< HEAD
 project(Peace Mind AI LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "Peace Mind AI")
-=======
-project(peace_mind_ai LANGUAGES CXX)
-
-# The name of the executable created for the application. Change this to change
-# the on-disk name of your application.
-set(BINARY_NAME "peace_mind_ai")
->>>>>>> a541fff646cde7fea085111aa75f4d58525631ec
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

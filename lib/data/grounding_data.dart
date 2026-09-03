@@ -14,7 +14,7 @@ final List<ExerciseStep> groundingSteps = [
       AppLang.en:
       'Welcome. Find a comfortable position, feet flat on the ground, back supported. Take a slow breath in through your nose for four counts... one, two, three, four... and release it gently through your mouth. This is the 5-4-3-2-1 technique — a simple way to bring your mind back to the present moment by noticing the world around you. There is nothing to fix, nothing to force. Just notice. Let\'s begin together, one more breath in... and out.',
       AppLang.ur:
-      'خوش آمدید۔ آرام دہ حالت میں بیٹھیں، پاؤں زمین پر سیدھے، کمر کا سہارا لیں۔ ناک سے چار گنتی تک آہستہ سانس لیں... ایک، دو، تین، چار... اور منہ سے آہستہ سے چھوڑ دیں۔ یہ 5-4-3-2-1 تکنیک ہے — اپنے ارد گرد کی دنیا پر توجہ دے کر ذہن کو حال میں واپس لانے کا آسان طریقہ۔ کچھ ٹھیک کرنا نہیں، کچھ زبردستی نہیں۔ بس محسوس کریں۔ آئیے ساتھ شروع کریں، ایک اور سانس اندر... اور باہر۔',
+      'خوش آمدید۔ آرام سے بیٹھ جائیں... پاؤں زمین پر سیدھے رکھیں، اور کمر کا سہارا لیں۔ اب ناک سے آہستہ آہستہ سانس اندر لیں... ایک... دو... تین... چار... اور پھر منہ سے، بہت آہستہ، سانس باہر چھوڑ دیں۔ یہ پانچ، چار، تین، دو، ایک کی تکنیک ہے۔ یعنی، اپنے ارد گرد کی چیزوں پر توجہ دے کر، اپنے ذہن کو اسی لمحے میں واپس لانا۔ آپ کو کچھ ٹھیک نہیں کرنا، نہ کچھ زبردستی کرنا ہے۔ بس محسوس کرنا ہے۔ آئیے ساتھ شروع کریں... ایک اور سانس اندر... اور آہستہ سے، باہر۔',
       AppLang.urRoman:
       'Khush aamdeed. Aaram deh position mein baithein, paon zameen par seedhe, kamar ka sahara lein. Naak se chaar ginti tak aahista saans lein... aik, do, teen, chaar... aur mun se aahista se chor dein. Yeh 5-4-3-2-1 technique hai — apne ird-gird ki duniya par tawajjo de kar zehn ko haal mein wapas laane ka aasan tareeqa. Kuch theek karna nahi, kuch zabardasti nahi. Bas mehsoos karein. Aayein saath shuru karein, aik aur saans andar... aur bahar.',
       AppLang.pa:
@@ -34,7 +34,7 @@ final List<ExerciseStep> groundingSteps = [
       AppLang.en:
       'Look slowly around you and silently name five things you can see. Notice their shapes, their colors, the way light falls on them. Take your time with each one. Now bring your attention to sound. Name four things you can hear right now — near or far, loud or quiet. You don\'t need to judge them, just notice them arriving and passing. Let each sound remind you that you are here, right now, safe in this moment.',
       AppLang.ur:
-      'آہستہ سے اردگرد دیکھیں اور خاموشی سے پانچ چیزوں کا نام لیں جو آپ دیکھ سکتے ہیں۔ ان کی شکلیں، رنگ، روشنی کا انداز محسوس کریں۔ ہر ایک پر وقت لیں۔ اب توجہ آواز پر لائیں۔ چار چیزوں کا نام لیں جو آپ ابھی سن سکتے ہیں — قریب یا دور، اونچی یا دھیمی۔ انہیں جانچنا نہیں، بس محسوس کریں۔ ہر آواز آپ کو یاد دلائے کہ آپ یہاں ہیں، اس لمحے میں محفوظ۔',
+      'اب، آہستہ آہستہ، ارد گرد دیکھیں... اور دل میں ان پانچ چیزوں کا نام لیں جو آپ دیکھ رہے ہیں۔ ان کی شکل، ان کے رنگ، اور روشنی جس طرح ان پر پڑ رہی ہے، سب محسوس کریں۔ ہر چیز پر تھوڑا سا ٹھہریں۔ اب توجہ آواز پر لائیں۔ چار آوازیں گنیں جو اس وقت سنائی دے رہی ہیں... قریب ہوں یا دور، اونچی ہوں یا دھیمی۔ انہیں جانچنا نہیں ہے، بس محسوس کرنا ہے... آوازیں آتی ہیں، اور جاتی ہیں۔ ہر آواز آپ کو یاد دلا رہی ہے... کہ آپ یہیں ہیں، اسی لمحے میں، اور بالکل محفوظ ہیں۔',
       AppLang.urRoman:
       'Aahista se ird-gird dekhein aur khamoshi se paanch cheezon ka naam lein jo aap dekh sakte hain. Unki shaklein, rang, roshni ka andaz mehsoos karein. Har aik par waqt lein. Ab tawajjo aawaaz par layein. Chaar cheezon ka naam lein jo aap abhi sun sakte hain — qareeb ya door, oonchi ya dheemi. Unhein jaanchna nahi, bas mehsoos karein. Har aawaaz aap ko yaad dilaye ke aap yahan hain, is lamhay mein mehfooz.',
       AppLang.pa:
@@ -54,7 +54,7 @@ final List<ExerciseStep> groundingSteps = [
       AppLang.en:
       'Now notice three things you can touch or feel — the texture of your clothing, the surface beneath your hands, the temperature of the air on your skin. Next, notice two things you can smell, even if it\'s simply the neutral scent of the room. Finally, notice one thing you can taste — a lingering flavor, or simply the inside of your mouth. With each sense you name, you are anchoring yourself more fully into this present moment.',
       AppLang.ur:
-      'اب تین چیزیں محسوس کریں جو آپ چھو سکتے ہیں — اپنے کپڑوں کی بناوٹ، ہاتھوں کے نیچے کی سطح، ہوا کا درجہ حرارت جلد پر۔ پھر دو چیزیں سونگھیں، چاہے صرف کمرے کی عام بو ہی ہو۔ آخر میں ایک چیز چکھیں — کوئی باقی ذائقہ یا بس منہ کے اندر کا احساس۔ ہر حسی تجربے کے ساتھ آپ اپنے آپ کو اس لمحے میں مضبوطی سے جوڑ رہے ہیں۔',
+      'اب تین چیزیں محسوس کریں جو آپ چھو سکتے ہیں... مثلاً اپنے کپڑوں کی بناوٹ، ہاتھوں کے نیچے کی سطح، یا جلد پر لگتی ہوئی ہوا۔ پھر، دو چیزیں سونگھیں... چاہے وہ صرف کمرے کی ہلکی سی بو ہی کیوں نہ ہو۔ اور آخر میں، ایک چیز چکھیں... کوئی رہتا ہوا ذائقہ، یا بس منہ کے اندر کا احساس۔ ہر احساس کے ساتھ، آپ اپنے آپ کو اسی لمحے میں مزید گہرائی سے جوڑ رہے ہیں۔',
       AppLang.urRoman:
       'Ab teen cheezein mehsoos karein jo aap chhoo sakte hain — apne kapron ki banawat, hathon ke neeche ki satah, hawa ka darja hararat jild par. Phir do cheezein soonghein, chahay sirf kamre ki aam boo hi ho. Aakhir mein aik cheez chakhein — koi baqi zaiqa ya bas mun ke andar ka ehsaas. Har hiasi tajurbe ke saath aap apne aap ko is lamhay mein mazbooti se jor rahe hain.',
       AppLang.pa:
@@ -74,7 +74,7 @@ final List<ExerciseStep> groundingSteps = [
       AppLang.en:
       'Beautifully done. Take one more slow breath in... and out. Notice how much more present and settled you feel, connected to the room around you instead of your racing thoughts. Whenever your mind starts to spin, you can return to this simple practice — five things you see, four you hear, three you touch, two you smell, one you taste. Carry this steadiness with you.',
       AppLang.ur:
-      'بہت خوب۔ ایک اور آہستہ سانس اندر لیں... اور باہر۔ محسوس کریں کہ آپ کتنا زیادہ حاضر اور settled ہیں، دوڑتے خیالات کی بجائے اپنے اردگرد سے جڑے ہوئے۔ جب بھی ذہن گھومنے لگے، اس آسان طریقے پر واپس آ سکتے ہیں — پانچ چیزیں دیکھیں، چار سنیں، تین چھوئیں، دو سونگھیں، ایک چکھیں۔ اس مستقل مزاجی کو اپنے ساتھ رکھیں۔',
+      'بہت خوب۔ ایک اور آہستہ سانس اندر لیں... اور آہستہ سے باہر چھوڑ دیں۔ اب محسوس کریں... آپ کتنے حاضر ہیں، اور کتنے مطمئن۔ دوڑتے ہوئے خیالات کی جگہ، اب آپ اپنے ارد گرد سے جڑے ہوئے ہیں۔ جب بھی ذہن پریشان ہونے لگے، آپ اس آسان مشق پر واپس آ سکتے ہیں... پانچ چیزیں دیکھیں، چار سنیں، تین چھوئیں، دو سونگھیں، اور ایک چکھیں۔ یہی سکون، یہی ٹھہراؤ، اپنے ساتھ ساتھ رکھیں۔',
       AppLang.urRoman:
       'Bohat khoob. Aik aur aahista saans andar lein... aur bahar. Mehsoos karein ke aap kitna zyada haazir aur settled hain, daurte khayalat ki bajaye apne ird-gird se jure huay. Jab bhi zehn ghoomne lage, is aasan tareeqe par wapas aa sakte hain — paanch cheezein dekhein, chaar sunein, teen chhuein, do soonghein, aik chakhein. Is mustaqil mizaji ko apne saath rakhein.',
       AppLang.pa:

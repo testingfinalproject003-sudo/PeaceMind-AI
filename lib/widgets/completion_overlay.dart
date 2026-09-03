@@ -32,19 +32,25 @@ class CompletionOverlay extends StatefulWidget {
 class _CompletionOverlayState extends State<CompletionOverlay>
     with TickerProviderStateMixin {
   late final AnimationController _entrance = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 700))
-    ..forward();
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  )..forward();
   late final AnimationController _bars = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1400))
-    ..forward();
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..forward();
   late final AnimationController _rings = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1600))
-    ..forward();
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+  )..forward();
   late final AnimationController _pulse = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 2000))
-    ..repeat(reverse: true);
-  late final List<_ConfettiPiece> _pieces =
-      List.generate(36, (i) => _ConfettiPiece(i));
+    vsync: this,
+    duration: const Duration(milliseconds: 2000),
+  )..repeat(reverse: true);
+  late final List<_ConfettiPiece> _pieces = List.generate(
+    36,
+    (i) => _ConfettiPiece(i),
+  );
 
   @override
   void dispose() {
@@ -72,8 +78,7 @@ class _CompletionOverlayState extends State<CompletionOverlay>
     'Consistency is the foundation of inner peace.',
   ];
 
-  String get _motivation =>
-      _motivations[widget.cycles % _motivations.length];
+  String get _motivation => _motivations[widget.cycles % _motivations.length];
 
   @override
   Widget build(BuildContext context) {
@@ -93,40 +98,44 @@ class _CompletionOverlayState extends State<CompletionOverlay>
               ],
             ),
           ),
-          child: LayoutBuilder(builder: (context, constraints) {
-            final size = Size(constraints.maxWidth, constraints.maxHeight);
-            return Stack(
-              children: [
-                ..._pieces.map((p) => _ConfettiWidget(piece: p, areaSize: size)),
-                SafeArea(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    child: Column(
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 10),
-                        _buildMotivationQuote(),
-                        const SizedBox(height: 12),
-                        _buildStatCards(),
-                        const SizedBox(height: 10),
-                        if (widget.previousCycles > 0) ...[
-                          _buildCycleComparison(),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final size = Size(constraints.maxWidth, constraints.maxHeight);
+              return Stack(
+                children: [
+                  ..._pieces.map(
+                    (p) => _ConfettiWidget(piece: p, areaSize: size),
+                  ),
+                  SafeArea(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      child: Column(
+                        children: [
+                          _buildHeader(),
                           const SizedBox(height: 10),
+                          _buildMotivationQuote(),
+                          const SizedBox(height: 12),
+                          _buildStatCards(),
+                          const SizedBox(height: 10),
+                          if (widget.previousCycles > 0) ...[
+                            _buildCycleComparison(),
+                            const SizedBox(height: 10),
+                          ],
+                          _buildScoreRings(),
+                          const SizedBox(height: 10),
+                          _buildTreeProgress(),
+                          const SizedBox(height: 10),
+                          _buildAnalysisChart(),
+                          const SizedBox(height: 14),
+                          _buildButtons(),
                         ],
-                        _buildScoreRings(),
-                        const SizedBox(height: 10),
-                        _buildTreeProgress(),
-                        const SizedBox(height: 10),
-                        _buildAnalysisChart(),
-                        const SizedBox(height: 14),
-                        _buildButtons(),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            },
+          ),
         );
       },
     );
@@ -159,16 +168,20 @@ class _CompletionOverlayState extends State<CompletionOverlay>
           Text(
             widget.config.title,
             style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: AppColors.ink),
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
           ),
           const SizedBox(height: 3),
           Text(
             widget.config.subtitleBuilder(widget.config.unitCount),
             textAlign: TextAlign.center,
             style: const TextStyle(
-                fontSize: 12.5, color: AppColors.inkSoft, height: 1.4),
+              fontSize: 12.5,
+              color: AppColors.inkSoft,
+              height: 1.4,
+            ),
           ),
         ],
       ),
@@ -199,8 +212,11 @@ class _CompletionOverlayState extends State<CompletionOverlay>
       ),
       child: Row(
         children: [
-          const Icon(Icons.format_quote_rounded,
-              color: AppColors.accent, size: 16),
+          const Icon(
+            Icons.format_quote_rounded,
+            color: AppColors.accent,
+            size: 16,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -224,19 +240,22 @@ class _CompletionOverlayState extends State<CompletionOverlay>
     return Row(
       children: [
         _StatCard(
-            value: fmtDuration(widget.totalTime),
-            label: 'TOTAL TIME',
-            icon: Icons.timer_outlined),
+          value: fmtDuration(widget.totalTime),
+          label: 'TOTAL TIME',
+          icon: Icons.timer_outlined,
+        ),
         const SizedBox(width: 8),
         _StatCard(
-            value: '${widget.cycles}',
-            label: 'CYCLES DONE',
-            icon: Icons.autorenew_rounded),
+          value: '${widget.cycles}',
+          label: 'CYCLES DONE',
+          icon: Icons.autorenew_rounded,
+        ),
         const SizedBox(width: 8),
         _StatCard(
-            value: '${widget.config.unitCount}',
-            label: widget.config.unitLabel,
-            icon: Icons.insights_rounded),
+          value: '${widget.config.unitCount}',
+          label: widget.config.unitLabel,
+          icon: Icons.insights_rounded,
+        ),
       ],
     );
   }
@@ -267,17 +286,17 @@ class _CompletionOverlayState extends State<CompletionOverlay>
                   improved
                       ? Icons.trending_up_rounded
                       : Icons.compare_arrows_rounded,
-                  color:
-                      improved ? AppColors.green : AppColors.inkSoft,
+                  color: improved ? AppColors.green : AppColors.inkSoft,
                   size: 20,
                 ),
                 if (improved)
                   const Text(
                     'Better!',
                     style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.green),
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.green,
+                    ),
                   ),
               ],
             ),
@@ -302,16 +321,18 @@ class _CompletionOverlayState extends State<CompletionOverlay>
     return Row(
       children: [
         _ScoreRing(
-            percent: calmPct,
-            label: 'Calm',
-            animCtrl: _rings,
-            color: AppColors.accent),
+          percent: calmPct,
+          label: 'Calm',
+          animCtrl: _rings,
+          color: AppColors.accent,
+        ),
         const SizedBox(width: 8),
         _ScoreRing(
-            percent: focusPct,
-            label: 'Focus',
-            animCtrl: _rings,
-            color: AppColors.green),
+          percent: focusPct,
+          label: 'Focus',
+          animCtrl: _rings,
+          color: AppColors.green,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: GlassPanel(
@@ -320,13 +341,19 @@ class _CompletionOverlayState extends State<CompletionOverlay>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.spa_rounded,
-                    size: 14, color: AppColors.accent),
+                const Icon(
+                  Icons.spa_rounded,
+                  size: 14,
+                  color: AppColors.accent,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   'Wellness scores based on your breathing cycles & session duration.',
                   style: const TextStyle(
-                      fontSize: 10, color: AppColors.inkSoft, height: 1.4),
+                    fontSize: 10,
+                    color: AppColors.inkSoft,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -349,7 +376,8 @@ class _CompletionOverlayState extends State<CompletionOverlay>
             alignment: Alignment.center,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                  colors: [Color(0xFF3ECF7A), Color(0xFF2A9D5C)]),
+                colors: [Color(0xFF3ECF7A), Color(0xFF2A9D5C)],
+              ),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -378,18 +406,20 @@ class _CompletionOverlayState extends State<CompletionOverlay>
                     const Text(
                       'Garden Progress',
                       style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
                     ),
                     const Spacer(),
                     Consumer<GardenProvider>(
                       builder: (_, g, _) => Text(
                         '${g.treeCount}/${GardenProvider.totalSlots}',
                         style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.green),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.green,
+                        ),
                       ),
                     ),
                   ],
@@ -397,8 +427,7 @@ class _CompletionOverlayState extends State<CompletionOverlay>
                 const SizedBox(height: 4),
                 Consumer<GardenProvider>(
                   builder: (_, g, _) {
-                    final frac =
-                        g.treeCount / GardenProvider.totalSlots;
+                    final frac = g.treeCount / GardenProvider.totalSlots;
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(5),
                       child: Container(
@@ -406,20 +435,17 @@ class _CompletionOverlayState extends State<CompletionOverlay>
                         color: const Color(0x80FFFFFF),
                         child: AnimatedBuilder(
                           animation: _bars,
-                          builder: (_, _) =>
-                              FractionallySizedBox(
+                          builder: (_, _) => FractionallySizedBox(
                             widthFactor: frac * _bars.value,
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient:
-                                    const LinearGradient(
+                                gradient: const LinearGradient(
                                   colors: [
                                     Color(0xFF3ECF7A),
-                                    Color(0xFF2A9D5C)
+                                    Color(0xFF2A9D5C),
                                   ],
                                 ),
-                                borderRadius:
-                                    BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ),
@@ -451,71 +477,85 @@ class _CompletionOverlayState extends State<CompletionOverlay>
                 height: 26,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    AppColors.accent.withValues(alpha: 0.15),
-                    AppColors.accent2.withValues(alpha: 0.08),
-                  ]),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.accent.withValues(alpha: 0.15),
+                      AppColors.accent2.withValues(alpha: 0.08),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.bar_chart_rounded,
-                    size: 14, color: AppColors.accent),
+                child: const Icon(
+                  Icons.bar_chart_rounded,
+                  size: 14,
+                  color: AppColors.accent,
+                ),
               ),
               const SizedBox(width: 8),
-              Text(widget.config.chartTitle,
-                  style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink)),
+              Text(
+                widget.config.chartTitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          ...widget.config.chartRows.map((row) => Padding(
-                padding: const EdgeInsets.only(bottom: 7),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 70,
-                      child: Text(row.label,
-                          style: const TextStyle(
-                              fontSize: 9.5, color: AppColors.inkSoft)),
+          ...widget.config.chartRows.map(
+            (row) => Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 70,
+                    child: Text(
+                      row.label,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        color: AppColors.inkSoft,
+                      ),
                     ),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Container(
-                          height: 12,
-                          color: const Color(0x88FFFFFF),
-                          alignment: Alignment.centerLeft,
-                          child: AnimatedBuilder(
-                            animation: _bars,
-                            builder: (_, _) =>
-                                FractionallySizedBox(
-                              widthFactor:
-                                  (row.percent / 100) * _bars.value,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: AppColors.accentGradient,
-                                  borderRadius:
-                                      BorderRadius.circular(6),
-                                ),
+                  ),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        height: 12,
+                        color: const Color(0x88FFFFFF),
+                        alignment: Alignment.centerLeft,
+                        child: AnimatedBuilder(
+                          animation: _bars,
+                          builder: (_, _) => FractionallySizedBox(
+                            widthFactor: (row.percent / 100) * _bars.value,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: AppColors.accentGradient,
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: 34,
-                      child: Text('${row.percent}%',
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                              fontSize: 9.5,
-                              color: AppColors.ink,
-                              fontWeight: FontWeight.w700)),
+                  ),
+                  SizedBox(
+                    width: 34,
+                    child: Text(
+                      '${row.percent}%',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -525,14 +565,16 @@ class _CompletionOverlayState extends State<CompletionOverlay>
   Widget _buildButtons() {
     return Row(
       children: [
-        Expanded(child: _OverlayButton(
-            label: 'Back to Garden', onTap: widget.onClose)),
+        Expanded(
+          child: _OverlayButton(label: 'Finish', onTap: widget.onClose),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: _OverlayButton(
-              label: 'Start New Cycle',
-              primary: true,
-              onTap: widget.onRestart),
+            label: 'Start New Cycle',
+            primary: true,
+            onTap: widget.onRestart,
+          ),
         ),
       ],
     );
@@ -544,8 +586,11 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String label;
   final IconData icon;
-  const _StatCard(
-      {required this.value, required this.label, required this.icon});
+  const _StatCard({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -562,20 +607,23 @@ class _StatCard extends StatelessWidget {
                 color: AppColors.accent.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
-              child:
-                  Icon(icon, size: 14, color: AppColors.accent),
+              child: Icon(icon, size: 14, color: AppColors.accent),
             ),
             const SizedBox(height: 5),
-            Text(value,
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.accent)),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.accent,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 8, color: AppColors.inkSoft)),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 8, color: AppColors.inkSoft),
+            ),
           ],
         ),
       ),
@@ -612,20 +660,26 @@ class _ScoreRing extends StatelessWidget {
                   CustomPaint(
                     size: const Size(58, 58),
                     painter: _RingPainter(
-                        (percent / 100) * animCtrl.value, color),
+                      (percent / 100) * animCtrl.value,
+                      color,
+                    ),
                   ),
                   Container(
                     width: 46,
                     height: 46,
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
-                        color: Colors.white, shape: BoxShape.circle),
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
-                        '${(percent * animCtrl.value).round()}%',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ink,
-                            fontSize: 13)),
+                      '${(percent * animCtrl.value).round()}%',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.ink,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               );
@@ -633,11 +687,14 @@ class _ScoreRing extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 3),
-        Text(label,
-            style: const TextStyle(
-                fontSize: 9,
-                color: AppColors.inkSoft,
-                fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 9,
+            color: AppColors.inkSoft,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
@@ -663,11 +720,12 @@ class _RingPainter extends CustomPainter {
       ..strokeWidth = radius * 0.38
       ..strokeCap = StrokeCap.round;
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius * 0.68),
-        -pi / 2,
-        2 * pi * frac,
-        false,
-        fg);
+      Rect.fromCircle(center: center, radius: radius * 0.68),
+      -pi / 2,
+      2 * pi * frac,
+      false,
+      fg,
+    );
   }
 
   @override
@@ -701,23 +759,28 @@ class _MiniCompare extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isCurrent ? AppColors.accent : AppColors.inkSoft)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: isCurrent ? AppColors.accent : AppColors.inkSoft,
+            ),
+          ),
           const SizedBox(height: 3),
-          Text('$cycles cycles',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color:
-                      isCurrent ? AppColors.accent : AppColors.ink)),
+          Text(
+            '$cycles cycles',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: isCurrent ? AppColors.accent : AppColors.ink,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text('Calm $calm%  ·  Focus $focus%',
-              style: const TextStyle(
-                  fontSize: 8, color: AppColors.inkSoft)),
+          Text(
+            'Calm $calm%  ·  Focus $focus%',
+            style: const TextStyle(fontSize: 8, color: AppColors.inkSoft),
+          ),
         ],
       ),
     );
@@ -729,8 +792,11 @@ class _OverlayButton extends StatelessWidget {
   final String label;
   final bool primary;
   final VoidCallback onTap;
-  const _OverlayButton(
-      {required this.label, required this.onTap, this.primary = false});
+  const _OverlayButton({
+    required this.label,
+    required this.onTap,
+    this.primary = false,
+  });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -753,11 +819,14 @@ class _OverlayButton extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: primary ? Colors.white : AppColors.ink)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: primary ? Colors.white : AppColors.ink,
+          ),
+        ),
       ),
     );
   }
@@ -770,11 +839,13 @@ class _ConfettiPiece {
   final double durationMs;
   final double delayMs;
   _ConfettiPiece(int seed)
-      : left = Random(seed * 977).nextDouble(),
-        color = AppColors
-            .confettiColors[Random(seed * 131).nextInt(AppColors.confettiColors.length)],
-        durationMs = 1800 + Random(seed * 53).nextDouble() * 1400,
-        delayMs = Random(seed * 17).nextDouble() * 600;
+    : left = Random(seed * 977).nextDouble(),
+      color =
+          AppColors.confettiColors[Random(
+            seed * 131,
+          ).nextInt(AppColors.confettiColors.length)],
+      durationMs = 1800 + Random(seed * 53).nextDouble() * 1400,
+      delayMs = Random(seed * 17).nextDouble() * 600;
 }
 
 class _ConfettiWidget extends StatefulWidget {
@@ -793,8 +864,9 @@ class _ConfettiWidgetState extends State<_ConfettiWidget>
   void initState() {
     super.initState();
     _c = AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: widget.piece.durationMs.round()));
+      vsync: this,
+      duration: Duration(milliseconds: widget.piece.durationMs.round()),
+    );
     Future.delayed(Duration(milliseconds: widget.piece.delayMs.round()), () {
       if (mounted) _c.forward();
     });
@@ -821,8 +893,7 @@ class _ConfettiWidgetState extends State<_ConfettiWidget>
             opacity: (1 - t).clamp(0, 1),
             child: Transform.rotate(
               angle: t * 2 * pi,
-              child:
-                  Container(width: 7, height: 12, color: widget.piece.color),
+              child: Container(width: 7, height: 12, color: widget.piece.color),
             ),
           ),
         );

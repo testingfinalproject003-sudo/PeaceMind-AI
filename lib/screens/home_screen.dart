@@ -409,6 +409,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _showGardenCelebration({
     required String taskTitle,
+    bool growTree = true,
   }) async {
     final authProvider = context.read<AuthProvider>();
     final userName = authProvider.userName;
@@ -434,7 +435,9 @@ class _HomeScreenState extends State<HomeScreen>
 
     if (!mounted) return;
 
-    await context.read<GardenProvider>().growTree();
+    if (growTree) {
+      await context.read<GardenProvider>().growTree();
+    }
   }
 
   @override
@@ -846,9 +849,11 @@ class _HomeScreenState extends State<HomeScreen>
                 exercise: info ?? boxBreathingExercise,
               ),
             ),
-          ).then((completed) {
-            // Exercise done → back on home garden with yappy song.
-            if (completed == true) _playYappy();
+          ).then((result) {
+            // Exercise done → show Yappy celebration card on home screen.
+            if (result is String) {
+              _showGardenCelebration(taskTitle: result, growTree: false);
+            }
             if (mounted) setState(() => selectedNavigation = 2);
           });
         } else {
@@ -1223,8 +1228,10 @@ class _HomeScreenState extends State<HomeScreen>
                           MaterialPageRoute(
                             builder: (_) => ExercisePlayerScreen(exercise: task.exerciseInfo!),
                           ),
-                        ).then((completed) {
-                          if (completed == true) _playYappy();
+                        ).then((result) {
+                          if (result is String) {
+                            _showGardenCelebration(taskTitle: result, growTree: false);
+                          }
                           if (mounted) {
                             setState(() {});
                             _restoreExerciseCompletions();
@@ -1401,8 +1408,10 @@ class _HomeScreenState extends State<HomeScreen>
                                     exercise: info ?? boxBreathingExercise,
                                   ),
                                 ),
-                              ).then((completed) {
-                                if (completed == true) _playYappy();
+                              ).then((result) {
+                                if (result is String) {
+                                  _showGardenCelebration(taskTitle: result, growTree: false);
+                                }
                                 if (mounted) {
                                   setState(() {});
                                   _restoreExerciseCompletions();

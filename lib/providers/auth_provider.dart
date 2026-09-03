@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user_model.dart';
 import 'routine_provider.dart';
+import 'package:flutter/material.dart';
+import '../screens/auth_screen.dart';
 
 class AuthProvider extends ChangeNotifier {
   AuthProvider({this.routineProvider}) {
@@ -86,7 +88,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _loadOnboardingFlag(String uid) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _onboardingCompleted = prefs.getBool('onboarding_completed_$uid') ?? false;
+      _onboardingCompleted =
+          prefs.getBool('onboarding_completed_$uid') ?? false;
     } catch (e) {
       debugPrint('AuthProvider onboarding flag error: $e');
       _onboardingCompleted = false;
@@ -110,77 +113,57 @@ class AuthProvider extends ChangeNotifier {
 
   /// Firestore se user ka document uthata hai. Agar exist nahi karta
   /// (bohot rare case — jaise doc manually delete ho gaya ho) to naya bana deta hai.
-  Future<void> _fetchOrCreateUserDoc(
-  String uid,
-  String email,
-) async {
-  final docRef = _firestore.collection('users').doc(uid);
-  final snapshot = await docRef.get();
+  Future<void> _fetchOrCreateUserDoc(String uid, String email) async {
+    final docRef = _firestore.collection('users').doc(uid);
+    final snapshot = await docRef.get();
 
-  final firebaseUser = _auth.currentUser;
+    final firebaseUser = _auth.currentUser;
 
-  if (snapshot.exists && snapshot.data() != null) {
-    final data = snapshot.data()!;
+    if (snapshot.exists && snapshot.data() != null) {
+      final data = snapshot.data()!;
 
-    final firestoreName =
-        (data['name'] ?? '').toString().trim();
+      final firestoreName = (data['name'] ?? '').toString().trim();
 
-    final firebaseName =
-        (firebaseUser?.displayName ?? '').trim();
+      final firebaseName = (firebaseUser?.displayName ?? '').trim();
 
-    final finalName = firestoreName.isNotEmpty
-        ? firestoreName
-        : firebaseName;
+      final finalName = firestoreName.isNotEmpty ? firestoreName : firebaseName;
 
-    _currentUser = UserModel(
-      uid: uid,
-      name: finalName,
-      email: (data['email'] ?? email).toString(),
-      mood: (data['mood'] ?? '🙂').toString(),
-      routineCount: data['routineCount'] is int
-          ? data['routineCount'] as int
-          : 0,
-      taskCount: data['taskCount'] is int
-          ? data['taskCount'] as int
-          : 0,
-    );
+      _currentUser = UserModel(
+        uid: uid,
+        name: finalName,
+        email: (data['email'] ?? email).toString(),
+        mood: (data['mood'] ?? '🙂').toString(),
+        routineCount: data['routineCount'] is int
+            ? data['routineCount'] as int
+            : 0,
+        taskCount: data['taskCount'] is int ? data['taskCount'] as int : 0,
+      );
 
-    // Agar Firestore mein name missing tha,
-    // Firebase name ko Firestore mein save kar do.
-    if (firestoreName.isEmpty && finalName.isNotEmpty) {
-      await docRef.set(
-        {
+      // Agar Firestore mein name missing tha,
+      // Firebase name ko Firestore mein save kar do.
+      if (firestoreName.isEmpty && finalName.isNotEmpty) {
+        await docRef.set({
           'name': finalName,
           'updatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+        }, SetOptions(merge: true));
+      }
+    } else {
+      final firebaseName = (firebaseUser?.displayName ?? '').trim();
+
+      final newUser = UserModel(uid: uid, name: firebaseName, email: email);
+
+      await docRef.set({
+        ...newUser.toJson(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      _currentUser = newUser;
     }
-  } else {
-    final firebaseName =
-        (firebaseUser?.displayName ?? '').trim();
-
-    final newUser = UserModel(
-      uid: uid,
-      name: firebaseName,
-      email: email,
-    );
-
-    await docRef.set({
-      ...newUser.toJson(),
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-
-    _currentUser = newUser;
   }
-}
 
   /// Real Firebase email/password sign-in.
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -234,38 +217,35 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
 
-     final fbUser = credential.user;
+      final fbUser = credential.user;
 
-if (fbUser == null) {
-  throw fb_auth.FirebaseAuthException(code: 'unknown');
-}
+      if (fbUser == null) {
+        throw fb_auth.FirebaseAuthException(code: 'unknown');
+      }
 
-final cleanName = name.trim();
+      final cleanName = name.trim();
 
-// Firebase Auth profile
-await fbUser.updateDisplayName(cleanName);
+      // Firebase Auth profile
+      await fbUser.updateDisplayName(cleanName);
 
-// Firestore profile
-final newUser = UserModel(
-  uid: fbUser.uid,
-  name: cleanName,
-  email: fbUser.email ?? email.trim(),
-);
+      // Firestore profile
+      final newUser = UserModel(
+        uid: fbUser.uid,
+        name: cleanName,
+        email: fbUser.email ?? email.trim(),
+      );
 
-await _firestore
-    .collection('users')
-    .doc(fbUser.uid)
-    .set({
-  ...newUser.toJson(),
-  'createdAt': FieldValue.serverTimestamp(),
-  'updatedAt': FieldValue.serverTimestamp(),
-});
+      await _firestore.collection('users').doc(fbUser.uid).set({
+        ...newUser.toJson(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
-_currentUser = newUser;
+      _currentUser = newUser;
 
-// Naya user — onboarding abhi complete nahi hua
-await _loadOnboardingFlag(fbUser.uid);
-await routineProvider?.bindUser(fbUser.uid);
+      // Naya user — onboarding abhi complete nahi hua
+      await _loadOnboardingFlag(fbUser.uid);
+      await routineProvider?.bindUser(fbUser.uid);
 
       _isLoading = false;
       notifyListeners();
@@ -286,48 +266,40 @@ await routineProvider?.bindUser(fbUser.uid);
 
   /// Sirf name field update karta hai — Firestore mein merge hoti hai,
   /// baaki fields (mood, routineCount, taskCount) untouched rehte hain.
- Future<void> updateName(String name) async {
-  final cleanName = name.trim();
+  Future<void> updateName(String name) async {
+    final cleanName = name.trim();
 
-  if (cleanName.isEmpty || _currentUser == null) {
-    return;
-  }
-
-  try {
-    final firebaseUser = _auth.currentUser;
-
-    // Firebase Authentication profile
-    if (firebaseUser != null) {
-      await firebaseUser.updateDisplayName(cleanName);
+    if (cleanName.isEmpty || _currentUser == null) {
+      return;
     }
 
-    // Firestore profile
-    await _firestore
-        .collection('users')
-        .doc(_currentUser!.uid)
-        .set(
-      {
+    try {
+      final firebaseUser = _auth.currentUser;
+
+      // Firebase Authentication profile
+      if (firebaseUser != null) {
+        await firebaseUser.updateDisplayName(cleanName);
+      }
+
+      // Firestore profile
+      await _firestore.collection('users').doc(_currentUser!.uid).set({
         'name': cleanName,
         'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+      }, SetOptions(merge: true));
 
-    // Local provider state
-    _currentUser = _currentUser!.copyWith(
-      name: cleanName,
-    );
+      // Local provider state
+      _currentUser = _currentUser!.copyWith(name: cleanName);
 
-    notifyListeners();
-  } catch (e) {
-    debugPrint('AuthProvider updateName error: $e');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('AuthProvider updateName error: $e');
+    }
   }
-}
 
   /// Logout — Firebase signOut ke baad local state hamesha clear
   /// hota hai (chahe signOut error de de). AuthGate khud AuthScreen
   /// dikha deta hai, kisi manual navigation ki zaroorat nahi.
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     try {
       await _auth.signOut();
     } catch (e) {
@@ -338,6 +310,15 @@ await routineProvider?.bindUser(fbUser.uid);
     _onboardingCompleted = false;
     await routineProvider?.bindUser(null);
     notifyListeners();
+
+    // ✅ mounted check - async gap safe
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
+    }
   }
 
   String _mapAuthError(fb_auth.FirebaseAuthException e) {

@@ -3,6 +3,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import 'nova_text_sanitizer.dart';
+
 class SpeechToTextService {
   SpeechToTextService({FlutterTts? flutterTts, stt.SpeechToText? speechToText})
       : _flutterTts = flutterTts ?? FlutterTts(),
@@ -102,7 +104,9 @@ class SpeechToTextService {
   }
 
   Future<void> speak(String text, {String locale = 'en-US'}) async {
-    final message = text.trim();
+    // TTS must only ever receive plain spoken words — no emojis,
+    // emoticons, markdown or decorative symbols.
+    final message = NovaTextSanitizer.sanitize(text);
     if (message.isEmpty) {
       return;
     }

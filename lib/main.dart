@@ -5,22 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-
+import 'providers/chat_provider.dart';
 import 'providers/audio_call_provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/daily_routine_provider.dart';
 import 'providers/routine_provider.dart';
 import 'screens/auth_gate.dart';
+import 'screens/chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Web par network WebSocket timing issue fix
   if (kIsWeb) {
@@ -56,8 +55,8 @@ class PeaceMindApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: routineProvider),
 
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(routineProvider: routineProvider)
-            ..loadUser(),
+          create: (_) =>
+              AuthProvider(routineProvider: routineProvider)..loadUser(),
         ),
         ChangeNotifierProvider(
           create: (_) => AudioCallProvider(routineProvider: routineProvider),
@@ -65,6 +64,7 @@ class PeaceMindApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => DailyRoutineProvider(routineProvider: routineProvider),
         ),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -79,7 +79,7 @@ class PeaceMindApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
         ),
-
+        routes: {'/chat': (context) => const ChatScreen()},
         home: const AuthGate(),
       ),
     );

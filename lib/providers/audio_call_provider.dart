@@ -73,7 +73,7 @@ class AudioCallProvider extends ChangeNotifier {
   String _sessionSummary = '';
   String _lastSubmittedTranscript = '';
 
-  /// Current detected language code ('en', 'ur', 'pa')
+  /// Current detected language code ('en', 'ur', 'pa', 'hinglish')
   String _detectedLang = 'en';
   String get detectedLang => _detectedLang;
 
@@ -296,11 +296,16 @@ class AudioCallProvider extends ChangeNotifier {
     _statusText = 'Processing...';
     notifyListeners();
 
-    final response = await _audioCallService.callNova(
-      cleanText,
-      _sessionSummary,
-      detectedLang: langName,
-    );
+    String? response;
+    try {
+      response = await _audioCallService.callNova(
+        cleanText,
+        _sessionSummary,
+        detectedLang: langName,
+      );
+    } catch (_) {
+      response = null;
+    }
     if (response == null || response.trim().isEmpty) {
       _state = AudioCallState.error;
       _statusText = 'Network issue. Please try again.';
@@ -329,19 +334,24 @@ class AudioCallProvider extends ChangeNotifier {
       'time': DateTime.now().toIso8601String(),
     });
 
-    await _audioCallService.saveMessage(
-      sessionId: _sessionId,
-      text: cleanText,
-      role: 'user',
-      source: 'audio_call',
-    );
-    await _audioCallService.saveMessage(
-      sessionId: _sessionId,
-      text: response,
-      role: 'nova',
-      source: 'audio_call',
-    );
-    await _audioCallService.saveSession(session);
+    // ── Persist turn (non-fatal: a Firestore failure must not freeze the call) ──
+    try {
+      await _audioCallService.saveMessage(
+        sessionId: _sessionId,
+        text: cleanText,
+        role: 'user',
+        source: 'audio_call',
+      );
+      await _audioCallService.saveMessage(
+        sessionId: _sessionId,
+        text: response,
+        role: 'nova',
+        source: 'audio_call',
+      );
+      await _audioCallService.saveSession(session);
+    } catch (_) {
+      // Firestore write failed — conversation still continues in-app.
+    }
 
     _sessionTranscript.add({
       'role': 'nova',

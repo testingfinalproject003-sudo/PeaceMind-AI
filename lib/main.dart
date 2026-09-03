@@ -10,6 +10,8 @@ import 'providers/audio_call_provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/daily_routine_provider.dart';
+import 'providers/garden_provider.dart';
+import 'providers/journal_provider.dart';
 import 'providers/routine_provider.dart';
 import 'screens/auth_gate.dart';
 
@@ -50,6 +52,8 @@ class PeaceMindApp extends StatelessWidget {
     // RoutineProvider pehle banao taake AuthProvider user ke
     // login/logout par usko bindUser() se sync kar sake.
     final routineProvider = RoutineProvider();
+    final gardenProvider = GardenProvider();
+    gardenProvider.load();
 
     return MultiProvider(
       providers: [
@@ -65,6 +69,10 @@ class PeaceMindApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => DailyRoutineProvider(routineProvider: routineProvider),
         ),
+        ChangeNotifierProvider(
+          create: (_) => JournalProvider(),
+        ),
+        ChangeNotifierProvider.value(value: gardenProvider),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

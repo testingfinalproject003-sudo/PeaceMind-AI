@@ -62,8 +62,12 @@ class AuthProvider extends ChangeNotifier {
       final fbUser = _auth.currentUser;
 
       if (fbUser != null) {
-        await _fetchOrCreateUserDoc(fbUser.uid, fbUser.email ?? '');
-        await _loadOnboardingFlag(fbUser.uid);
+        // Parallel: user doc (network) + onboarding flag (local prefs)
+        // run together — sequential awaits ek full round-trip slow theke.
+        await Future.wait([
+          _fetchOrCreateUserDoc(fbUser.uid, fbUser.email ?? ''),
+          _loadOnboardingFlag(fbUser.uid),
+        ]);
         await routineProvider?.bindUser(fbUser.uid);
       } else {
         _currentUser = null;

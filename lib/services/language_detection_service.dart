@@ -1,7 +1,7 @@
 /// Detects the user's language from their text input.
 ///
-/// Supports Urdu, Punjabi, and English. Hindi is explicitly excluded —
-/// if the text looks like Hindi (Devanagari), it falls back to English.
+/// Supports Urdu, Punjabi, Hinglish, and English.
+/// Hindi (Devanagari script) is never returned — falls back to English.
 ///
 /// The same detection result drives:
 ///   • NOVA's reply language (chat + audio call system prompt)
@@ -10,12 +10,13 @@
 class LanguageDetectionService {
   const LanguageDetectionService();
 
-  /// Returns one of 'ur', 'pa', 'en'.
+  /// Returns one of 'ur', 'pa', 'hinglish', 'en'.
   ///
   /// Detection heuristic:
   ///   • Arabic-script characters (Urdu)  → 'ur'
   ///   • Gurmukhi-script characters (Punjabi) → 'pa'
   ///   • Devanagari (Hindi) → 'en'  (Hindi is never used)
+  ///   • Roman script with South-Asian keywords → 'hinglish'
   ///   • Otherwise → 'en'
   String detect(String text) {
     final clean = text.trim();
@@ -38,9 +39,9 @@ class LanguageDetectionService {
       }
     }
 
-    // Roman Urdu detection: Latin script but Urdu-specific keywords present
+    // Roman script with South-Asian keywords → Hinglish
     if (latinCount > 0 && arabicCount == 0 && gurmukhiCount == 0) {
-      if (_looksLikeRomanUrdu(clean)) return 'ur';
+      if (_looksLikeRomanUrdu(clean)) return 'hinglish';
       return 'en';
     }
 
@@ -63,6 +64,8 @@ class LanguageDetectionService {
         return 'ur-PK';
       case 'pa':
         return 'pa-IN';
+      case 'hinglish':
+        return 'en-IN';
       default:
         return 'en-US';
     }
@@ -75,6 +78,8 @@ class LanguageDetectionService {
         return 'ur-PK';
       case 'pa':
         return 'pa-IN';
+      case 'hinglish':
+        return 'en-IN';
       default:
         return 'en-US';
     }
@@ -87,6 +92,8 @@ class LanguageDetectionService {
         return 'Urdu';
       case 'pa':
         return 'Punjabi';
+      case 'hinglish':
+        return 'Hinglish';
       default:
         return 'English';
     }

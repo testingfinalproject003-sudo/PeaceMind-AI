@@ -1,230 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
-class GardenWidget extends StatefulWidget {
-  const GardenWidget({
-    super.key,
-  });
+import '../providers/garden_provider.dart';
+import '../theme/app_theme.dart';
+import 'skeleton.dart';
 
-  @override
-  GardenWidgetState createState() => GardenWidgetState();
-}
-
-class GardenWidgetState extends State<GardenWidget> {
-  // ===========================================================================
-  // SETTINGS
-  // ===========================================================================
-
-  static const int totalSlots = 12;
-
-  static const String _treeCountKey = 'garden_tree_count';
-  static const String _gardenStreakKey = 'garden_streak';
-
-  // ===========================================================================
-  // ASSETS
-  // ===========================================================================
+class GardenWidget extends StatelessWidget {
+  const GardenWidget({super.key});
 
   static const String _gardenBackground =
       'assets/images/home/garden_background.jpg';
-
-  static const String _staticTree =
-      'assets/animations/garden_tree_static.json';
-
-  // ===========================================================================
-  // STATE
-  // ===========================================================================
-
-  int _treeCount = 0;
-  int _gardenStreak = 0;
-
-  bool _isLoading = true;
-  bool _isUpdating = false;
-
-  // ===========================================================================
-  // INIT
-  // ===========================================================================
-
-  @override
-  void initState() {
-    super.initState();
-    _loadGarden();
-  }
-
-  // ===========================================================================
-  // LOAD SAVED DATA
-  // ===========================================================================
-
-  Future<void> _loadGarden() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final savedTreeCount = prefs.getInt(_treeCountKey) ?? 0;
-      final savedStreak = prefs.getInt(_gardenStreakKey) ?? 0;
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _treeCount = savedTreeCount.clamp(0, totalSlots);
-        _gardenStreak = savedStreak < 0 ? 0 : savedStreak;
-        _isLoading = false;
-      });
-    } catch (e) {
-      debugPrint('Garden load error: $e');
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  // ===========================================================================
-  // SAVE DATA
-  // ===========================================================================
-
-  Future<void> _saveGarden() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setInt(
-        _treeCountKey,
-        _treeCount,
-      );
-
-      await prefs.setInt(
-        _gardenStreakKey,
-        _gardenStreak,
-      );
-    } catch (e) {
-      debugPrint('Garden save error: $e');
-    }
-  }
-
-  Future<void> growNextTree() async {
-    await addStaticTree();
-  }
-
-  // ===========================================================================
-  // ADD ONE TREE
-  // ===========================================================================
-
-  Future<void> addStaticTree() async {
-    if (_isUpdating) {
-      return;
-    }
-
-    if (_isLoading) {
-      await _waitForGardenLoad();
-    }
-
-    if (!mounted || _isLoading) {
-      return;
-    }
-
-    _isUpdating = true;
-
-    try {
-      setState(() {
-        _treeCount++;
-      });
-
-      await _saveGarden();
-
-      if (_treeCount >= totalSlots) {
-        await Future.delayed(
-          const Duration(milliseconds: 1000),
-        );
-
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          _gardenStreak++;
-        });
-
-        await _saveGarden();
-
-        await Future.delayed(
-          const Duration(milliseconds: 600),
-        );
-
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          _treeCount = 0;
-        });
-
-        await _saveGarden();
-      }
-    } catch (e) {
-      debugPrint('Garden update error: $e');
-    } finally {
-      _isUpdating = false;
-    }
-  }
-
-  // ===========================================================================
-  // WAIT FOR INITIAL LOAD
-  // ===========================================================================
-
-  Future<void> _waitForGardenLoad() async {
-    int attempts = 0;
-
-    while (_isLoading && attempts < 60) {
-      await Future.delayed(
-        const Duration(milliseconds: 50),
-      );
-
-      attempts++;
-    }
-  }
-
-  // ===========================================================================
-  // PUBLIC RESET
-  // ===========================================================================
-
-  Future<void> resetGarden() async {
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _treeCount = 0;
-    });
-
-    await _saveGarden();
-  }
-
-  // ===========================================================================
-  // GETTERS
-  // ===========================================================================
-
-  int get treeCount => _treeCount;
-
-  int get gardenStreak => _gardenStreak;
-
-  int get remainingTrees => totalSlots - _treeCount;
-
-  // ===========================================================================
-  // BUILD
-  // ===========================================================================
+  static const String _staticTree = 'assets/animations/garden_tree_static.json';
+  static const String _growingTree = 'assets/animations/garden_tree_growing.json';
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return _buildLoadingGarden();
-    }
+    final garden = context.watch<GardenProvider>();
 
-    // Outer Margin for Side Padding
+    if (garden.isLoading) return _buildLoadingGarden();
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ClipRRect(
@@ -239,72 +34,82 @@ class GardenWidgetState extends State<GardenWidget> {
               alignment: Alignment.center,
             ),
           ),
-          child: _buildGardenContent(),
+          child: _buildGardenContent(garden),
         ),
       ),
     );
   }
 
-  // ===========================================================================
-  // LOADING
-  // ===========================================================================
-
   Widget _buildLoadingGarden() {
+    // Skeleton layout mirrors the real garden card
+    // (header + tree grid + progress bar) — no spinner.
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Container(
           width: double.infinity,
-          height: 300,
+          padding: const EdgeInsets.all(16.0),
           color: const Color(0xFFE8F0E3),
-          child: const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: Color(0xFF1D7654),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  SkeletonBlock(width: 140, height: 16),
+                  Spacer(),
+                  SkeletonBlock(width: 60, height: 16),
+                ],
               ),
-            ),
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  6,
+                  (_) => const SkeletonBlock(
+                    width: 40,
+                    height: 40,
+                    radius: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              const SkeletonBlock(height: 10, radius: 5),
+              const SizedBox(height: 6),
+              const SkeletonBlock(height: 8, radius: 4),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ===========================================================================
-  // CONTENT
-  // ===========================================================================
-
-  Widget _buildGardenContent() {
+  Widget _buildGardenContent(GardenProvider garden) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
-          const SizedBox(height: 20),
-          _buildTreeGrid(),
+          _buildHeader(garden),
+          const SizedBox(height: 12),
+          _buildTreeGrid(garden),
+          const SizedBox(height: 10),
+          _buildProgressBar(garden),
           const SizedBox(height: 4),
         ],
       ),
     );
   }
 
-  // ===========================================================================
-  // HEADER
-  // ===========================================================================
-
-  Widget _buildHeader() {
+  Widget _buildHeader(GardenProvider garden) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Growth Garden 🌱',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -313,27 +118,21 @@ class GardenWidgetState extends State<GardenWidget> {
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
                   shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 4,
-                    ),
+                    Shadow(color: Colors.black45, blurRadius: 4),
                   ],
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Every completed task grows your garden.',
+                '${garden.totalTrees} trees grown · ${garden.gardenStreak} streak 🔥',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 9.5,
                   fontWeight: FontWeight.w700,
                   shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 3,
-                    ),
+                    Shadow(color: Colors.black38, blurRadius: 3),
                   ],
                 ),
               ),
@@ -341,53 +140,50 @@ class GardenWidgetState extends State<GardenWidget> {
           ),
         ),
         const SizedBox(width: 10),
-        _buildStreakBadge(),
+        _buildStreakBadge(garden),
       ],
     );
   }
 
-  // ===========================================================================
-  // STREAK
-  // ===========================================================================
-
-  Widget _buildStreakBadge() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          '🔥',
-          style: TextStyle(fontSize: 20),
+  Widget _buildStreakBadge(GardenProvider garden) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0x55FFFFFF), Color(0x33FFFFFF)],
         ),
-        Text(
-          '$_gardenStreak',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-            shadows: [
-              Shadow(
-                color: Colors.black45,
-                blurRadius: 3,
-              ),
-            ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🔥', style: TextStyle(fontSize: 13)),
+          const SizedBox(width: 3),
+          Text(
+            '${garden.gardenStreak}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              shadows: [
+                Shadow(color: Colors.black38, blurRadius: 2),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  // ===========================================================================
-  // 12 TREE GRID
-  // ===========================================================================
-
-  Widget _buildTreeGrid() {
+  Widget _buildTreeGrid(GardenProvider garden) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
-        itemCount: totalSlots,
+        itemCount: GardenProvider.totalSlots,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 6,
           crossAxisSpacing: 2,
@@ -395,26 +191,73 @@ class GardenWidgetState extends State<GardenWidget> {
           childAspectRatio: 1.0,
         ),
         itemBuilder: (context, index) {
-          final hasTree = index < _treeCount;
-          return _buildTreeSlot(hasTree: hasTree);
+          final hasTree = index < garden.treeCount;
+          final isNewlyGrown = index == garden.lastGrownIndex && hasTree;
+          return _buildTreeSlot(hasTree, isNewlyGrown);
         },
       ),
     );
   }
 
-  // ===========================================================================
-  // TREE SLOT
-  // ===========================================================================
-
-  Widget _buildTreeSlot({required bool hasTree}) {
+  Widget _buildTreeSlot(bool hasTree, bool isNewlyGrown) {
     return ClipRect(
-      child: hasTree ? _buildStaticTree() : _buildEmptySlot(),
+      child: hasTree
+          ? (isNewlyGrown
+              ? _buildGrowingTreeAnimation()
+              : _buildStaticTree())
+          : _buildEmptySlot(),
     );
   }
 
-  // ===========================================================================
-  // TREE LOTTIE
-  // ===========================================================================
+  Widget _buildGrowingTreeAnimation() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 1200),
+      curve: Curves.elasticOut,
+      builder: (context, scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: child,
+        );
+      },
+      child: Center(
+        child: SizedBox(
+          width: 58,
+          height: 58,
+          child: Lottie.asset(
+            _growingTree,
+            animate: true,
+            repeat: false,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback: show static tree with glow
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: AppColors.green.withValues(alpha: 0.20),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.green.withValues(alpha: 0.30),
+                          blurRadius: 14,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Text('🌳', style: TextStyle(fontSize: 32)),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildStaticTree() {
     return Center(
@@ -428,10 +271,7 @@ class GardenWidgetState extends State<GardenWidget> {
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return const Center(
-              child: Text(
-                '🌳',
-                style: TextStyle(fontSize: 42),
-              ),
+              child: Text('🌳', style: TextStyle(fontSize: 32)),
             );
           },
         ),
@@ -439,19 +279,86 @@ class GardenWidgetState extends State<GardenWidget> {
     );
   }
 
-  // ===========================================================================
-  // EMPTY SLOT
-  // ===========================================================================
-
   Widget _buildEmptySlot() {
-    return const Center(
-      child: Text(
-        '+',
-        style: TextStyle(
-          color: Colors.transparent,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+    return Center(
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.08),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.12),
+          ),
         ),
+        child: const Center(
+          child: Text(
+            '+',
+            style: TextStyle(
+              color: Colors.white24,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(GardenProvider garden) {
+    final frac = garden.treeCount / GardenProvider.totalSlots;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Text('🌱', style: TextStyle(fontSize: 11)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: Container(
+                height: 8,
+                color: Colors.white.withValues(alpha: 0.15),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: frac),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) =>
+                      FractionallySizedBox(
+                    widthFactor: value,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF3ECF7A),
+                            Color(0xFF2A9D5C),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '${garden.treeCount}/${GardenProvider.totalSlots}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              shadows: [
+                Shadow(color: Colors.black38, blurRadius: 2),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

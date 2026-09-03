@@ -103,7 +103,10 @@ class RoutineProvider extends ChangeNotifier {
       }
     }
 
-    if (routineStr != null) _routines = Routine.listFromJson(routineStr);
+    if (routineStr != null) {
+      _routines = Routine.listFromJson(routineStr);
+      await _resetStaleCompletions();
+    }
     if (historyStr != null) _history = HistoryEntry.listFromJson(historyStr);
     _history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
     notifyListeners();
@@ -270,6 +273,27 @@ class RoutineProvider extends ChangeNotifier {
     _saveHistory();
     _historyService.saveEntry(entry); // Firebase backup
     notifyListeners();
+  }
+
+  /// Daily update: jo routine kal ya usse pehle complete hui thi wo
+  /// aaj fir se available ho jati hai — warna completed routine hamesha
+  /// ke liye home screen se gayab rehti thi aur pending tasks kaam
+  /// nahi karte the.
+  Future<void> _resetStaleCompletions() async {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    var changed = false;
+    for (final r in _routines) {
+      if (r.isCompleted &&
+          (r.completedAt == null || r.completedAt!.isBefore(todayStart))) {
+        r.isCompleted = false;
+        r.completedAt = null;
+        r.moodScore = null;
+        changed = true;
+      }
+    }
+    if (changed) await _saveRoutines();
   }
 
   void resetDailyRoutines() {

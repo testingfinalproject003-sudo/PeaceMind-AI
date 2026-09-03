@@ -11,7 +11,6 @@ class ExerciseScreen extends StatelessWidget {
   static const Color darkText = Color(0xFF303450);
   static const Color greyText = Color(0xFF777B94);
 
-  // Sab exercises ki data list
   static final List<_ExerciseData> _exercises = [
     _ExerciseData(
       title: 'Box Breathing',
@@ -85,7 +84,6 @@ class ExerciseScreen extends StatelessWidget {
     );
   }
 
-  // 2 tiles per row grid
   Widget _buildExerciseGrid(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
@@ -98,7 +96,18 @@ class ExerciseScreen extends StatelessWidget {
         childAspectRatio: 0.78,
       ),
       itemBuilder: (context, index) {
-        return _buildExerciseTile(context, _exercises[index]);
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: Duration(milliseconds: 400 + index * 120),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Transform.translate(
+              offset: Offset(0, 30 * (1 - value)),
+              child: Opacity(opacity: value, child: child),
+            );
+          },
+          child: _buildExerciseTile(context, _exercises[index]),
+        );
       },
     );
   }
@@ -113,15 +122,22 @@ class ExerciseScreen extends StatelessWidget {
           ),
         );
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: .05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: .06),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: data.color.withValues(alpha: .40),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -157,11 +173,11 @@ class ExerciseScreen extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.black.withValues(alpha: 0),
-                      Colors.black.withValues(alpha: 0.6),
+                      Colors.black.withValues(alpha: 0.65),
                     ],
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
+                padding: const EdgeInsets.fromLTRB(12, 24, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -187,6 +203,27 @@ class ExerciseScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            // Play icon overlay
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 16,
                 ),
               ),
             ),
@@ -237,7 +274,6 @@ class ExerciseScreen extends StatelessWidget {
   }
 }
 
-// Helper class exercise data hold karne ke liye
 class _ExerciseData {
   final String title;
   final String subtitle;

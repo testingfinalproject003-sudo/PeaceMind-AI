@@ -13,6 +13,7 @@ import '../data/exercises.dart';
 import '../models/exercise_models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/daily_routine_provider.dart';
+import '../providers/garden_provider.dart';
 import '../providers/routine_provider.dart';
 import '../widgets/garden_celebration_card.dart';
 import '../widgets/garden_widget.dart';
@@ -33,7 +34,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   static const Color background = Color(0xFFF3F6E8);
   static const Color darkBlue = Color(0xFF202952);
   static const Color royalOcean = Color(0xFF365A91);
@@ -48,9 +49,6 @@ class _HomeScreenState extends State<HomeScreen>
   String selectedMood = '🙂';
   int motivationIndex = 0;
   final Set<String> completingTaskIds = <String>{};
-
-  final GlobalKey<GardenWidgetState> _gardenKey =
-      GlobalKey<GardenWidgetState>();
 
   late final List<Routine> _exerciseTasks;
   final Set<String> _completedExerciseIds = {};
@@ -94,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     tz_data.initializeTimeZones();
     moodController = AnimationController(
       vsync: this,
@@ -107,6 +106,16 @@ class _HomeScreenState extends State<HomeScreen>
       // Rule 5: auto-generate today's 5 tasks on home load
       context.read<DailyRoutineProvider>().ensureTodayRoutine();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App wapas khulne par: naya din ho sakta hai — daily tasks
+      // regenerate/sync karo aur routine completions refresh karo.
+      context.read<DailyRoutineProvider>().ensureTodayRoutine();
+      _restoreExerciseCompletions();
+    }
   }
 
   void _initExerciseTasks() {
@@ -425,11 +434,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     if (!mounted) return;
 
-    await _gardenKey.currentState?.growNextTree();
+    await context.read<GardenProvider>().growTree();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _audioPlayer.dispose();
     moodController.dispose();
     super.dispose();
@@ -490,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   SliverToBoxAdapter(child: _buildMoodTracker()),
                   SliverToBoxAdapter(
-                    child: GardenWidget(key: _gardenKey),
+                    child: const GardenWidget(),
                   ),
                   // Rule 5: Today's Daily 5 auto-generated tasks
                   if (dailyProvider.tasks.isNotEmpty)
@@ -836,7 +846,11 @@ class _HomeScreenState extends State<HomeScreen>
                 exercise: info ?? boxBreathingExercise,
               ),
             ),
-          ).then((_) => setState(() => selectedNavigation = 2));
+          ).then((completed) {
+            // Exercise done → back on home garden with yappy song.
+            if (completed == true) _playYappy();
+            if (mounted) setState(() => selectedNavigation = 2);
+          });
         } else {
           Navigator.push(
             context,
@@ -1209,7 +1223,8 @@ class _HomeScreenState extends State<HomeScreen>
                           MaterialPageRoute(
                             builder: (_) => ExercisePlayerScreen(exercise: task.exerciseInfo!),
                           ),
-                        ).then((_) {
+                        ).then((completed) {
+                          if (completed == true) _playYappy();
                           if (mounted) {
                             setState(() {});
                             _restoreExerciseCompletions();
@@ -1386,7 +1401,8 @@ class _HomeScreenState extends State<HomeScreen>
                                     exercise: info ?? boxBreathingExercise,
                                   ),
                                 ),
-                              ).then((_) {
+                              ).then((completed) {
+                                if (completed == true) _playYappy();
                                 if (mounted) {
                                   setState(() {});
                                   _restoreExerciseCompletions();

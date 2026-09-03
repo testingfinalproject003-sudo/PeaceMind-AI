@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// Supported narration / UI languages, matching the original app.
-enum AppLang { en, ur, urRoman, zh, pa }
+enum AppLang { en, ur, urRoman, pa }
 
 extension AppLangCode on AppLang {
   /// Key used inside the translation maps.
@@ -13,8 +13,6 @@ extension AppLangCode on AppLang {
         return 'ur';
       case AppLang.urRoman:
         return 'ur_roman';
-      case AppLang.zh:
-        return 'zh';
       case AppLang.pa:
         return 'pa';
     }
@@ -29,8 +27,6 @@ extension AppLangCode on AppLang {
         return 'ur-PK';
       case AppLang.urRoman:
         return 'en-US';
-      case AppLang.zh:
-        return 'zh-CN';
       case AppLang.pa:
         return 'pa-IN';
     }
@@ -45,8 +41,6 @@ extension AppLangCode on AppLang {
         return 'اردو';
       case AppLang.urRoman:
         return 'Roman Urdu';
-      case AppLang.zh:
-        return '中文 Chinese';
       case AppLang.pa:
         return 'ਪੰਜਾਬੀ Punjabi';
     }

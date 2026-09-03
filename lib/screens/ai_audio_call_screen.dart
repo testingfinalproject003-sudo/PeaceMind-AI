@@ -184,10 +184,13 @@ class _AiAudioCallScreenState extends State<AiAudioCallScreen> {
             ),
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios_new_rounded, color: darkText),
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                await context.read<AudioCallProvider>().endCall();
-                navigator.pop();
+              onPressed: () {
+                // Pehle pop karo, phir endCall background mein chale —
+                // warna Firestore writes (summary/transcript) offline
+                // hone par back button hang ho jata tha.
+                final callProvider = context.read<AudioCallProvider>();
+                Navigator.of(context).pop();
+                callProvider.endCall();
               },
             ),
             actions: [

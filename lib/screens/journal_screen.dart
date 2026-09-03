@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+
+import '../models/history_model.dart';
+import '../models/journal_entry.dart';
+import '../providers/daily_routine_provider.dart';
+import '../providers/garden_provider.dart';
+import '../providers/journal_provider.dart';
+import '../providers/routine_provider.dart';
+import '../widgets/skeleton.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -24,22 +34,16 @@ class _JournalScreenState extends State<JournalScreen> {
   final TextEditingController _negativeCtrl = TextEditingController();
   final TextEditingController _letGoCtrl = TextEditingController();
 
-  final List<JournalEntry> _entries = [
-    JournalEntry(
-      date: 'Today, 08:30 AM',
-      positive: 'Finished my morning walk.',
-      negative: 'Felt anxious before the meeting.',
-      letGo: 'Overthinking small mistakes.',
-      mood: '🙂',
-    ),
-    JournalEntry(
-      date: 'Yesterday, 07:15 PM',
-      positive: 'Cooked a healthy meal.',
-      negative: 'Could not sleep well.',
-      letGo: 'Worrying about things I cannot control.',
-      mood: '😕',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Local (SharedPreferences) + Firestore se entries load karo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<JournalProvider>().ensureLoaded();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -51,6 +55,9 @@ class _JournalScreenState extends State<JournalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final journalProvider = context.watch<JournalProvider>();
+    final entries = journalProvider.entries;
+
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
@@ -92,7 +99,40 @@ class _JournalScreenState extends State<JournalScreen> {
                   const SizedBox(height: 24),
                   _buildSectionTitle('Recent Entries'),
                   const SizedBox(height: 10),
-                  ..._entries.map(_buildEntryCard),
+                  if (journalProvider.isLoading)
+                    // Skeleton entry cards — spinner ki jagah.
+                    ...List.generate(
+                      3,
+                      (_) => const Padding(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SkeletonBlock(width: 90, height: 10),
+                            SizedBox(height: 6),
+                            SkeletonBlock(height: 12),
+                            SizedBox(height: 4),
+                            SkeletonBlock(width: 200, height: 12),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (entries.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          'No entries yet — write your first one above 🌱',
+                          style: TextStyle(
+                            color: greyText.withValues(alpha: .80),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ...entries.take(20).map(_buildEntryCard),
                 ],
               ),
             ),
@@ -322,35 +362,73 @@ class _JournalScreenState extends State<JournalScreen> {
     );
   }
 
-  void _saveEntry() {
+  /// Entry save karo — local (SharedPreferences) + Firestore dono mein.
+  /// Rule 5: isse daily journal task complete hota hai, history entry
+  /// banti hai aur garden tree grow karta hai.
+  Future<void> _saveEntry() async {
     if (_positiveCtrl.text.isEmpty &&
         _negativeCtrl.text.isEmpty &&
         _letGoCtrl.text.isEmpty) {
       return;
     }
 
+    final journalProvider = context.read<JournalProvider>();
+    await journalProvider.addEntry(
+      positive: _positiveCtrl.text.isNotEmpty ? _positiveCtrl.text : '-',
+      negative: _negativeCtrl.text.isNotEmpty ? _negativeCtrl.text : '-',
+      letGo: _letGoCtrl.text.isNotEmpty ? _letGoCtrl.text : '-',
+      mood: '🙂',
+    );
+
+    if (!mounted) return;
+
+    // Rule 5: daily 5-task set mein journal task complete karo
+    context.read<DailyRoutineProvider>().markTaskComplete('daily_journal');
+
+    // History entry (local + Firestore) — daily task sync bhi isi se hota hai
+    context.read<RoutineProvider>().addHistoryEntry(HistoryEntry(
+          id: const Uuid().v4(),
+          routineId: 'daily_journal',
+          routineTitle: 'Daily Journal',
+          category: 'journal',
+          completedAt: DateTime.now(),
+          moodScore: null,
+          notes: 'Journal entry saved',
+        ));
+
+    // Garden tree grow karo journal completion par
+    context.read<GardenProvider>().growTree();
+
     setState(() {
-      _entries.insert(
-        0,
-        JournalEntry(
-          date: 'Just now',
-          positive: _positiveCtrl.text.isNotEmpty ? _positiveCtrl.text : '-',
-          negative: _negativeCtrl.text.isNotEmpty ? _negativeCtrl.text : '-',
-          letGo: _letGoCtrl.text.isNotEmpty ? _letGoCtrl.text : '-',
-          mood: '🙂',
-        ),
-      );
       _positiveCtrl.clear();
       _negativeCtrl.clear();
       _letGoCtrl.clear();
     });
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Entry saved 🌱'),
         duration: Duration(milliseconds: 1300),
       ),
     );
+  }
+
+  String _formatEntryDate(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final entryDay = DateTime(d.year, d.month, d.day);
+
+    final hour12 = d.hour == 0 ? 12 : (d.hour > 12 ? d.hour - 12 : d.hour);
+    final ampm = d.hour >= 12 ? 'PM' : 'AM';
+    final minute = d.minute.toString().padLeft(2, '0');
+    final time = '${hour12.toString().padLeft(2, '0')}:$minute $ampm';
+
+    if (entryDay == today) return 'Today, $time';
+    if (entryDay == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday, $time';
+    }
+    return '${d.month}/${d.day}, $time';
   }
 
   Widget _buildSectionTitle(String title) {
@@ -389,7 +467,7 @@ class _JournalScreenState extends State<JournalScreen> {
           Row(
             children: [
               Text(
-                entry.date,
+                _formatEntryDate(entry.createdAt),
                 style: const TextStyle(
                   color: royalOcean,
                   fontSize: 10,
@@ -449,20 +527,4 @@ class _JournalScreenState extends State<JournalScreen> {
       ],
     );
   }
-}
-
-class JournalEntry {
-  final String date;
-  final String positive;
-  final String negative;
-  final String letGo;
-  final String mood;
-
-  JournalEntry({
-    required this.date,
-    required this.positive,
-    required this.negative,
-    required this.letGo,
-    required this.mood,
-  });
 }

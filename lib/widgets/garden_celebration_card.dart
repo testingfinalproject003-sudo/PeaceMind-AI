@@ -38,27 +38,61 @@ class GardenCelebrationCard extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
+                    color: Colors.black.withValues(alpha: 0.20),
                     blurRadius: 30,
-                    offset: const Offset(0, 12),
+                    offset: const Offset(0, 14),
                   ),
                 ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 82,
-                    height: 82,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        '🎉',
-                        style: TextStyle(fontSize: 42),
-                      ),
+                  // ── Animated tree growing visual ──
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 1400),
+                    curve: Curves.elasticOut,
+                    builder: (context, scale, child) {
+                      return Transform.scale(scale: scale, child: child);
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glow ring
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                const Color(0xFF3ECF7A).withValues(alpha: 0.25),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Inner circle
+                        Container(
+                          width: 82,
+                          height: 82,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xFF3ECF7A)
+                                  .withValues(alpha: 0.40),
+                              width: 2,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '🌳',
+                              style: TextStyle(fontSize: 42),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -100,13 +134,32 @@ class GardenCelebrationCard extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  const Text(
-                    'Every small step helps your garden grow.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      height: 1.4,
+                  // ── Growth message ──
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('🌱', style: TextStyle(fontSize: 12)),
+                        SizedBox(width: 6),
+                        Text(
+                          'A new tree has grown in your garden!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -128,7 +181,7 @@ class GardenCelebrationCard extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Grow My Tree 🌱',
+                        'Continue 🌱',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w900,

@@ -164,22 +164,52 @@ class StepTracker extends StatelessWidget {
   }
 }
 
-/// Thin animated progress bar, mirrors `.timerbar` / `.timerfill`.
+/// Thin animated progress bar with glow effect.
 class TimerBar extends StatelessWidget {
   final double progress; // 0..1
   const TimerBar({super.key, required this.progress});
 
   @override
   Widget build(BuildContext context) {
+    final clamped = progress.clamp(0.0, 1.0).toDouble();
     return ClipRRect(
-      borderRadius: BorderRadius.circular(3),
+      borderRadius: BorderRadius.circular(4),
       child: Container(
-        height: 4,
+        height: 5,
         color: AppColors.glass,
         alignment: Alignment.centerLeft,
-        child: FractionallySizedBox(
-          widthFactor: progress.clamp(0, 1),
-          child: Container(decoration: const BoxDecoration(gradient: AppColors.accentGradient)),
+        child: Stack(
+          children: [
+            FractionallySizedBox(
+              widthFactor: clamped,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.accentGradient,
+                ),
+              ),
+            ),
+            // Glow dot at the leading edge
+            if (clamped > 0.01)
+              Positioned(
+                left: (clamped * (MediaQuery.of(context).size.width - 36)).clamp(0.0, 9999.0).toDouble() - 4,
+                top: -2,
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accent2,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.glow.withValues(alpha: 0.7),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -340,16 +370,31 @@ class PlayerControls extends StatelessWidget {
         GestureDetector(
           onTap: onPlayPause,
           child: Container(
-            width: 50,
-            height: 50,
+            width: 54,
+            height: 54,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.white,
+              gradient: const LinearGradient(
+                colors: [Colors.white, Color(0xFFF0F4FA)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.glassBorder),
-              boxShadow: const [BoxShadow(color: Color(0x40406496), blurRadius: 18, offset: Offset(0, 8))],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.15),
+                  blurRadius: 22,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: const Color(0x40406496),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            child: Icon(playing ? Icons.pause : Icons.play_arrow, color: AppColors.accent, size: 22),
+            child: Icon(playing ? Icons.pause_rounded : Icons.play_arrow_rounded, color: AppColors.accent, size: 24),
           ),
         ),
         const SizedBox(width: 10),

@@ -6,8 +6,11 @@ import '../theme/app_theme.dart';
 import '../models/exercise_models.dart';
 import '../widgets/glass_widgets.dart';
 import '../widgets/completion_overlay.dart';
+import '../widgets/garden_celebration_card.dart';
 import '../providers/routine_provider.dart';
 import '../providers/daily_routine_provider.dart';
+import '../providers/garden_provider.dart';
+import '../providers/auth_provider.dart';
 
 class ExercisePlayerScreen extends StatefulWidget {
   final ExerciseInfo exercise;
@@ -25,6 +28,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
 
   int _current = 0;
   int _cycles = 1;
+  int _previousCycles = 0;
   bool _playing = true;
   bool _muted = false;
   bool _showLangMenu = false;
@@ -92,8 +96,8 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       } else {
         _pendingAdvance = true;
         // Safety: agar TTS complete na ho (device par voice missing)
-        // to 3 second buffer ke baad advance — stage stuck nahi hota.
-        Future.delayed(const Duration(seconds: 3), () {
+        // to 8 second buffer ke baad advance — stage stuck nahi hota.
+        Future.delayed(const Duration(seconds: 8), () {
           if (!mounted || !_pendingAdvance) return;
           _pendingAdvance = false;
           _speechDone = true;
@@ -122,7 +126,12 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     try {
       await _tts.stop();
       await _tts.setLanguage(_lang.ttsLocale);
-      await _tts.setSpeechRate(0.42);
+      // Dynamic speech rate: calculate so TTS finishes close to step duration.
+      // ~150 words/min at rate 0.5 is baseline; adjust per step.
+      final wordCount = _step.textFor(_lang).split(RegExp(r'\s+')).length;
+      final durationSec = _step.duration.inMilliseconds / 1000.0;
+      final targetRate = (wordCount / durationSec / 2.8).clamp(0.32, 0.58);
+      await _tts.setSpeechRate(targetRate);
       await _tts.setPitch(1.0);
       final result = await _tts.speak(_step.textFor(_lang));
       // speak fail hua (voice/engine missing) — script timer ke sath
@@ -214,13 +223,38 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       if (dailyTaskId != null) {
         context.read<DailyRoutineProvider>().markTaskComplete(dailyTaskId);
       }
+
+      // Grow tree in garden on exercise completion
+      context.read<GardenProvider>().growTree();
     }
     
     setState(() => _showOverlay = true);
+
+    // Show garden celebration dialog
+    if (mounted) {
+      _showExerciseCelebration();
+    }
+  }
+
+  Future<void> _showExerciseCelebration() async {
+    final userName = context.read<AuthProvider>().userName;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (dialogContext) {
+        return GardenCelebrationCard(
+          userName: userName,
+          taskTitle: widget.exercise.brandTitle,
+          onContinue: () => Navigator.of(dialogContext).pop(),
+        );
+      },
+    );
   }
 
   void _onRestart() {
     setState(() {
+      _previousCycles = _cycles;
       _cycles++;
       _showOverlay = false;
       _current = 0;
@@ -236,7 +270,9 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   }
 
   void _onClose() {
-    setState(() => _showOverlay = false);
+    // Back to home garden — result=true tells the caller (HomeScreen)
+    // to play the yappy celebration song and show the newly grown tree.
+    Navigator.of(context).pop(_historySaved);
   }
 
   @override
@@ -305,6 +341,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
                     config: widget.exercise.completion,
                     totalTime: _sessionElapsed,
                     cycles: _cycles,
+                    previousCycles: _previousCycles,
                     onClose: _onClose,
                     onRestart: _onRestart,
                   ),
@@ -342,12 +379,6 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
           text: 'Cycle $_cycles',
           gradient: const LinearGradient(colors: [AppColors.greenBadgeStart, AppColors.greenBadgeEnd]),
           textColor: AppColors.greenBadgeText,
-        ),
-        const SizedBox(width: 6),
-        const PillBadge(
-          text: '✦ Premium',
-          gradient: LinearGradient(colors: [AppColors.goldBadgeStart, AppColors.goldBadgeEnd]),
-          textColor: AppColors.goldBadgeText,
         ),
         const SizedBox(width: 6),
         IconCircleButton(

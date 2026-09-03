@@ -52,11 +52,17 @@ class _LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFF3F6E8),
+    // Matches the native splash (same image + background) so the
+    // native → Flutter handoff feels seamless while auth restores.
+    return Scaffold(
+      backgroundColor: const Color(0xFF2D1B69),
       body: Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF202952),
+        child: Image(
+          image: AssetImage('assets/images/splash.png'),
+          width: 220,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) =>
+              CircularProgressIndicator(color: Colors.white),
         ),
       ),
     );

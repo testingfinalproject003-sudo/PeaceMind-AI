@@ -122,7 +122,7 @@ encrypted media/exports)]
 Layering follows the structure defined in PRD §6.3, refined for a strict one-directional dependency rule: **Screens → Providers → Repositories → Services**. Screens never touch `services/` directly; Providers never touch Firestore/Hive directly.
 
 ```
-peacemind_ai/
+Peace Mind AI/
 ├── lib/
 │   ├── main.dart
 │   ├── app.dart

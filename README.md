@@ -1,646 +1,376 @@
-# PeaceMind AI
+# PeaceMind AI 🌿
 
-> A private, judgment-free AI companion for everyday mental and emotional support.  
-> **Not a replacement for licensed therapy or medical diagnosis.**
+> *"Your space, your pace. Small steps are still progress."*
 
----
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-000000?style=flat)
+![Qwen AI](https://img.shields.io/badge/Qwen_AI-qwen--plus-blue?style=flat)
+![Dart SDK](https://img.shields.io/badge/Dart_SDK-3.11-0175C2?style=flat&logo=dart&logoColor=white)
 
-## Table of Contents
-- [Overview](#overview)
-- [Core Principles](#core-principles)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Key Features](#key-features)
-- [Exercise Catalog](#exercise-catalog)
-- [Exercise System](#exercise-system)
-- [Crisis Protocol](#crisis-protocol)
-- [Privacy & Security](#privacy--security)
-- [AI Data Agreement](#ai-data-agreement)
-- [AI Persona Guidelines](#ai-persona-guidelines)
-- [Localization](#localization)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
-- [Emergency Resources](#emergency-resources)
+**AI-powered mental wellness companion.** Mental First Aid — not therapy, not a medical device, never diagnoses.
 
 ---
 
-## Overview
+## Problem Statement
 
-PeaceMind AI is a Flutter-based mobile application that provides 24/7 emotional support through AI-powered chat, voice conversations, and **6 guided therapeutic exercises**. Built with a Firebase backend, the app acts as a coping-support layer — a bridge to professional care, not a replacement for it.
+Millions struggle with stress, anxiety, and burnout every day — yet never seek traditional therapy. The barriers are systemic and deeply personal:
 
-The app features a **unified exercise player** that supports both **fully scripted** and **AI-coached** therapeutic sessions within the same consistent interface.
+- **Stigma** — "What will people think if I see a therapist?"
+- **Cost** — therapy is unaffordable for most students and low-income users.
+- **Privacy** — fear of being judged, exposed, or labeled by others.
+- **Access** — long waitlists and a severe shortage of mental health professionals, especially across South Asia.
 
----
-
-## Core Principles
-
-1. **Privacy First** — End-to-end encryption, anonymous usage options, no third-party trackers
-2. **Your Data, Your Benefit** — AI uses your data ONLY to personalize your experience. Never for model training. Never sold.
-3. **Crisis Always First** — Any indication of self-harm or danger immediately triggers emergency resources
-4. **Never Diagnoses** — The AI supports and encourages; it never labels users with conditions
-5. **Scoring Stays Hidden** — Background wellbeing signals are never shown to users as tests or numbers
-6. **Warm & Respectful** — Every interaction feels like a caring person, never robotic or cold
-7. **A Bridge, Not a Replacement** — The app actively encourages users toward real professional care when needed
-8. **One UI, Six Exercises** — All exercises share the same calming, immersive player interface
+PeaceMind AI exists to close that gap. It is a private, always-available companion that meets users where they are — on their phone, in their own language, without judgment — and takes the first step with them when they would otherwise take none.
 
 ---
 
-## Tech Stack
+## Target Users
 
-### Frontend
-| Technology | Purpose |
-|---|---|
-| **Flutter** | Cross-platform mobile framework (iOS & Android) |
-| **Dart** | Programming language |
-| **BLoC / Riverpod** | State management |
-| **Hive / SQLite** | Local data caching |
-| **flutter_secure_storage** | Secure token & key storage |
-| **Lottie** | Animations |
-| **just_audio** | Audio playback for exercise TTS |
-
-### Backend
-| Technology | Purpose |
-|---|---|
-| **Firebase Authentication** | Anonymous, email, social login |
-| **Cloud Firestore** | Real-time database for messages, user data, exercise progress |
-| **Firebase Cloud Functions** | AI proxy API, data export, admin logic, exercise content delivery |
-| **Firebase Cloud Messaging** | Push notifications |
-| **Firebase Crashlytics** | Error tracking & analytics |
-| **Firebase ML Kit** | On-device NLP & speech recognition |
-
-### AI / ML
-| Technology | Purpose |
-|---|---|
-| **OpenAI GPT-4 / Claude** | Conversational AI + exercise coaching (via secure proxy) |
-| **Custom NLP Pipeline** | Crisis detection & content moderation |
-| **Cloud Text-to-Speech** | AI voice responses + exercise narration |
-| **Cloud Speech-to-Text** | Voice input transcription |
-
-### DevOps & Security
-| Technology | Purpose |
-|---|---|
-| **GitHub Actions / Codemagic** | CI/CD pipeline |
-| **OWASP Mobile Security** | Security standards compliance |
-| **AES-256 / TLS 1.3** | Data encryption |
+- **Students and young professionals** dealing with academic pressure, imposter syndrome, and early-career burnout.
+- **Anyone feeling stressed, anxious, or overwhelmed** who needs support in the moment — not weeks from now on a waitlist.
+- **South Asian users** who want mental wellness support in **Urdu** or **English**, without the cultural friction of Western-centric therapy apps.
+- **People who want help but will never visit a therapist** — due to stigma, privacy concerns, or simply not feeling "sick enough" to justify it.
 
 ---
 
-## Architecture
+## Core Features
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Flutter App (iOS/Android)              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │  Splash  │  │  Onboard │  │   Home   │  │     Chat     │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘ │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │  Voice   │  │ Exercise │  │  Crisis  │  │   Library    │ │
-│  │          │  │  Player  │  │          │  │              │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘ │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTPS / gRPC
-┌──────────────────────────▼──────────────────────────────────┐
-│                    Firebase Backend                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │     Auth     │  │  Firestore   │  │ Cloud Functions  │  │
-│  └──────────────┘  └──────────────┘  └──────────────────┘  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │     FCM      │  │  Crashlytics │  │   Cloud Storage  │  │
-│  └──────────────┘  └──────────────┘  └──────────────────┘  │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│              AI Services (via Cloud Functions Proxy)        │
-│  ┌──────────────────┐  ┌──────────────────┐                 │
-│  │   LLM API        │  │  Crisis NLP      │                 │
-│  │ (GPT-4 / Claude) │  │  (Custom Model)  │                 │
-│  └──────────────────┘  └──────────────────┘                 │
-│  ┌──────────────────┐  ┌──────────────────┐                 │
-│  │  Text-to-Speech  │  │ Speech-to-Text   │                 │
-│  └──────────────────┘  └──────────────────┘                 │
-└─────────────────────────────────────────────────────────────┘
-```
+### 1. NOVA Chat
 
-### Data Flow
-1. User input (text/voice/exercise) → Flutter app
-2. Input encrypted client-side → sent to Cloud Functions
-3. Cloud Functions proxy to AI services (anonymized session IDs)
-4. AI response + crisis analysis returned
-5. If crisis detected → immediate Crisis Intervention Screen
-6. Response decrypted and displayed to user
-7. Conversation / exercise progress stored encrypted in Firestore
+![NOVA Chat](assets/screenshots/chat1.jpeg)
+![NOVA Chat Conversation](assets/screenshots/chat2.jpeg)
+
+Natural AI conversation — no forms, no questionnaires, no clinical intake. Just talk.
+
+- **Hidden distress detection**: every AI reply carries a hidden `[DISTRESS_SCORE: 0.0–1.0]` tag. Distress is detected from the conversation itself — the user is never asked "how are you feeling on a scale of 1–10."
+- **Inline exercise popup**: when distress exceeds **0.7**, NOVA suggests a relevant exercise mid-conversation. The popup includes a 3-minute cooldown to prevent over-triggering, and the user can decline at any time.
+- **Urdu replies auto-spoken via TTS**: when the user speaks Urdu, NOVA's reply is automatically spoken aloud using the `[SPEAK:true]` tag — no tap required.
+- **English replies are text-only**: the manual play button appears for English responses, giving users control over audio playback.
+- **Session summary on end**: when a chat session concludes, NOVA generates a summary that is saved to Firestore history — building a record of progress over time.
 
 ---
 
-## Getting Started
+### 2. NOVA Voice Call
 
-### Prerequisites
-- Flutter SDK >= 3.19.0
-- Dart >= 3.0.0
-- Firebase CLI
-- Android Studio / Xcode
-- OpenAI API key (or Claude API key)
+![NOVA Voice Call](assets/screenshots/call1.jpeg)
+![NOVA Voice Call Active](assets/screenshots/call2.jpeg)
 
-### Installation
+Continuous hands-free voice conversation with NOVA — like a real phone call with an AI companion that listens, understands, and responds in real time.
 
-```bash
-# Clone the repository
-git clone https://github.com/your-org/peacemind-ai.git
-cd peacemind-ai
-
-# Install dependencies
-flutter pub get
-
-# Configure Firebase
-firebase login
-flutterfire configure
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your API keys and Firebase config
-
-# Run code generation (if using freezed, json_serializable, etc.)
-dart run build_runner build --delete-conflicting-outputs
-
-# Run the app
-flutter run
-```
-
-### Environment Variables
-Create a `.env` file in the project root:
-
-```env
-# Firebase
-FIREBASE_API_KEY=your_key
-FIREBASE_APP_ID=your_app_id
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_PROJECT_ID=your_project_id
-
-# AI API (via Cloud Functions — do NOT store in client code)
-# These should be in Firebase Functions environment
-OPENAI_API_KEY=your_openai_key
-CRISIS_NLP_ENDPOINT=your_crisis_endpoint
-
-# Feature Flags
-ENABLE_VOICE=true
-ENABLE_BIOMETRIC_AUTH=true
-ENABLE_AI_COACHING=true
-ENABLE_ANALYTICS=false
-```
+- **Continuous VAD (Voice Activity Detection)**: the microphone stays open by default. NOVA auto-listens after each pause and restarts listening after it finishes speaking — no push-to-talk required (tap-to-speak is available as an opt-in toggle).
+- **Full speech pipeline**: Speech → STT (speech-to-text) → language auto-detection → AI reply generation → TTS (text-to-speech) in the user's detected language.
+- **Crisis keyword detection**: 12 hard-coded unsafe phrases (self-harm, suicide ideation, hopelessness) are evaluated *before* the AI is ever called. These patterns **cannot be prompt-injected** — they bypass the model entirely and trigger an immediate safety response.
+- **Crisis trigger response**: calming visual overlay + grounding voice message + `safetyFlag: true` written permanently to Firestore — alerting future sessions to provide extra care.
+- **Full transcript saved**: every voice call transcript is stored in Firestore for replay and review after the call ends.
 
 ---
 
-## Project Structure
+### 3. Guided Exercises
 
-```
-peacemind-ai/
-├── android/                    # Android-specific config
-├── ios/                        # iOS-specific config
-├── lib/
-│   ├── main.dart               # Entry point
-│   ├── app.dart                # MaterialApp configuration
-│   ├── config/                 # Routes, themes, constants
-│   ├── core/                   # Utilities, extensions, errors
-│   ├── data/                   # Repositories, data sources
-│   ├── domain/                 # Entities, use cases
-│   ├── presentation/           # UI layer
-│   │   ├── splash/
-│   │   ├── onboarding/         # No skip button — all screens mandatory
-│   │   ├── auth/
-│   │   ├── home/
-│   │   ├── chat/
-│   │   ├── voice/
-│   │   ├── exercise/           # Unified player + library (6 exercises)
-│   │   ├── crisis/
-│   │   ├── resources/
-│   │   ├── settings/
-│   │   ├── history/
-│   │   └── widgets/            # Shared UI components
-│   └── services/               # Firebase, AI API, local storage, TTS
-├── functions/                  # Firebase Cloud Functions
-│   ├── src/
-│   │   ├── ai-proxy/           # LLM API proxy (chat + coaching)
-│   │   ├── crisis-detection/   # Crisis NLP pipeline
-│   │   ├── data-export/        # GDPR/data export
-│   │   ├── moderation/         # Content moderation
-│   │   └── exercise-content/   # Scripted exercise delivery
-│   └── package.json
-├── assets/
-│   ├── images/                 # App images
-│   ├── animations/             # Lottie files
-│   └── exercise_scripts/       # 6 exercise JSON scripts
-├── test/                       # Unit & widget tests
-├── integration_test/           # E2E tests
-├── l10n/                       # Localization files (ARB)
-└── pubspec.yaml
-```
+![Guided Exercises](assets/screenshots/exercise.jpeg)
 
----
+Four fully animated, CBT-based exercises — each with step-by-step narration, a synced progress timer, and an immersive visual stage. Completion is only recorded when the exercise **fully finishes** — never on open, never on abandon.
 
-## Key Features
-
-### 🤖 AI Companion
-- **Text Chat:** Real-time, context-aware conversations with warm, respectful tone
-- **Voice Mode:** Speech-to-text input and AI voice responses
-- **Multi-Language:** Supports 15+ languages with automatic detection
-- **Context Memory:** AI remembers last 20 messages for continuity
-- **Exercise Recommendations:** AI suggests relevant exercises based on conversation context
-
-### 🧘 Unified Exercise Player
-All 6 exercises share the **same immersive UI** — only the content changes:
-
-| Exercise | Visual | Guidance Mode | Duration |
-|---|---|---|---|
-| **Box Breathing & Grounding** | Expanding square synced to breath | Scripted or AI-Coached | 5–10 min |
-| **Release Tension & Acceptance** | Body heat-map red→gold fade | Scripted or AI-Coached | 10–15 min |
-| **Cognitive Reframing** | Thought bubbles dark→light transform | Scripted or AI-Coached | 8–12 min |
-| **Mindful Walking** | Path/footstep animation | Scripted or AI-Coached | 10–20 min |
-| **Body Scan** | Anatomical body with scanning beam | Scripted or AI-Coached | 15–20 min |
-| **STOP Skill** | Four-quadrant compass/stoplight | Scripted or AI-Coached | 3–5 min |
-
-**Shared UI Components:**
-- Progress tracker (step dots)
-- Timer bar (step + total time)
-- Visual stage (pluggable visualizer)
-- Script panel with typing animation
-- Play / Pause / Next / Previous / Mute controls
-- Voice wave animation during TTS
-- Session completion overlay with stats & confetti
-
-### 🛡️ Crisis Safety
-- **Real-Time Detection:** NLP analysis of every user input for self-harm/danger indicators
-- **Immediate Response:** Non-dismissible crisis screen with emergency numbers
-- **Localized Resources:** Automatic country-based hotline detection
-- **Grounding Tools:** Built-in breathing exercises and grounding techniques
-
-### 🔒 Privacy & Anonymity
-- **Anonymous Mode:** Use the app without email or personal information
-- **End-to-End Encryption:** All messages encrypted at rest and in transit
-- **No Third-Party Trackers:** No ads, no analytics SDKs, no data selling
-- **User Control:** Full data export and account deletion capabilities
-- **AI Data Agreement:** Users explicitly consent to AI using their data ONLY for their benefit
-
-### 🌉 Professional Bridge
-- **Resource Directory:** Vetted mental health professionals and hotlines
-- **Educational Content:** When and how to seek professional help
-- **Conversation Export:** Optional encrypted summaries for sharing with therapists
-- **Exercise History Export:** Share exercise patterns with therapists (opt-in)
-
----
-
-## Exercise Catalog
-
-### 1. Box Breathing and Grounding
-> *Calm your nervous system with rhythmic breathing*
-
-- **Category:** Calm / Anxiety
-- **Duration:** 5–10 minutes
-- **Visual:** Expanding/contracting square synced to 4-4-4-4 breath cycle
-- **Steps:** Inhale (4s) → Hold (4s) → Exhale (4s) → Hold (4s), 6–10 cycles
-- **AI Coaching:** Adapts hold duration; suggests grounding cues ("Feel your feet on the floor")
-- **Best For:** Acute anxiety, panic moments, pre-sleep wind-down
-
-### 2. Release Tension and Acceptance Emotion
-> *Let go of what you're holding inside*
-
-- **Category:** Emotional Release
-- **Duration:** 10–15 minutes
-- **Visual:** Body heat-map with tension points glowing red → fading to warm gold
-- **Steps:** Scan body for tension → breathe into tight areas → visualize dissolving → acceptance affirmation
-- **AI Coaching:** Identifies emotional themes from conversations; guides targeted release
-- **Best For:** Suppressed emotions, grief, anger, physical stress
-
-### 3. Cognitive Reframing
-> *Shift your perspective with compassion*
-
-- **Category:** Cognitive / Thought Work
-- **Duration:** 8–12 minutes
-- **Visual:** Thought bubbles appearing and transforming (dark → light, jagged → soft)
-- **Steps:** Identify negative thought → examine evidence → generate alternative → practice compassionate reframe
-- **AI Coaching:** Uses conversation context for personalized reframes; Socratic questions
-- **Best For:** Negative self-talk, catastrophizing, rumination
-
-### 4. Mindful Walking
-> *Find peace in gentle movement*
-
-- **Category:** Movement / Active
-- **Duration:** 10–20 minutes
-- **Visual:** Gentle path/footstep animation; optional outdoor photo backdrop
-- **Steps:** Stand still → feel weight shift → slow steps → notice heel-to-toe → sync breath with pace → pause and observe
-- **AI Coaching:** Adjusts pace guidance based on energy level; suggests observation prompts
-- **Best For:** Restlessness, low energy, need for gentle movement
-- **Note:** Audio-only friendly — designed for eyes-open, mobile use
-
-### 5. Body Scan
-> *Journey through your body with awareness*
-
-- **Category:** Relaxation / PMR
-- **Duration:** 15–20 minutes
-- **Visual:** Anatomical body diagram with scanning beam and glowing joints
-- **Steps:** Toes → feet → legs → hips → stomach → chest → hands → arms → shoulders → neck → face → whole body
-- **AI Coaching:** Lingers on areas user historically reports tension; adjusts scan speed
-- **Best For:** Deep relaxation, sleep preparation, chronic tension
-
-### 6. STOP Skill
-> *Pause before you react*
-
-- **Category:** Crisis / Impulse Control
-- **Duration:** 3–5 minutes
-- **Visual:** Four-quadrant compass or stoplight animation
-- **Steps:** **S**top → **T**ake a breath → **O**bserve (body, thoughts, feelings) → **P**roceed mindfully
-- **AI Coaching:** Asks what triggered the impulse; guides observation without judgment
-- **Best For:** Urge surfing, emotional overwhelm, impulse control, crisis prevention
-
----
-
-## Exercise System
-
-### Scripted Mode
-- Pre-written therapeutic scripts for all 6 exercises stored locally or fetched from Firestore
-- Available in all supported languages
-- Deterministic playback with fixed timing
-- Works fully offline
-- Content reviewed by licensed mental health professionals
-
-### AI-Coached Mode
-- AI generates personalized guidance in real-time
-- Adapts pacing based on user's mood and responsiveness
-- Can respond to voice input during exercise ("Can we slow down?")
-- Uses ONLY user's own data (mood history, conversation context, exercise completion)
-- **Never uses external data sources or user data for model training**
-
-### Switching Modes
-Users can switch from AI-coached to scripted mode mid-session without losing progress. If network is lost during AI-coached mode, the app gracefully falls back to scripted content.
-
-### Adding a New Exercise
-1. Create exercise JSON following the schema in `assets/exercise_scripts/schema.json`
-2. Add translations in `l10n/exercises/`
-3. Build visualizer in `lib/presentation/exercise/visualizers/`
-4. Register in Firestore `exercises` collection
-5. No UI changes needed — unified player handles all exercises
-
----
-
-## Crisis Protocol
-
-> ⚠️ **CRITICAL:** The crisis intervention system is the highest-priority feature in PeaceMind AI.
-
-### Trigger Conditions
-The crisis screen activates automatically when user input contains:
-- Intent to self-harm or suicide
-- Intent to harm others
-- Severe crisis language (custom NLP model + keyword detection)
-
-### User Experience
-1. **Immediate Overlay:** Crisis screen appears within 500ms of detection
-2. **Cannot Be Dismissed:** Back button and swipe gestures are disabled
-3. **Supportive Messaging:** "You are not alone. Help is available right now."
-4. **One-Tap Help:** Direct call/text links to emergency services and crisis hotlines
-5. **Post-Crisis Care:** Gentle return to app with follow-up resources
-
-### For Developers
-- Crisis detection runs on both client (lightweight) and server (comprehensive)
-- All crisis events are logged securely with anonymized session IDs
-- The crisis flow is **exempt from A/B testing** — never experiment on safety features
-- Hotline numbers are verified quarterly
-
----
-
-## Privacy & Security
-
-### Data Handling
-| Data Type | Storage | Encryption | Retention |
-|---|---|---|---|
-| Messages | Firestore | AES-256 | Until user deletes |
-| User Profile | Firestore | AES-256 | Until account deletion |
-| Mood Entries | Firestore | AES-256 | Until account deletion |
-| Exercise Progress | Firestore | AES-256 | Until account deletion |
-| Crisis Events | Firestore | AES-256 | 7 years (legal) |
-| Auth Tokens | Local (Secure Storage) | Platform keychain | Session-based |
-
-### Security Measures
-- Firebase Security Rules strictly control data access
-- All AI API calls proxied through Cloud Functions (API keys never in client)
-- OWASP Mobile Top 10 compliance
-- Regular penetration testing
-- Clinical review of all AI-generated content guidelines
-
-### Wellbeing Scoring
-- Background wellbeing signals are calculated server-side
-- **Scores are NEVER displayed to users** — they inform AI context and exercise recommendations only
-- Aggregated, anonymized data may be used for app improvement
-
----
-
-## AI Data Agreement
-
-Before any AI personalization begins, users must explicitly agree to the **AI Data Use Agreement** during onboarding (no skip option):
-
-### What Users Agree To
-- ✅ AI analyzes their conversations, mood entries, and exercise progress **only to personalize support**
-- ✅ Data is used **solely for their benefit** — better responses, relevant exercises, timely suggestions
-- ✅ **No data is used to train or fine-tune external AI models**
-- ✅ **No data is sold, shared, or monetized**
-- ✅ They can revoke this agreement at any time in Settings
-
-### What Happens If Revoked
-- AI personalization stops immediately
-- App continues to function with generic scripted content
-- Previous data remains encrypted and accessible to the user
-- No data is deleted upon revocation (unless user requests full deletion)
-
-### For Developers
-- AI Agreement acceptance is stored with version number and timestamp
-- App must check agreement status before enabling AI features
-- Agreement updates must prompt re-acceptance on next app open
-- All AI data usage must be auditable
-
----
-
-## AI Persona Guidelines
-
-The AI must adhere to these principles in every interaction:
-
-1. **Supportive, Not Clinical** — Use warm, conversational language. Avoid medical jargon.
-2. **Never Diagnose** — Do not label users with conditions ("depression", "anxiety disorder", etc.)
-3. **Never Prescribe** — Do not suggest medication, dosage, or specific treatments
-4. **Encourage Professional Help** — For severe or persistent issues, always suggest speaking to a professional
-5. **Person-First Language** — "You are experiencing" not "You are"
-6. **Culturally Aware** — Respect the user's cultural and linguistic context
-7. **Crisis-Ready** — If user expresses self-harm, immediately transition to crisis protocol
-8. **Exercise-Aware** — Suggest relevant exercises naturally, never forcefully
-
-### Example Tone
-> ❌ **Wrong:** "It sounds like you have generalized anxiety disorder."
-> ✅ **Right:** "It sounds like you've been carrying a lot of worry lately. That can feel really heavy. Would a breathing exercise help right now?"
-
----
-
-## Localization
-
-PeaceMind AI supports 15+ languages at launch:
-
-- English (en)
-- Spanish (es)
-- French (fr)
-- German (de)
-- Portuguese (pt)
-- Italian (it)
-- Dutch (nl)
-- Russian (ru)
-- Chinese Simplified (zh)
-- Japanese (ja)
-- Korean (ko)
-- Arabic (ar) — RTL support
-- Hindi (hi)
-- Turkish (tr)
-- Polish (pl)
-- Urdu (ur) — RTL support
-- Punjabi (pa)
-
-### Adding a New Language
-1. Add ARB file in `l10n/`
-2. Add exercise scripts in `l10n/exercises/`
-3. Run `flutter gen-l10n`
-4. Update `supportedLocales` in `app.dart`
-5. Verify RTL layout if applicable
-
----
-
-## Testing
-
-### Test Pyramid
-```
-    /\
-   /  \     E2E Tests (integration_test/)
-  /----\
- /      \   Widget Tests (test/presentation/)
-/--------\
-           Unit Tests (test/domain/, test/data/)
-```
-
-### Running Tests
-
-```bash
-# Unit tests
-flutter test
-
-# Widget tests
-flutter test test/presentation/
-
-# E2E tests
-flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart
-
-# Crisis flow simulation (manual)
-# 1. Launch app
-# 2. Navigate to chat
-# 3. Type: "I want to hurt myself"
-# 4. Verify crisis screen appears within 500ms
-
-# Exercise player test (manual)
-# 1. Launch app
-# 2. Go to Exercise Library
-# 3. Start any of the 6 exercises
-# 4. Verify unified UI loads: tracker, timer, stage, script, controls
-# 5. Switch between scripted and AI-coached modes
-# 6. Verify completion overlay with stats
-```
-
-### Critical Test Scenarios
-- [ ] Crisis detection triggers on explicit self-harm language
-- [ ] Crisis detection triggers on implicit/vague crisis language
-- [ ] Messages encrypt and decrypt correctly
-- [ ] Anonymous user can use full app features
-- [ ] Offline mode caches messages and exercises, syncs on reconnect
-- [ ] Account deletion removes all user data
-- [ ] AI never generates diagnostic language
-- [ ] Voice transcription handles background noise
-- [ ] **All 6 exercises render correctly in unified player**
-- [ ] **AI-coached mode falls back to scripted on network loss**
-- [ ] **AI Agreement must be accepted before AI features activate (no skip)**
-- [ ] **Revoking AI Agreement immediately disables personalization**
-
----
-
-## Deployment
-
-### Pre-Release Checklist
-- [ ] All P0 tasks complete
-- [ ] Crisis protocol tested by licensed mental health professional
-- [ ] Security audit passed (OWASP Mobile)
-- [ ] Legal review of Terms of Service, Privacy Policy, and **AI Data Agreement**
-- [ ] Hotline numbers verified for all supported countries
-- [ ] Accessibility audit passed (WCAG 2.1 AA)
-- [ ] Load testing completed (10k concurrent users)
-- [ ] **All 6 exercise scripts reviewed by clinical advisor**
-- [ ] App store assets prepared (screenshots, descriptions, age rating)
-
-### Release Channels
-```
-Development → Staging → Internal Testing → Closed Beta → Open Beta → Production
-```
-
-### App Store Submission
-- **Age Rating:** 17+ (Mature themes, crisis content)
-- **Content Warnings:** Mental health, crisis resources
-- **Privacy Nutrition Label:** Data linked to user (encrypted), no third-party sharing
-- **AI Disclosure:** App uses AI for personalization; data not used for model training
-
----
-
-## Contributing
-
-We welcome contributions that align with our mission. Please read our [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
-
-### Special Considerations
-- **Crisis Features:** Any changes to crisis detection or intervention flows require review by a licensed mental health professional
-- **AI Prompts:** All system prompt changes must be reviewed for safety and tone
-- **Exercise Scripts:** New scripted content must be reviewed by a clinical advisor
-- **Privacy:** Never introduce tracking, analytics, or data sharing without explicit user consent
-- **Accessibility:** All UI changes must maintain screen reader and high-contrast support
-- **AI Agreement:** Any changes to AI data usage require legal review and version bump
-- **Onboarding:** Never add a skip button — all onboarding screens are mandatory for legal and safety compliance
-
-### Reporting Security Issues
-Please email security@peacemind.ai with encrypted details. Do not open public issues for security vulnerabilities.
-
----
-
-## License
-
-PeaceMind AI is licensed under the [Apache License 2.0](LICENSE).
-
-**Important:** This software is provided as-is for emotional support purposes. It is not a medical device and should not be used as a substitute for professional mental health care.
-
----
-
-## Emergency Resources
-
-If you or someone you know is in crisis, help is available immediately:
-
-| Country | Resource | Contact |
+| Exercise | Technique | Animation |
 |---|---|---|
-| **United States** | 988 Suicide & Crisis Lifeline | Call or text **988** |
-| **United States** | Crisis Text Line | Text **HOME** to **741741** |
-| **United Kingdom** | Samaritans | Call **116 123** |
-| **Canada** | Talk Suicide Canada | Call **1-833-456-4566** |
-| **Australia** | Lifeline Australia | Call **13 11 14** |
-| **India** | AASRA | Call **91-9820466726** |
-| **International** | Befrienders Worldwide | [befrienders.org](https://www.befrienders.org) |
-| **Emergency** | Local Emergency Services | Call your local emergency number |
+| **Box Breathing** | 4-4-4-4 inhale-hold-exhale-hold cycles | Expanding/contracting ring synchronized to breath count |
+| **Grounding 5-4-3-2-1** | Sensory awareness across five senses | Sense orbs, ripple effects, and floating motes per stage |
+| **Body Scan** | Progressive body awareness from head to toe | Body-node glow animation traveling across a body silhouette |
+| **Mindful Walking** | Attentive walking meditation | Animated path with footstep markers and ambient scene |
 
-**If you are in immediate danger, call your local emergency number right away.**
+Each exercise ends with a **completion overlay** showing time spent, cycles completed, calm/focus scores, and garden progress gained.
 
 ---
 
-<div align="center">
+### 4. Journaling
 
-**PeaceMind AI** — *You are not alone.*
+![Journaling](assets/screenshots/journal.jpeg)
 
-peacemind.support@gmail.com
+Three gentle, non-confrontational prompts designed to build reflective habits without pressure:
 
-</div>
+- **Positive** — something good that happened today.
+- **Challenge** — something difficult you faced.
+- **Let Go** — something you want to release.
+
+Entries are saved to both **SharedPreferences** (instant local access) and **Firestore** (`users/{uid}/journal`) for cloud persistence. Saving a journal entry also marks the daily journal task complete and contributes to **Garden growth**.
+
+---
+
+### 5. Daily Routine
+
+![Daily Routine](assets/screenshots/routine.jpeg)
+
+Auto-generates a fresh set of **exactly 5 tasks per day**: 4 exercises + 1 journal entry. Designed to give users a small, achievable structure every morning — not an overwhelming to-do list.
+
+- Regenerates on local date change — no server clock dependency.
+- Actively avoids repeating yesterday's exact task set, keeping the routine feeling fresh.
+- Tasks are completable directly from the home screen cards or the routine screen.
+
+---
+
+### 6. Garden (Gamification)
+
+![Garden](assets/screenshots/home.jpeg)
+
+The Garden replaces a meaningless login streak with a **visual growth system driven only by real task completion**. Meaningless taps do not count.
+
+- **12-slot visual garden** displayed on the home screen.
+- **Exercise completed** (all steps finished in the player) → **+1 tree**
+- **Journal entry saved** → **+1 tree**
+- **Full garden (12 trees)** → `gardenStreak++` and all slots reset to 0 — marking one completed "garden cycle," not a daily login.
+- **NOT a login streak**: opening the app without doing anything earns nothing.
+- **Persistence**: SharedPreferences for instant local reads; Firestore (`users/{uid}/garden`) for cloud backup. Merge strategy: **cloud wins if greater** — safe for offline use and multi-device sync.
+
+---
+
+### 7. Progress Reports
+
+![Progress Reports](assets/screenshots/report.jpeg)
+
+All charts and metrics are powered by **real session data only** — no fake or placeholder entries. If you haven't used the app, the report is honestly empty.
+
+- **Weekly activity bar chart** — sessions completed per day across the past week.
+- **Mood-trend line chart** — emotional trajectory over time, derived from distress scores.
+- **Category pie chart** — breakdown of activity by type (exercises, calls, chat, journal).
+- **Streak and performance summary cards** — garden cycles completed, total trees grown, session counts.
+- **Filterable session list** — All / Tasks / Exercises / Calls / Chat — with timestamps and summaries.
+
+---
+
+## AI Model Used
+
+| Field | Detail |
+|---|---|
+| **Provider** | [OpenRouter](https://openrouter.ai) |
+| **Model** | `qwen/qwen-plus` (Alibaba Cloud — Qwen family) |
+| **Chat path** | Model hardcoded in `services/api_chat_service.dart` |
+| **Voice path** | Model loaded from `.env` → `OPENROUTER_MODEL` |
+| **Conversation approach** | CBT-based (Cognitive Behavioral Therapy) |
+
+Every AI reply is parsed for hidden control tags:
+
+| Tag | Purpose |
+|---|---|
+| `[DISTRESS_SCORE: X.X]` | Triggers an inline exercise popup when score exceeds 0.7 |
+| `[SUGGESTED_EXERCISE: id]` | Identifies which exercise to suggest in the popup |
+| `[SPEAK: true/false]` | Auto-speaks the reply via TTS for Urdu; silent for English |
+
+**Cross-session memory**: at the end of each session, a summary and durable user facts are written to `users/{uid}/memory/userFacts` in Firestore. These are read before every subsequent AI call — in both chat and voice — so NOVA never re-asks what it already knows.
+
+---
+
+## Language Support
+
+Language detection is handled by `services/language_detection_service.dart` — the same service drives both chat and voice paths. Detection runs **per message** (chat) and **per utterance** (voice), not per session.
+
+| Input | Detected As | NOVA Replies In | Voice Output |
+|---|---|---|---|
+| Urdu script (ا ب پ …) | `ur` | Urdu — simple, respectful, 1–3 sentences | Auto-spoken (`ur-PK`) |
+| English | `en` | English | Spoken (`en-US` / `en-IN`) |
+| Roman Urdu ("aap kaise hain") | `en` / `hinglish` | English | Spoken |
+| Mixed Urdu + English | Urdu wins | Urdu | Auto-spoken |
+
+> **Note:** Hindi and Punjabi are **not supported**. Both system prompts explicitly instruct the model: *"NEVER use Hindi or Devanagari script."* Hindi input is force-detected as English and replied to in English only.
+
+---
+
+## Functional Requirements
+
+1. User must be able to register and log in via email/password authentication.
+2. NOVA must respond to text input using natural, conversational dialogue — no clinical forms.
+3. NOVA must support continuous voice calls with live STT and TTS in the user's language.
+4. App must detect emotional distress from conversation content without asking the user directly.
+5. App must trigger an inline exercise popup when the distress score exceeds **0.7**.
+6. App must detect crisis keywords and activate the safety flow immediately — bypassing the AI entirely.
+7. Each exercise must record completion **only** when all steps are fully finished — never on open.
+8. Journal entries must save to both local storage (SharedPreferences) and Firestore for cloud persistence.
+9. Daily routine must auto-generate exactly **5 unique tasks per day** and refresh on date change.
+10. Garden must grow only on genuine task completion — no taps, no logins, no shortcuts.
+11. Progress reports must display only real session data — no placeholder or fabricated entries.
+12. App must detect the user's language per message (chat) and per utterance (voice) automatically.
+13. Cross-session memory must persist between chat and voice sessions so NOVA retains context over time.
+
+---
+
+## Non-Functional Requirements
+
+1. **Privacy** — all user data stored under `users/{uid}`; accounts are fully isolated with no shared data.
+2. **Availability** — AI companion accessible 24/7 with no appointment or waitlist.
+3. **Safety** — crisis keyword detection is hard-coded (12 patterns) and cannot be bypassed by prompt injection.
+4. **Performance** — TTS and STT must respond without noticeable lag during voice calls.
+5. **Offline resilience** — SharedPreferences provides instant local reads; Firestore syncs when the connection returns.
+6. **Security** — API keys stored in `.env` and excluded from version control via `.gitignore`.
+7. **Scalability** — Firestore collection architecture supports per-user growth without schema changes.
+8. **Ethics** — the app never diagnoses, never labels, and never shames the user under any circumstance.
+9. **Language accuracy** — language detection runs per message, not per session, to handle multilingual users correctly.
+10. **Data integrity** — garden tree counts and streak values use a cloud-wins merge strategy to prevent data loss on offline usage.
+
+---
+
+## Database Structure (Firestore)
+
+### Collection Paths
+
+| Path | Stores |
+|---|---|
+| `users/{uid}/session/{sessionId}/messages` | Chat messages grouped by session |
+| `users/{uid}/chatMessages` | Voice call turn-by-turn messages |
+| `users/{uid}/sessionSummaries` | AI-generated end-of-session summaries |
+| `users/{uid}/audioCallSessions` | Full voice call transcripts |
+| `users/{uid}/memory/userFacts` | Durable facts NOVA remembers about the user |
+| `users/{uid}/journal` | Journal entries |
+| `users/{uid}/garden` | Garden state (`treeCount`, `totalTrees`, `gardenStreak`) |
+
+### Safety Flag
+
+On any crisis keyword detection, a permanent flag is written:
+
+```
+users/{uid} → safetyFlag: true
+```
+
+This flag is **never deleted** — it persists across all future sessions to ensure NOVA provides consistently careful support.
+
+### Local Storage (SharedPreferences)
+
+- Onboarding completion flag (per account)
+- Garden state (instant access before Firestore syncs)
+- Daily routine date and task set
+- Per-user cached data using `uid`-prefixed keys
+
+---
+
+## Technical Architecture
+
+| Layer | Technology | Location |
+|---|---|---|
+| Framework | Flutter, Dart SDK ^3.11, Material 3 | `pubspec.yaml`, `main.dart` |
+| State management | Provider (`ChangeNotifier`), 7 providers | `lib/providers/*` |
+| Auth + DB | Firebase Auth + Cloud Firestore | `firebase_options.dart`, `services/` |
+| Local storage | SharedPreferences | All providers and services |
+| AI — Chat | OpenRouter REST, `qwen/qwen-plus` | `services/api_chat_service.dart` |
+| AI — Voice | OpenRouter REST, `qwen/qwen-plus` | `services/audio_call_service.dart` |
+| STT | `speech_to_text` plugin | `services/speech_to_text_service.dart` |
+| TTS | `flutter_tts` (on-device voices) | `services/speech_to_text_service.dart` |
+| Charts | `fl_chart` | `screens/history_screen.dart` |
+| Animations | Lottie + `AnimationController` | `assets/animations/`, `lib/widgets/stage/` |
+| Config | `flutter_dotenv` (`.env` file) | `.env`, `main.dart` |
+
+> **Note:** `.env` contains `TTS_MODEL` and `YOUR_VOICE_API_KEY` fields, but no code reads them yet. Current TTS uses on-device `flutter_tts` voices. Cloud TTS integration is planned for a future release.
+
+---
+
+## App Flow
+
+```
+main.dart → AuthGate
+ ├── Not logged in           → AuthScreen
+ │                              ![Sign Up](assets/screenshots/signup.jpeg)
+ │                              ![Sign In](assets/screenshots/signin.jpeg)
+ ├── Logged in, no onboard   → OnboardingScreen  (runs once per account)
+ └── Logged in + onboarded   → HomeScreen
+                                ![Home](assets/screenshots/home.jpeg)
+       ├── Chat Screen        → NOVA text chat
+       │                         ![Chat](assets/screenshots/chat1.jpeg)
+       │                         ![Chat](assets/screenshots/chat2.jpeg)
+       │     └── Switch to Voice Call
+       │                           ![Call](assets/screenshots/call1.jpeg)
+       │                           ![Call](assets/screenshots/call2.jpeg)
+       ├── Voice Call Screen  → NOVA hands-free voice call
+       ├── Exercise Screen    → Exercise catalog
+       │                         ![Exercises](assets/screenshots/exercise.jpeg)
+       │     └── Exercise Player Screen
+       ├── Routine Screen     → Daily 5 tasks
+       │                         ![Routine](assets/screenshots/routine.jpeg)
+       │     └── Exercise Player Screen
+       ├── Journal Screen     → 3-prompt journaling
+       │                         ![Journal](assets/screenshots/journal.jpeg)
+       ├── Settings Screen
+       │                         ![Settings](assets/screenshots/setting.jpeg)
+       │     └── History / Reports Screen
+       │                           ![Report](assets/screenshots/report.jpeg)
+       └── Home routine cards → Exercise Player Screen
+```
+
+**Session rule:** Logged-in users return directly to the Home screen on app restart. Logout is available only via Settings — there is no other way to end a session.
+
+---
+
+## App Structure
+
+```
+PeaceMind-AI/
+├── .env                          # API keys — never commit
+├── firebase.json
+├── pubspec.yaml
+├── assets/
+│   ├── animations/               # Lottie files (garden_tree_static.json, mood lotties)
+│   ├── audio/                    # yappy.mp3
+│   ├── images/                   # splash.png, exercise covers, home backgrounds
+│   └── screenshots/              # signup.jpeg, signin.jpeg, home.jpeg, exercise.jpeg,
+│                                   setting.jpeg, report.jpeg, journal.jpeg, routine.jpeg,
+│                                   chat1.jpeg, chat2.jpeg, call1.jpeg, call2.jpeg
+└── lib/
+    ├── main.dart                 # Entry: dotenv + Firebase init + MultiProvider + AuthGate
+    ├── firebase_options.dart
+    ├── data/                     # Exercise step scripts and registry
+    ├── logic/                    # Audio call session state machine
+    ├── models/                   # user, routine, history, journal, exercise, call session
+    ├── providers/                # auth, chat, audio_call, routine, daily_routine,
+    │                             # journal, garden
+    ├── screens/                  # All app screens
+    ├── services/                 # All backend + AI + language + TTS/STT services
+    ├── theme/app_theme.dart
+    └── widgets/                  # Garden widget, exercise popup, audio call UI,
+                                  # panic overlay, stage/ (4 animated exercise stages)
+```
+
+---
+
+## Business Model (Planned — Not Yet in Code)
+
+> ⚠️ **Not yet enforced in code.** There is currently no tier, quota, or session-counter logic anywhere in the app. Every user has full access. The table below is the target model for future implementation.
+
+| Tier | Duration | Chat Sessions | Call Sessions | Extras |
+|---|---|---|---|---|
+| **Free** | 1 month | 30 | 15 | — |
+| **Basic** | 2 months | 60 | 35 | — |
+| **Premium** | 5 months | Unlimited | Unlimited | Real psychiatrist booking |
+
+**Note:** The crisis safety flow **always bypasses session limits** — no exceptions. A user in crisis will never be told "you've used your quota."
+
+---
+
+## Future Targets
+
+- In-app AI disclosure banner — *"I am an AI and may make mistakes"*
+- One-tap emergency helpline screen with local numbers
+- Real doctor / psychiatrist booking flow (Premium tier)
+- Flagged-issue tiering: trauma, eating disorders, substance use → **coping-only mode** with mandatory referral to a real professional
+- Cloud TTS integration — replace on-device `flutter_tts` voices with high-quality API-based voices
+- Session quota enforcement per tier with upgrade prompts at limits
+- Data-usage explanation screen — transparent disclosure of what is stored and why
+- Clinical review and CBT certification from a qualified mental health professional
+- iOS App Store and Google Play Store release
+
+---
+
+## Safety & Ethics
+
+### Currently Implemented
+
+- **Never diagnoses** — both the chat and voice system prompts explicitly instruct the model: *"Never assume or diagnose any mental health condition."*
+- **Never reveals distress scores** — `[DISTRESS_SCORE: X.X]` is an internal tag. The user never sees it and is never told they are being scored.
+- **Hard-coded crisis detection** — 12 keyword patterns (self-harm, suicide ideation, hopelessness) are evaluated before the AI is ever called. This logic **bypasses the model entirely** and cannot be manipulated by prompt injection.
+- **Permanent safety flag** — `safetyFlag: true` is written to Firestore on any crisis trigger. It is never deleted, ensuring all future sessions provide appropriately careful support.
+
+### Planned
+
+- Emergency contact screen with one-tap calling for local crisis helplines
+- Helpline numbers screen with region-appropriate resources
+- Referral flow for serious mental health concerns — directing users to real professionals when AI support is not enough
+
+---
+
+**PeaceMind AI** — *Your space, your pace. Small steps are still progress.* 🌱

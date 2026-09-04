@@ -36,6 +36,29 @@ migrate_working_dir/
 # Symbolication related
 app.*.symbols
 
+# Environment variables
+.env
+.env.*
+.env.local
+.env.production
+
+# Firebase config (generate locally with `flutterfire configure`)
+lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Service account keys (NEVER commit)
+**/service_account*.json
+**/serviceAccount*.json
+**/*-credentials.json
+
+# Keystore / signing keys
+*.keystore
+*.jks
+*.p12
+**/android/key.properties
+**/android/app/*.jks
+
 # Obfuscation related
 app.*.map.json
 
@@ -43,6 +66,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Widget Preview related
-.widget_preview/

@@ -48,7 +48,7 @@ flutter:
     - assets/images/mindful_walking_cover.png
     - assets/images/body_scan_cover.png
     - assets/images/body_scan.jpg
-
+    - assets/screenshots/
 flutter_native_splash:
   color: "#2D1B69"
   image: assets/images/splash.png

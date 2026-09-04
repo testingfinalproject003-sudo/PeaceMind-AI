@@ -7,6 +7,8 @@
 ![OpenRouter](https://img.shields.io/badge/OpenRouter-000000?style=flat)
 ![Qwen AI](https://img.shields.io/badge/Qwen_AI-qwen--plus-blue?style=flat)
 ![Dart SDK](https://img.shields.io/badge/Dart_SDK-3.11-0175C2?style=flat&logo=dart&logoColor=white)
+![Javeria Usmani (Team Leader) ] 
+![Mahnoor Naeem (Developer) ] ![ Momina Munir (Developer) ] ![Qudsia Imtiaz (Developer) ]
 
 **AI-powered mental wellness companion.** Mental First Aid — not therapy, not a medical device, never diagnoses.
 
@@ -266,30 +268,27 @@ This flag is **never deleted** — it persists across all future sessions to ens
 ```
 main.dart → AuthGate
  ├── Not logged in           → AuthScreen
- │                              ![Sign Up](assets/screenshots/signup.jpeg)
- │                              ![Sign In](assets/screenshots/signin.jpeg)
+ │                              
  ├── Logged in, no onboard   → OnboardingScreen  (runs once per account)
  └── Logged in + onboarded   → HomeScreen
-                                ![Home](assets/screenshots/home.jpeg)
+                              
        ├── Chat Screen        → NOVA text chat
-       │                         ![Chat](assets/screenshots/chat1.jpeg)
-       │                         ![Chat](assets/screenshots/chat2.jpeg)
+       │                        
        │     └── Switch to Voice Call
-       │                           ![Call](assets/screenshots/call1.jpeg)
-       │                           ![Call](assets/screenshots/call2.jpeg)
+       │                          
        ├── Voice Call Screen  → NOVA hands-free voice call
        ├── Exercise Screen    → Exercise catalog
-       │                         ![Exercises](assets/screenshots/exercise.jpeg)
+       │                       
        │     └── Exercise Player Screen
        ├── Routine Screen     → Daily 5 tasks
-       │                         ![Routine](assets/screenshots/routine.jpeg)
+       │                       
        │     └── Exercise Player Screen
        ├── Journal Screen     → 3-prompt journaling
-       │                         ![Journal](assets/screenshots/journal.jpeg)
+       │                       
        ├── Settings Screen
-       │                         ![Settings](assets/screenshots/setting.jpeg)
+       │                         
        │     └── History / Reports Screen
-       │                           ![Report](assets/screenshots/report.jpeg)
+       │                          
        └── Home routine cards → Exercise Player Screen
 ```
 

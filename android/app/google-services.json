@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "685007533336",
+    "firebase_url": "https://peace-mind-ai-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "peace-mind-ai",
+    "storage_bucket": "peace-mind-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685007533336:android:883c42df42e64cd92d5a6d",
+        "android_client_info": {
+          "package_name": "com.example.peace_mind_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGWyQz9s1zYEWEI9dPtskHCEISaL7UF5E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685007533336:android:4a7015009dccbeab2d5a6d",
+        "android_client_info": {
+          "package_name": "com.example.peace_mind_chat_standalone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGWyQz9s1zYEWEI9dPtskHCEISaL7UF5E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

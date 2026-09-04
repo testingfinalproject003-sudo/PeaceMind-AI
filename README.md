@@ -7,8 +7,10 @@
 ![OpenRouter](https://img.shields.io/badge/OpenRouter-000000?style=flat)
 ![Qwen AI](https://img.shields.io/badge/Qwen_AI-qwen--plus-blue?style=flat)
 ![Dart SDK](https://img.shields.io/badge/Dart_SDK-3.11-0175C2?style=flat&logo=dart&logoColor=white)
-![Javeria Usmani (Team Leader) ] 
-![Mahnoor Naeem (Developer) ] ![ Momina Munir (Developer) ] ![Qudsia Imtiaz (Developer) ]
+![Team Leader](https://img.shields.io/badge/Team_Leader-Javeria_Usmani-purple?style=flat)
+![Developer](https://img.shields.io/badge/Developer-Mahnoor_Naeem-green?style=flat)
+![Developer](https://img.shields.io/badge/Developer-Momina_Munir-green?style=flat)
+![Developer](https://img.shields.io/badge/Developer-Qudsia_Imtiaz-green?style=flat)
 
 **AI-powered mental wellness companion.** Mental First Aid — not therapy, not a medical device, never diagnoses.
 

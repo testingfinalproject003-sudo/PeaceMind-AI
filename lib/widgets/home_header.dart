@@ -34,12 +34,7 @@ class HomeHeader extends StatelessWidget {
     final userName = context.watch<AuthProvider>().userName;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        20,
-        18,
-        20,
-        8,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -48,22 +43,29 @@ class HomeHeader extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white.withValues(alpha: 0.72),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.80),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF173B55)
-                      .withValues(alpha: 0.08),
+                  color: const Color(0xFF173B55).withValues(alpha: 0.08),
                   blurRadius: 14,
                   offset: const Offset(0, 5),
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            // Profile circle — first letter of the logged-in user's name
+            // (empty/null userName → AuthProvider 'Friend' fallback → 'F').
+            child: CircleAvatar(
               radius: 27,
-              backgroundImage: AssetImage(
-                'assets/images/home/profile.jpg',
+              backgroundColor: Colors.white.withValues(alpha: 0.85),
+              child: Text(
+                userName.isEmpty
+                    ? 'F'
+                    : userName.characters.first.toUpperCase(),
+                style: const TextStyle(
+                  color: Color(0xFF173B55),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
@@ -72,8 +74,7 @@ class HomeHeader extends StatelessWidget {
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _getGreeting(),
@@ -117,23 +118,15 @@ class HomeHeader extends StatelessWidget {
 
           Container(
             width: 48,
-            padding: const EdgeInsets.symmetric(
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFECE8FA)
-                  .withValues(alpha: 0.78),
+              color: const Color(0xFFECE8FA).withValues(alpha: 0.78),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.85)),
             ),
             child: Column(
               children: [
-                const Text(
-                  '🔥',
-                  style: TextStyle(fontSize: 17),
-                ),
+                const Text('🔥', style: TextStyle(fontSize: 17)),
                 Text(
                   '$streak',
                   style: const TextStyle(

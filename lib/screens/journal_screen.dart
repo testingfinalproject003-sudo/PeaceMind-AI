@@ -69,6 +69,8 @@ class _JournalScreenState extends State<JournalScreen> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
                 children: [
+                  _buildCover(),
+                  const SizedBox(height: 16),
                   _buildAiBadge(),
                   const SizedBox(height: 16),
                   _buildInputField(
@@ -212,6 +214,34 @@ class _JournalScreenState extends State<JournalScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Journal cover page — user-added asset (assets/images/home/journal.jpg).
+  /// Asset fail ho to wahi soft glassy gradient fallback — koi break nahi.
+  Widget _buildCover() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: SizedBox(
+        height: 150,
+        width: double.infinity,
+        child: Image.asset(
+          'assets/images/home/journal.jpg',
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFECE8FA), Color(0xFFE4F0EA)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: const Center(
+              child: Icon(Icons.menu_book_rounded, color: darkBlue, size: 42),
+            ),
+          ),
+        ),
       ),
     );
   }

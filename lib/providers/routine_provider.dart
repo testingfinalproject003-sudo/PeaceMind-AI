@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../models/routine_model.dart';
 import '../models/history_model.dart';
 import '../services/history_service.dart';
+import '../services/notification_service.dart';
 import 'dart:math';
 
 class RoutineProvider extends ChangeNotifier {
@@ -106,6 +107,7 @@ class RoutineProvider extends ChangeNotifier {
     if (routineStr != null) {
       _routines = Routine.listFromJson(routineStr);
       await _resetStaleCompletions();
+      syncNotifications();
     }
     if (historyStr != null) _history = HistoryEntry.listFromJson(historyStr);
     _history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
@@ -125,6 +127,9 @@ class RoutineProvider extends ChangeNotifier {
   /// Public: NOVA call / chat jaisi bahar ki activities history mein
   /// add karne ke liye. Local + Firestore dono mein save hota hai.
   void addHistoryEntry(HistoryEntry entry) {
+    // Duplicate guard: same id (chat/call session) dobara add na ho —
+    // manual end + sweep + day-rollover kabhi race na karein.
+    if (_history.any((h) => h.id == entry.id)) return;
     _history.add(entry);
     _history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
     _saveHistory();
@@ -160,6 +165,12 @@ class RoutineProvider extends ChangeNotifier {
     return next;
   }
 
+  /// Routine reminders ko current routines ke sath sync karta hai
+  /// (NotificationService on/off setting respect karta hai).
+  void syncNotifications() {
+    NotificationService.instance.syncWith(_routines);
+  }
+
   void addRoutine({
     required String title,
     required String category,
@@ -176,6 +187,7 @@ class RoutineProvider extends ChangeNotifier {
       coverImage: coverImage,
     ));
     _saveRoutines();
+    syncNotifications();
     notifyListeners();
   }
 
@@ -184,6 +196,7 @@ class RoutineProvider extends ChangeNotifier {
     if (idx != -1) {
       _routines[idx] = updated;
       _saveRoutines();
+      syncNotifications();
       notifyListeners();
     }
   }
@@ -191,6 +204,7 @@ class RoutineProvider extends ChangeNotifier {
   void deleteRoutine(String id) {
     _routines.removeWhere((r) => r.id == id);
     _saveRoutines();
+    syncNotifications();
     notifyListeners();
   }
 

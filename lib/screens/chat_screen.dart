@@ -1,9 +1,8 @@
 // lib/screens/chat_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:developer';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import '../models/history_model.dart';
-import '../providers/routine_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/audio_player_widget.dart';
 import '../widgets/exercise_popup.dart';
@@ -23,15 +22,36 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isInitialized = false;
 
+  // ── Progressive history loading state ──
+  String? _lastNewestId; // bottom (newest) message id — new message detect
+  double? _extentBeforePagination; // older messages insert hone se pehle ka
+  // maxScrollExtent — pagination ke baad view stable rakhne ke liye
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ChatProvider>();
       provider.initialize();
       _isInitialized = true;
       log('✅ ChatScreen initialized');
     });
+  }
+
+  /// Reverse list mein upar scroll (older messages) → next page load.
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels <= 0 || pos.maxScrollExtent - pos.pixels > 300) return;
+
+    final provider = context.read<ChatProvider>();
+    if (provider.hasMoreMessages &&
+        !provider.isLoadingOlder &&
+        !provider.isInitialLoad) {
+      _extentBeforePagination = pos.maxScrollExtent;
+      provider.loadOlderMessages();
+    }
   }
 
   @override
@@ -41,11 +61,12 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  /// Reverse ListView: offset 0 = bottom (newest message).
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -110,11 +131,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (confirm != true) return;
 
-    // Capture BEFORE endSession — it clears messages and sessionId.
-    final sessionId = provider.currentSessionId;
-    final messages = List<Map<String, dynamic>>.from(provider.messages);
-    final userTurns = messages.where((m) => m['sender'] == 'user').length;
-
+    // Provider khud summary + shared memory + Report entry (local +
+    // Firestore) save karta hai — yahan duplicate write ki zaroorat nahi.
     const durationMinutes = 5;
 
     await provider.endSession(
@@ -123,32 +141,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     if (!mounted) return;
-
-    // History entry (local + Firestore) — same pattern as voice calls,
-    // category 'chat' so the session appears in Progress & History.
-    if (sessionId != null && userTurns > 0) {
-      var snippet =
-          (messages.lastWhere(
-                    (m) => m['sender'] == 'user',
-                    orElse: () => const {},
-                  )['text'] ??
-                  '')
-              .toString()
-              .trim();
-      if (snippet.length > 90) snippet = '${snippet.substring(0, 90)}...';
-
-      context.read<RoutineProvider>().addHistoryEntry(
-        HistoryEntry(
-          id: sessionId,
-          routineId: sessionId,
-          routineTitle: 'NOVA Chat Session',
-          category: 'chat',
-          completedAt: DateTime.now(),
-          moodScore: null,
-          notes: '$userTurns messages — $snippet',
-        ),
-      );
-    }
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -174,10 +166,35 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         }
 
-        final messageCount = chatProvider.messages.length;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (messageCount > 0) _scrollToBottom();
-        });
+        // ── Progressive history: pagination complete → view stable rakho.
+        // Older messages TOP par insert hoti hain (reverse list), isliye
+        // scroll offset ko added height ke barah upar shift karte hain.
+        if (_extentBeforePagination != null && !chatProvider.isLoadingOlder) {
+          final oldMax = _extentBeforePagination!;
+          _extentBeforePagination = null;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!_scrollController.hasClients) return;
+            final delta =
+                _scrollController.position.maxScrollExtent - oldMax;
+            if (delta > 0 && _scrollController.offset > 0) {
+              _scrollController.jumpTo(_scrollController.offset + delta);
+            }
+          });
+        }
+
+        // ── Naya message sirf tab scroll jab user bottom ke paas ho —
+        // history parh rahe user ko yank na karo.
+        final messages = chatProvider.messages;
+        final newestId =
+            messages.isNotEmpty ? messages.first['id'] as String? : null;
+        if (newestId != null && newestId != _lastNewestId) {
+          _lastNewestId = newestId;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!_scrollController.hasClients) return;
+            final pos = _scrollController.position;
+            if (pos.pixels < 200) _scrollToBottom();
+          });
+        }
 
         // Loading state
         if (chatProvider.isLoading && !_isInitialized) {
@@ -189,8 +206,10 @@ class _ChatScreenState extends State<ChatScreen> {
           );
         }
 
-        // Error state
-        if (chatProvider.error != null) {
+        // Error state — sirf tab jab session hi usable na ho.
+        // Send/stream error par conversation ko error screen se MAT
+        // chhupao — messages dikhte rehte hain, error SnackBar mein aata hai.
+        if (chatProvider.error != null && !chatProvider.isSessionActive) {
           return Scaffold(
             backgroundColor: AppColors.skyMid,
             body: Center(
@@ -218,6 +237,24 @@ class _ChatScreenState extends State<ChatScreen> {
           );
         }
 
+        // Active session mein error (send/stream fail) → SnackBar,
+        // chat UI waisa hi rehta hai (AI fail ho to bhi user message visible).
+        if (chatProvider.error != null) {
+          final err = chatProvider.error!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            chatProvider.clearError();
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(err),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.redAccent,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          });
+        }
+
         // Main Chat UI
         return Scaffold(
           backgroundColor: AppColors.skyMid,
@@ -239,13 +276,24 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.call),
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  // Provider pehle capture karo — async gap ke baad builder
+                  // context use nahi karna (app-level provider hai, safe).
+                  final chatProvider = context.read<ChatProvider>();
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const AiAudioCallScreen(),
                     ),
                   );
+                  // Call ke baad shared memory (chat + call same long-term
+                  // memory use karte hain) turant reload karo.
+                  chatProvider.refreshUserContext();
+                  // Back-button path mein endCall background mein chalta hai
+                  // — thodi der baad ek aur refresh taake updated memory pakdi jaye.
+                  Future.delayed(const Duration(seconds: 5), () {
+                    chatProvider.refreshUserContext();
+                  });
                 },
               ),
               IconButton(
@@ -256,17 +304,40 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           body: Column(
             children: [
-              // Messages list
+              // Messages list — reverse: index 0 = bottom (newest),
+              // older messages upar gradually load hoti hain.
               Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: chatProvider.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = chatProvider.messages[index];
-                    return _buildMessageBubble(message);
-                  },
-                ),
+                child: chatProvider.isInitialLoad &&
+                        chatProvider.messages.isEmpty
+                    ? _buildSkeletonList()
+                    : ListView.builder(
+                        controller: _scrollController,
+                        reverse: true,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: chatProvider.messages.length +
+                            (chatProvider.isLoadingOlder ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          // Top par loader jab older messages aa rahi hon
+                          if (chatProvider.isLoadingOlder &&
+                              index == chatProvider.messages.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          final message = chatProvider.messages[index];
+                          return _buildMessageBubble(message);
+                        },
+                      ),
               ),
               // Quick replies
               _buildQuickReplies(),
@@ -283,12 +354,47 @@ class _ChatScreenState extends State<ChatScreen> {
   // UI BUILDERS
   // ============================================================
 
+  // ============================================================
+  // SKELETON (old messages load ho rahe hon)
+  // ============================================================
+
+  Widget _buildSkeletonList() {
+    return ListView(
+      reverse: true,
+      padding: const EdgeInsets.all(16),
+      children: [
+        for (int i = 0; i < 6; i++) _buildSkeletonBubble(i.isEven),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonBubble(bool isUser) {
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        height: 46,
+        width: MediaQuery.of(context).size.width * (isUser ? 0.45 : 0.65),
+        decoration: BoxDecoration(
+          color: AppColors.glass,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.glassBorder),
+        ),
+      )
+          .animate(onPlay: (c) => c.repeat(reverse: true))
+          .fadeIn(duration: 450.ms)
+          .then()
+          .fadeOut(duration: 450.ms),
+    );
+  }
+
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isUser = message['sender'] == 'user';
     final text = message['text'] ?? '';
     final language = message['language'] ?? 'en';
 
     return Align(
+      key: ValueKey(message['id']),
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

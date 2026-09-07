@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -12,6 +13,7 @@ import '../widgets/completion_overlay.dart';
 import '../providers/routine_provider.dart';
 import '../providers/daily_routine_provider.dart';
 import '../providers/garden_provider.dart';
+import '../services/yourvoice_tts_service.dart';
 
 class ExercisePlayerScreen extends StatefulWidget {
   final ExerciseInfo exercise;
@@ -26,6 +28,8 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   late AnimationController _stepCtrl;
   final Stopwatch _sessionStopwatch = Stopwatch();
   final FlutterTts _tts = FlutterTts();
+  final AudioPlayer _cloudPlayer = AudioPlayer();
+  final YourVoiceTtsService _yourVoice = YourVoiceTtsService.instance;
 
   int _current = 0;
   int _cycles = 1;
@@ -224,11 +228,14 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   }
 
   /// Start TTS narration for the current step.
+  /// For Urdu, uses YourVoice cloud TTS for natural human-like voice.
+  /// Falls back to on-device flutter_tts when cloud is unavailable.
   /// On engine failure, falls back to the configured step duration.
   /// Does NOT increment _stepGeneration — the caller (_beginStep)
   /// has already set the generation for this narration cycle.
   Future<void> _speak() async {
     final gen = _stepGeneration;
+    final text = _step.textFor(_lang);
     setState(() {
       _revealChars = 0;
       _speechDone = false;
@@ -237,24 +244,59 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _startFallbackTimer();
       return;
     }
+
+    // ── Urdu: try YourVoice cloud TTS first ──
+    if (_lang == AppLang.ur) {
+      try {
+        await _cloudPlayer.stop();
+        await _tts.stop();
+        if (!mounted || gen != _stepGeneration) return;
+
+        final audioBytes = await _yourVoice.synthesize(
+          text,
+          language: _lang.ttsLocale,
+        );
+        if (!mounted || gen != _stepGeneration) return;
+
+        if (audioBytes != null) {
+          // Listen for playback completion to advance step.
+          _cloudPlayer.onPlayerComplete.listen((_) {
+            if (!mounted || gen != _stepGeneration) return;
+            setState(() {
+              _revealChars = text.length;
+              _speechDone = true;
+            });
+            _tryAdvance();
+          });
+          // Show full text immediately for cloud audio (no word-level tracking).
+          setState(() => _revealChars = text.length);
+          await _cloudPlayer.setSourceBytes(audioBytes);
+          if (!mounted || gen != _stepGeneration) return;
+          await _cloudPlayer.resume();
+          return;
+        }
+        // Cloud returned null — fall through to device TTS.
+      } catch (_) {
+        if (!mounted || gen != _stepGeneration) {
+          return;
+        }
+        // Cloud failed — fall through to device TTS.
+      }
+    }
+
+    // ── Device TTS (English, Punjabi, Roman Urdu, or Urdu fallback) ──
     try {
       await _tts.stop();
-      // Guard: a newer step/speak was started while awaiting stop.
+      await _cloudPlayer.stop();
       if (!mounted || gen != _stepGeneration) return;
       await _tts.setLanguage(_lang.ttsLocale);
       if (!mounted || gen != _stepGeneration) return;
-      // Prefer the device's most natural Urdu voice before speaking.
       await _tuneUrduVoice();
       if (!mounted || gen != _stepGeneration) return;
-      // Natural speech rate — let actual TTS duration control step timing.
-      // Urdu voices speak faster at the same value, so they use a slightly
-      // calmer rate for guided-meditation pacing.
       await _tts.setSpeechRate(_ttsRate[_lang] ?? 0.45);
       await _tts.setPitch(1.0);
-      final result = await _tts.speak(_step.textFor(_lang));
+      final result = await _tts.speak(text);
       if (!mounted || gen != _stepGeneration) return;
-      // speak() failed (voice/engine missing) — use fallback timer
-      // so the step doesn't get stuck.
       if (result != 1) {
         setState(() => _speechDone = true);
         _startFallbackTimer();
@@ -304,6 +346,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       // Pause: invalidate stale TTS callbacks and stop speech.
       _stepGeneration++;
       _tts.stop();
+      _cloudPlayer.stop();
     }
   }
 
@@ -314,6 +357,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       // Fall back to configured step duration for advancement.
       _stepGeneration++;
       _tts.stop();
+      _cloudPlayer.stop();
       _startFallbackTimer();
     } else {
       // Unmute: restart narration with fresh generation.
@@ -338,6 +382,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
     _stepCtrl.stop();
     _sessionStopwatch.stop();
     _tts.stop();
+    _cloudPlayer.stop();
     
     // Mark exercise as complete in routine provider (sirf ek dafa)
     if (mounted && !_historySaved) {
@@ -379,6 +424,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
       _speechDone = false;
     });
     await _tts.stop();
+    await _cloudPlayer.stop();
     if (!mounted) return;
     _sessionStopwatch.reset();
     _sessionStopwatch.start();
@@ -401,6 +447,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
   void dispose() {
     _stepCtrl.dispose();
     _tts.stop();
+    _cloudPlayer.dispose();
     super.dispose();
   }
 
@@ -462,6 +509,24 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
                   ],
                 ),
               ),
+              // Transparent barrier to dismiss language menu on outside tap.
+              if (_showLangMenu)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _showLangMenu = false),
+                    child: Container(color: Colors.transparent),
+                  ),
+                ),
+              // Menu barrier ke BAAD (upar) render hota hai warna barrier har
+              // tap kha jata hai aur Urdu select nahi ho pati. Top bar ke
+              // chhote Stack ke bahar hit-test nahi hota, is liye yahan
+              // full-screen Stack mein position hota hai.
+              if (_showLangMenu)
+                Positioned(
+                  top: 44,
+                  right: 18,
+                  child: LanguageMenu(current: _lang, onSelect: _onSelectLang),
+                ),
               if (_showOverlay)
                 Positioned.fill(
                   child: CompletionOverlay(
@@ -469,6 +534,7 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
                     totalTime: _sessionElapsed,
                     cycles: _cycles,
                     previousCycles: _previousCycles,
+                    lang: _lang,
                     onClose: _onClose,
                     onRestart: _onRestart,
                   ),
@@ -513,20 +579,10 @@ class _ExercisePlayerScreenState extends State<ExercisePlayerScreen>
           child: Icon(_muted ? Icons.volume_off_rounded : Icons.volume_up_rounded, size: 15, color: AppColors.ink),
         ),
         const SizedBox(width: 6),
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            IconCircleButton(
-              onTap: () => setState(() => _showLangMenu = !_showLangMenu),
-              child: const Icon(Icons.language_rounded, size: 15, color: AppColors.ink),
-            ),
-            if (_showLangMenu)
-              Positioned(
-                top: 34,
-                right: 0,
-                child: LanguageMenu(current: _lang, onSelect: _onSelectLang),
-              ),
-          ],
+        // Language menu build() ke root Stack mein hai (bounds/hit-test fix).
+        IconCircleButton(
+          onTap: () => setState(() => _showLangMenu = !_showLangMenu),
+          child: const Icon(Icons.language_rounded, size: 15, color: AppColors.ink),
         ),
       ],
     );

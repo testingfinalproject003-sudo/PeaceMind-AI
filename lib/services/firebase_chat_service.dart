@@ -82,6 +82,76 @@ class FirebaseChatService {
     }).toList();
   }
 
+  /// Aaj (same day) ka sabse recent OPEN chat session — daily resume ke liye.
+  /// Local filter taake composite index ki zaroorat na pade.
+  Future<String?> getTodayOpenChatSession() async {
+    final userId = currentUserId;
+    if (userId == null) return null;
+
+    final now = DateTime.now();
+    final dayStart = DateTime(now.year, now.month, now.day);
+
+    try {
+      final snapshot = await _getSessionCollection(userId)
+          .orderBy('createdAt', descending: true)
+          .limit(10)
+          .get();
+
+      String? fallback;
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        if (data['channel'] != 'chat' || data['status'] != 'open') continue;
+        final ts = data['createdAt'] as Timestamp?;
+        if (ts == null || !ts.toDate().isAfter(dayStart)) continue;
+
+        // Purana code har chat-open par nayi session bana deta tha —
+        // isliye sabse nayi open session aksar KHALI hoti hai aur aaj ki
+        // asli baat-cheet purani open session mein reh jati thi.
+        // Isliye messages wali (newest) session prefer karo.
+        if ((data['messageCount'] as int? ?? 0) > 0) return doc.id;
+        fallback ??= doc.id;
+      }
+    } catch (e) {
+      dev.log('⚠️ getTodayOpenChatSession error: $e');
+    }
+    return null;
+  }
+
+  /// Kal se PEHLE ki OPEN chat sessions (app kill ya bina End Session ke
+  /// chhodi hui) — sweep inka memory save karke close karta hai.
+  /// Local filter taake composite index ki zaroorat na pade.
+  Future<List<Map<String, dynamic>>> getStaleOpenChatSessions() async {
+    final userId = currentUserId;
+    if (userId == null) return [];
+
+    final now = DateTime.now();
+    final dayStart = DateTime(now.year, now.month, now.day);
+
+    try {
+      final snapshot = await _getSessionCollection(userId)
+          .orderBy('createdAt', descending: true)
+          .limit(10)
+          .get();
+
+      final stale = <Map<String, dynamic>>[];
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        if (data['channel'] != 'chat' || data['status'] != 'open') continue;
+        final ts = data['createdAt'] as Timestamp?;
+        if (ts == null || !ts.toDate().isBefore(dayStart)) continue;
+        stale.add({
+          'id': doc.id,
+          'messageCount': data['messageCount'] as int? ?? 0,
+          'createdAt': ts.toDate().toIso8601String(),
+        });
+      }
+      return stale;
+    } catch (e) {
+      dev.log('⚠️ getStaleOpenChatSessions error: $e');
+      return [];
+    }
+  }
+
   // ============================================================
   // MESSAGE METHODS
   // ============================================================
@@ -135,7 +205,12 @@ class FirebaseChatService {
 
   // 🔥 REMOVED the duplicate method — only one getSessionMessages exists.
 
-  Stream<List<Map<String, dynamic>>> listenToMessages(String sessionId) {
+  /// [limit] — pagination: newest [limit] messages (desc order). Older
+  /// messages scroll par load hoti hain (gradual history loading).
+  Stream<List<Map<String, dynamic>>> listenToMessages(
+    String sessionId, {
+    int limit = 50,
+  }) {
     final userId = currentUserId;
     if (userId == null) {
       dev.log('❌ No user, returning empty stream');
@@ -143,6 +218,7 @@ class FirebaseChatService {
     }
     return _getMessagesCollection(userId, sessionId)
         .orderBy('timestamp', descending: true)
+        .limit(limit)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {

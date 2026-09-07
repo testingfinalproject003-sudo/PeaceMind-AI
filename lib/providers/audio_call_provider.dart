@@ -71,7 +71,7 @@ class AudioCallProvider extends ChangeNotifier {
   bool _isBusy = false;
   bool _sttUnavailable = false;
   bool _isListening = false;
-  final String _sessionId = const Uuid().v4();
+  String _sessionId = const Uuid().v4();
   String _sessionSummary = '';
   String _lastSubmittedTranscript = '';
 
@@ -97,6 +97,10 @@ class AudioCallProvider extends ChangeNotifier {
   DateTime? _sessionStartTime;
   int _turnCount = 0;
   bool _historySaved = false;
+
+  /// Duplicate endCall guard — back button + End button race se dobara
+  /// summary/entry nahi banti.
+  bool _endingCall = false;
 
   AudioCallState get state => _state;
   String get statusText => _statusText;
@@ -135,6 +139,10 @@ class AudioCallProvider extends ChangeNotifier {
       return;
     }
 
+    // Har call ek NAYA session hai — provider app-level reuse hone par
+    // bhi fresh id (warna do calls same doc/history id par likhti).
+    _sessionId = const Uuid().v4();
+    _endingCall = false;
     _sessionSummary = await _sessionMemory.buildMemoryContext();
     _userName = await _sessionMemory.fetchUserName();
     _sessionStartTime = DateTime.now();
@@ -401,6 +409,11 @@ class AudioCallProvider extends ChangeNotifier {
   }
 
   Future<void> endCall() async {
+    // Race guard: back button + End button dono ek saath fire ho sakte
+    // hain — dobara endCall duplicate summary/entry nahi banata.
+    if (_endingCall || _state == AudioCallState.ended) return;
+    _endingCall = true;
+
     _state = AudioCallState.ending;
     _statusText = 'Ending session...';
     notifyListeners();
@@ -457,19 +470,24 @@ class AudioCallProvider extends ChangeNotifier {
     }
 
     // Rule 3: save summary to shared cross-session memory store
-    await _sessionMemory.saveSummary(
-      sessionId: _sessionId,
-      summary: finalSummary,
-    );
+    // (non-fatal: offline fail ho to bhi history entry zaroor banti hai)
+    try {
+      await _sessionMemory.saveSummary(
+        sessionId: _sessionId,
+        summary: finalSummary,
+      );
+    } catch (_) {}
 
     // ── Save transcript blob for history replay ──
-    await _audioCallService.saveSessionTranscript(
-      sessionId: _sessionId,
-      transcript: _sessionTranscript,
-    );
+    try {
+      await _audioCallService.saveSessionTranscript(
+        sessionId: _sessionId,
+        transcript: _sessionTranscript,
+      );
+    } catch (_) {}
 
-    // ── History mein session save karo (duration + snippet) ──
-    _saveCallHistory();
+    // ── History mein session save karo (duration + summary) ──
+    _saveCallHistory(finalSummary);
 
     _state = AudioCallState.ended;
     _statusText = 'Session ended';
@@ -479,7 +497,7 @@ class AudioCallProvider extends ChangeNotifier {
 
   /// NOVA call ko RoutineProvider ke history (local + Firestore)
   /// mein 'audio' category ke sath entry bana deta hai.
-  void _saveCallHistory() {
+  void _saveCallHistory(String summary) {
     if (_historySaved) return;
     final provider = routineProvider;
     if (provider == null) return;
@@ -495,6 +513,17 @@ class AudioCallProvider extends ChangeNotifier {
     var snippet = _lastTranscript.trim();
     if (snippet.length > 90) snippet = '${snippet.substring(0, 90)}...';
 
+    // Tile summary: AI summary (max 140 chars), warna last transcript.
+    var tileSummary = summary.trim();
+    if (tileSummary.length > 140) {
+      tileSummary = '${tileSummary.substring(0, 140)}...';
+    }
+
+    final notes = [
+      '${minutes}m ${seconds}s · $_turnCount turns',
+      if (tileSummary.isNotEmpty) tileSummary else snippet,
+    ].join(' — ');
+
     provider.addHistoryEntry(HistoryEntry(
       id: _sessionId,
       routineId: _sessionId,
@@ -502,7 +531,7 @@ class AudioCallProvider extends ChangeNotifier {
       category: 'audio',
       completedAt: DateTime.now(),
       moodScore: null,
-      notes: '${minutes}m ${seconds}s · $_turnCount turns — $snippet',
+      notes: notes,
     ));
   }
 

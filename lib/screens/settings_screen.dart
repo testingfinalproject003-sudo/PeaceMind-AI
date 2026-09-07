@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/routine_provider.dart';
+import '../services/notification_service.dart';
 import 'journal_screen.dart';
 import 'routine_screen.dart';
 import 'history_screen.dart';
@@ -34,6 +36,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
 
   bool _isSaving = false;
+  bool _notificationsOn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationsOn = NotificationService.instance.enabled;
+  }
 
   // ===========================================================================
   // BUILD
@@ -42,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final user = authProvider.currentUser;
+    // final user = authProvider.currentUser;
 
     /*
       AuthProvider Firebase se real user data provide karta hai.
@@ -52,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     */
     final userName = authProvider.userName;
 
-    final routineCount = user?.routineCount ?? 0;
+    // final routineCount = user?.routineCount ?? 0;
     // final taskCount = user?.taskCount ?? 0;
 
     if (authProvider.isLoading) {
@@ -95,8 +104,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingTile(
                     icon: Icons.notifications_none_rounded,
                     title: 'Notifications',
-                    subtitle: 'Manage routine reminders',
-                    onTap: _showNotifications,
+                    subtitle: _notificationsOn
+                        ? 'Routine reminders are on'
+                        : 'Routine reminders are off',
+                    showArrow: false,
+                    trailing: Switch(
+                      value: _notificationsOn,
+                      activeThumbColor: darkBlue,
+                      onChanged: _toggleNotifications,
+                    ),
                   ),
 
                   const SizedBox(height: 18),
@@ -111,7 +127,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingTile(
                     icon: Icons.calendar_month_rounded,
                     title: 'Routine',
-                    subtitle: '$routineCount routines active',
+                    subtitle: 'Manage your routines',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -352,8 +368,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white.withValues(alpha: .40)),
             ),
-            child: const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/home/profile.jpg'),
+            // Profile circle — first letter of the logged-in user's name
+            // (empty/null userName → AuthProvider 'Friend' fallback → 'F').
+            child: Center(
+              child: Text(
+                userName.isEmpty
+                    ? 'F'
+                    : userName.characters.first.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ),
 
@@ -453,8 +480,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
     bool showArrow = true,
+    Widget? trailing,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -501,7 +529,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            if (showArrow)
+            if (trailing != null)
+              trailing
+            else if (showArrow)
               const Icon(
                 Icons.chevron_right_rounded,
                 color: greyText,
@@ -649,75 +679,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // NOTIFICATIONS
   // ===========================================================================
 
-  void _showNotifications() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-          decoration: const BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSheetHandle(),
+  /// Settings switch — notifications on/off. On karne par permission
+  /// request hota hai, phir routines ke reminders reschedule hote hain.
+  Future<void> _toggleNotifications(bool value) async {
+    final granted = await NotificationService.instance.toggle(value);
 
-              const SizedBox(height: 10),
+    if (!mounted) return;
 
-              const Text(
-                'Routine Notifications 🔔',
-                style: TextStyle(
-                  color: darkText,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+    setState(() {
+      _notificationsOn = NotificationService.instance.enabled;
+    });
 
-              const SizedBox(height: 5),
-
-              const Text(
-                'You will receive a reminder when it is time for an enabled routine.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: greyText, fontSize: 9, height: 1.4),
-              ),
-
-              const SizedBox(height: 18),
-
-              Container(
-                margin: const EdgeInsets.only(bottom: 7),
-                padding: const EdgeInsets.all(12),
-                decoration: _glassDecoration(lightLavender),
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.notifications_active_outlined,
-                      color: darkBlue,
-                      size: 20,
-                    ),
-
-                    SizedBox(width: 10),
-
-                    Expanded(
-                      child: Text(
-                        'Routine reminders are based on your saved routines.',
-                        style: TextStyle(
-                          color: darkText,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    if (value && granted) {
+      context.read<RoutineProvider>().syncNotifications();
+    } else if (value && !granted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notification permission is required for reminders.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   // ===========================================================================
@@ -840,22 +822,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // SHEET HANDLE
-  // ===========================================================================
-
-  Widget _buildSheetHandle() {
-    return Container(
-      width: 42,
-      height: 4,
-      margin: const EdgeInsets.only(top: 8, bottom: 5),
-      decoration: BoxDecoration(
-        color: greyText.withValues(alpha: .35),
-        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

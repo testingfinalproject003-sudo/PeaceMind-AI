@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/routine_provider.dart';
 import '../../models/routine_model.dart';
+import '../../utils/routine_cover_resolver.dart';
 
 class RoutineScreen extends StatefulWidget {
   const RoutineScreen({super.key});
@@ -351,6 +352,8 @@ class _RoutineScreenState extends State<RoutineScreen> {
             itemBuilder: (_, i) {
               final r = routines[i];
               final hasCover = r.coverImage != null && r.coverImage!.isNotEmpty;
+              // Auto cover: type se matching asset (manual URL nahi ho to)
+              final autoCover = RoutineCoverResolver.resolveAsset(r);
               
               return Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -369,12 +372,44 @@ class _RoutineScreenState extends State<RoutineScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Stack(
                     children: [
-                      // Background: Cover image or blue gradient
+                      // Background: manual cover image, auto asset, ya blue gradient
                       if (hasCover)
                         Positioned.fill(
                           child: Image.network(
                             r.coverImage!,
                             fit: BoxFit.cover,
+                            // URL fail (offline/expired) → auto asset → gradient
+                            errorBuilder: (_, _, _) => autoCover != null
+                                ? Image.asset(
+                                    autoCover,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Container(
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [Color(0xFF0B6FA8), Color(0xFF2C9BD6)],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [Color(0xFF0B6FA8), Color(0xFF2C9BD6)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        )
+                      else if (autoCover != null)
+                        Positioned.fill(
+                          child: Image.asset(
+                            autoCover,
+                            fit: BoxFit.cover,
+                            // Asset missing → safe gradient fallback
                             errorBuilder: (_, _, _) => Container(
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
@@ -399,12 +434,12 @@ class _RoutineScreenState extends State<RoutineScreen> {
                           ),
                         ),
                       
-                      // Glass overlay
+                      // Glass overlay (manual ya auto cover dono par)
                       Positioned.fill(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: hasCover ? 3 : 0, sigmaY: hasCover ? 3 : 0),
+                          filter: ImageFilter.blur(sigmaX: hasCover || autoCover != null ? 3 : 0, sigmaY: hasCover || autoCover != null ? 3 : 0),
                           child: Container(
-                            color: hasCover 
+                            color: hasCover || autoCover != null
                               ? Colors.black.withValues(alpha : 0.25) 
                               : Colors.transparent,
                           ),

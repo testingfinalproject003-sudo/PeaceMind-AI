@@ -367,9 +367,7 @@ PeaceMind-AI/
 - One-tap emergency helpline screen with local numbers
 - Real doctor / psychiatrist booking flow (Premium tier)
 - Flagged-issue tiering: trauma, eating disorders, substance use → **coping-only mode** with mandatory referral to a real professional
-- Extend cloud TTS (YourVoic) from exercise narration to chat and voice calls
 - Session quota enforcement per tier with upgrade prompts at limits
-- Data-usage explanation screen — transparent disclosure of what is stored and why
 - Clinical review and CBT certification from a qualified mental health professional
 - iOS App Store and Google Play Store release
 

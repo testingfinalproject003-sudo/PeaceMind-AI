@@ -19,8 +19,12 @@ class AiAudioCallScreen extends StatefulWidget {
   State<AiAudioCallScreen> createState() => _AiAudioCallScreenState();
 }
 
-class _AiAudioCallScreenState extends State<AiAudioCallScreen> {
+class _AiAudioCallScreenState extends State<AiAudioCallScreen>
+    with WidgetsBindingObserver {
   final Stopwatch _sessionTimer = Stopwatch();
+
+  /// Kis din call shuru hui — din badalne par auto-save/close.
+  final DateTime _callDay = DateTime.now();
 
   /// UI ko har second refresh karta hai taake call duration
   /// live tick kare (pehle 00:00 hi atka rehta tha).
@@ -29,9 +33,21 @@ class _AiAudioCallScreenState extends State<AiAudioCallScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _sessionTimer.start();
     _uiTick = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      // Din badal gaya — session auto-save/close (End na dabaya ho to bhi).
+      final now = DateTime.now();
+      if (now.year != _callDay.year ||
+          now.month != _callDay.month ||
+          now.day != _callDay.day) {
+        final callProvider = context.read<AudioCallProvider>();
+        Navigator.of(context).maybePop();
+        callProvider.endCall();
+        return;
+      }
+      setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AudioCallProvider>().initialize();
@@ -40,9 +56,19 @@ class _AiAudioCallScreenState extends State<AiAudioCallScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _uiTick?.cancel();
     _sessionTimer.stop();
     super.dispose();
+  }
+
+  /// App band/kill hone par session turant save — summary/history kabhi
+  /// lost na hon (best-effort, fire-and-forget).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      context.read<AudioCallProvider>().endCall();
+    }
   }
 
   String _formatDuration(Duration d) {

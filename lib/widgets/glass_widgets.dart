@@ -27,7 +27,8 @@ class GlassPanel extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            gradient: gradient ??
+            gradient:
+                gradient ??
                 LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -59,10 +60,17 @@ class PillBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(gradient: gradient, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: textColor),
+        style: TextStyle(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
       ),
     );
   }
@@ -98,7 +106,12 @@ class StepTracker extends StatelessWidget {
   final List<ExerciseStep> steps;
   final int current;
   final AppLang lang;
-  const StepTracker({super.key, required this.steps, required this.current, required this.lang});
+  const StepTracker({
+    super.key,
+    required this.steps,
+    required this.current,
+    required this.lang,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +127,14 @@ class StepTracker extends StatelessWidget {
                 children: [
                   if (i != 0)
                     Positioned(
-                      right: MediaQuery.of(context).size.width / (2 * steps.length),
-                      child: Container(height: 2, width: 999, color: AppColors.glassBorder),
+                      right:
+                          MediaQuery.of(context).size.width /
+                          (2 * steps.length),
+                      child: Container(
+                        height: 2,
+                        width: 999,
+                        color: AppColors.glassBorder,
+                      ),
                     ),
                   Container(
                     width: 24,
@@ -124,7 +143,9 @@ class StepTracker extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: active ? AppColors.accentGradient : null,
-                      color: active ? null : (done ? Colors.white : AppColors.glass),
+                      color: active
+                          ? null
+                          : (done ? Colors.white : AppColors.glass),
                       border: Border.all(
                         color: done ? AppColors.accent : AppColors.glassBorder,
                         width: 2,
@@ -138,7 +159,9 @@ class StepTracker extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: active ? Colors.white : (done ? AppColors.accent : AppColors.inkSoft),
+                        color: active
+                            ? Colors.white
+                            : (done ? AppColors.accent : AppColors.inkSoft),
                       ),
                     ),
                   ),
@@ -191,7 +214,11 @@ class TimerBar extends StatelessWidget {
             // Glow dot at the leading edge
             if (clamped > 0.01)
               Positioned(
-                left: (clamped * (MediaQuery.of(context).size.width - 36)).clamp(0.0, 9999.0).toDouble() - 4,
+                left:
+                    (clamped * (MediaQuery.of(context).size.width - 36))
+                        .clamp(0.0, 9999.0)
+                        .toDouble() -
+                    4,
                 top: -2,
                 child: Container(
                   width: 9,
@@ -242,10 +269,14 @@ class TimeRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('${fmtDuration(stepElapsed)} / ${fmtDuration(stepTotal)}',
-              style: const TextStyle(fontSize: 9.5, color: AppColors.inkSoft)),
-          Text('Total ${fmtDuration(sessionTotal)}',
-              style: const TextStyle(fontSize: 9.5, color: AppColors.inkSoft)),
+          Text(
+            '${fmtDuration(stepElapsed)} / ${fmtDuration(stepTotal)}',
+            style: const TextStyle(fontSize: 9.5, color: AppColors.inkSoft),
+          ),
+          Text(
+            'Total ${fmtDuration(sessionTotal)}',
+            style: const TextStyle(fontSize: 9.5, color: AppColors.inkSoft),
+          ),
         ],
       ),
     );
@@ -260,8 +291,10 @@ class LiveDot extends StatefulWidget {
 }
 
 class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-  AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -291,7 +324,11 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
 class ScriptPanel extends StatelessWidget {
   final String visibleText;
   final bool typingDone;
-  const ScriptPanel({super.key, required this.visibleText, required this.typingDone});
+  const ScriptPanel({
+    super.key,
+    required this.visibleText,
+    required this.typingDone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +359,11 @@ class ScriptPanel extends StatelessWidget {
               child: SingleChildScrollView(
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 12.5, height: 1.55, color: AppColors.ink),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      height: 1.55,
+                      color: AppColors.ink,
+                    ),
                     children: [
                       TextSpan(text: visibleText),
                       if (!typingDone)
@@ -365,7 +406,13 @@ class PlayerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _FlatButton(label: 'Previous', enabled: canGoPrev, onTap: onPrev)),
+        Expanded(
+          child: _FlatButton(
+            label: 'Previous',
+            enabled: canGoPrev,
+            onTap: onPrev,
+          ),
+        ),
         const SizedBox(width: 10),
         GestureDetector(
           onTap: onPlayPause,
@@ -394,7 +441,11 @@ class PlayerControls extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(playing ? Icons.pause_rounded : Icons.play_arrow_rounded, color: AppColors.accent, size: 24),
+            child: Icon(
+              playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              color: AppColors.accent,
+              size: 24,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -438,7 +489,13 @@ class _FlatButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.glassBorder),
             boxShadow: primary
-                ? [const BoxShadow(color: Color(0x663E8FDE), blurRadius: 20, offset: Offset(0, 10))]
+                ? [
+                    const BoxShadow(
+                      color: Color(0x663E8FDE),
+                      blurRadius: 20,
+                      offset: Offset(0, 10),
+                    ),
+                  ]
                 : null,
           ),
           child: Text(
@@ -459,7 +516,11 @@ class _FlatButton extends StatelessWidget {
 class LanguageMenu extends StatelessWidget {
   final AppLang current;
   final ValueChanged<AppLang> onSelect;
-  const LanguageMenu({super.key, required this.current, required this.onSelect});
+  const LanguageMenu({
+    super.key,
+    required this.current,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +530,9 @@ class LanguageMenu extends StatelessWidget {
       elevation: 10,
       child: Container(
         padding: const EdgeInsets.all(6),
-        constraints: const BoxConstraints(minWidth: 150),
+        // maxWidth zaroori hai — Row ke andar Stack se aane wale unbounded
+        // constraints par width: double.infinity crash karta tha.
+        constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppLang.values.map((l) {
@@ -479,7 +542,10 @@ class LanguageMenu extends StatelessWidget {
               onTap: () => onSelect(l),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: active ? AppColors.accent : null,
                   borderRadius: BorderRadius.circular(8),

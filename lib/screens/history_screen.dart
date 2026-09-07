@@ -245,6 +245,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
         .where((h) => _filter == 'all' || _filterGroup(h.category) == _filter)
         .toList();
 
+    // ── Session numbering (Chat / Voice Call tiles): chronological —
+    // oldest = Session 1, har type apni numbering (chat aur calls alag).
+    // history newest-first hai, is liye reversed iterate karte hain.
+    final sessionNumbers = <String, int>{};
+    for (final category in const ['chat', 'audio']) {
+      final ids = history
+          .where((h) => h.category == category)
+          .map((h) => h.id)
+          .toList();
+      var n = 0;
+      for (final id in ids.reversed) {
+        n++;
+        sessionNumbers[id] = n;
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF9F4),
       appBar: AppBar(
@@ -591,8 +607,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       itemCount: filteredSessions.length > 30
                           ? 30
                           : filteredSessions.length,
-                      itemBuilder: (_, i) =>
-                          _buildHistoryTile(filteredSessions[i]),
+                      itemBuilder: (_, i) => _buildHistoryTile(
+                            filteredSessions[i],
+                            sessionNumbers,
+                          ),
                     ),
                   const SizedBox(height: 20),
                 ],
@@ -601,8 +619,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // ── Real history tile (task / exercise / voice call) ──
-  Widget _buildHistoryTile(HistoryEntry h) {
+  // ── Real history tile (task / exercise / voice call / chat) ──
+
+  /// Chat / Voice Call tiles "Session 1, Session 2, ..." labeled hoti
+  /// hain — type badge (emoji + label) aur date tile par already hain,
+  /// summary notes mein. Baaki categories apna routineTitle rakhti hain.
+  String _tileTitle(HistoryEntry h, Map<String, int> sessionNumbers) {
+    final isSession = h.category == 'chat' || h.category == 'audio';
+    if (!isSession) return h.routineTitle;
+    final n = sessionNumbers[h.id];
+    return n == null ? h.routineTitle : 'Session $n';
+  }
+
+  Widget _buildHistoryTile(HistoryEntry h, Map<String, int> sessionNumbers) {
     final isVoiceCall = h.category == 'audio';
 
     return Container(
@@ -664,7 +693,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               if (isVoiceCall) const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  h.routineTitle,
+                  _tileTitle(h, sessionNumbers),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

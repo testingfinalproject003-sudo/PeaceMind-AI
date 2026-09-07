@@ -78,6 +78,11 @@ class SessionManager {
     _conversationHistory.clear();
   }
 
+  /// Daily resume: aaj ka open chat session (new session na bana kar
+  /// same session continue karne ke liye).
+  Future<String?> findTodayOpenChatSession() =>
+      _firebaseService.getTodayOpenChatSession();
+
   // ============================================================
   // MESSAGE HANDLING
   // ============================================================
@@ -155,30 +160,59 @@ class SessionManager {
   // REAL-TIME LISTENING
   // ============================================================
 
-  Stream<List<Map<String, dynamic>>> listenToMessages() {
+  Stream<List<Map<String, dynamic>>> listenToMessages({int limit = 50}) {
     if (_currentSessionId == null) {
       return Stream.value([]);
     }
-    return _firebaseService.listenToMessages(_currentSessionId!);
+    return _firebaseService.listenToMessages(_currentSessionId!, limit: limit);
   }
 
   // ============================================================
   // SESSION SUMMARY (AI-Powered)
   // ============================================================
 
-  Future<void> generateSessionSummary({
+  /// Generates the AI summary for a session, saves it to Firestore,
+  /// merges userFacts into the shared memory and updates the overall
+  /// summary.
+  ///
+  /// Returns the shared summary text (topics + insights) so callers can
+  /// store it in the Report/History entry — or null when only a fallback
+  /// summary could be saved.
+  ///
+  /// Duplicate guard: if this session was already summarized (e.g. End
+  /// Session pressed again after a partial failure, or the stale sweep
+  /// re-visiting a closed session), the AI call is skipped entirely so
+  /// overall session counts / memory are never double-written.
+  Future<String?> generateSessionSummary({
     required int durationMinutes,
     required String? pendingTask,
+    // Sweep ke liye explicit session/history — instance state untouched.
+    String? sessionId,
+    List<Map<String, String>>? history,
   }) async {
-    if (_currentSessionId == null) {
+    final sid = sessionId ?? _currentSessionId;
+    if (sid == null) {
       throw Exception('No active session to summarize.');
+    }
+    final conversation = history ?? _conversationHistory;
+
+    // Already summarized once — never double-count a session.
+    try {
+      final existing = await _firebaseService.getSessionSummary(sid);
+      if (existing != null) {
+        dev.log('ℹ️ Summary already exists for $sid — skipping regeneration');
+        final insights = (existing['keyInsights'] ?? '').toString().trim();
+        return insights.isEmpty ? null : insights;
+      }
+    } catch (_) {
+      // Read failure — continue and let the save below be idempotent.
     }
 
     dev.log('📝 Generating session summary...');
 
     try {
       final summaryData = await _apiService.generateSessionSummary(
-        conversationHistory: _conversationHistory,
+        conversationHistory: conversation,
         personalityTag: null,
       );
 
@@ -188,7 +222,7 @@ class SessionManager {
       double averageDistress = 0.0;
       try {
         final messages = await _firebaseService.getSessionMessages(
-          _currentSessionId!,
+          sid,
         );
         final distressValues = messages
             .map((m) => m['distressLevel'] as double?)
@@ -204,7 +238,7 @@ class SessionManager {
       }
 
       await _firebaseService.saveSessionSummary(
-        sessionId: _currentSessionId!,
+        sessionId: sid,
         personalityTag: summaryData['personalityTag'],
         averageDistress: averageDistress,
         techniquesUsed: summaryData['techniquesUsed'],
@@ -212,7 +246,7 @@ class SessionManager {
         keyInsights: summaryData['keyInsights'],
         pendingTask: pendingTask,
         durationMinutes: durationMinutes,
-        messageCount: _conversationHistory.length,
+        messageCount: conversation.length,
         progress: summaryData['progress'],
         unresolvedConcerns: summaryData['unresolved'],
         whatHelped: summaryData['helped'],
@@ -222,6 +256,7 @@ class SessionManager {
       // ── Shared cross-mode memory ──
       // 'userFacts' is only present when the AI extraction succeeded, so
       // fallback summaries never pollute long-term memory.
+      String? sharedSummary;
       if (summaryData.containsKey('userFacts')) {
         final userFacts = List<String>.from(summaryData['userFacts'] ?? []);
         final corrections = List<String>.from(summaryData['corrections'] ?? []);
@@ -245,9 +280,10 @@ class SessionManager {
         ].where((p) => p.trim().isNotEmpty).toList();
 
         if (sharedParts.isNotEmpty) {
+          sharedSummary = sharedParts.join(' ');
           await _sessionMemory.saveSummary(
-            sessionId: _currentSessionId!,
-            summary: sharedParts.join(' '),
+            sessionId: sid,
+            summary: sharedSummary,
           );
         }
       }
@@ -260,9 +296,11 @@ class SessionManager {
           averageDistress: averageDistress,
         );
       }
+      return sharedSummary;
     } catch (e) {
       dev.log('❌ Summary generation error: $e');
       await _saveFallbackSummary(durationMinutes, pendingTask);
+      return null;
     }
   }
 
@@ -283,6 +321,79 @@ class SessionManager {
       messageCount: _conversationHistory.length,
     );
     dev.log('📝 Fallback summary saved');
+  }
+
+  // ============================================================
+  // STALE SESSION SWEEP (abandoned chat memory recovery)
+  // ============================================================
+
+  /// Kal se pehle ki OPEN chat sessions ka memory save karta hai aur sab ko
+  /// close karta hai, aur closed sessions ki list return karta hai
+  /// (`{id, createdAt, messageCount, summary}`) taake caller unhe Report
+  /// history entries bana sake. App kill hone ya din badalne par bina End
+  /// ke chhori gayi conversations ka summary + userFacts yahan recover
+  /// hote hain, taake NOVA agli baar user ki history jaan sake.
+  ///
+  /// Cost guard: sirf last-10 open sessions, aur AI summary sirf unhi
+  /// sessions ka jo 2+ messages rakhti ho (khaali sessions bas close hoti
+  /// hain). Instance state (_currentSessionId) ko touch nahi karta.
+  Future<List<Map<String, dynamic>>> sweepStaleChatSessions() async {
+    final closedSessions = <Map<String, dynamic>>[];
+    try {
+      final staleList = await _firebaseService.getStaleOpenChatSessions();
+      if (staleList.isEmpty) return closedSessions;
+
+      for (final s in staleList) {
+        final id = s['id'] as String;
+        try {
+          final messages = await _firebaseService.getSessionMessages(id);
+          final history = messages.map<Map<String, String>>((msg) {
+            return {
+              'sender': (msg['sender'] as String?) ?? 'nova',
+              'text': (msg['text'] as String?) ?? '',
+            };
+          }).toList();
+
+          var summaryText = '';
+          if (history.length >= 2 && _apiService.isConfigured) {
+            final createdAt = DateTime.tryParse(
+              (s['createdAt'] as String?) ?? '',
+            );
+            final minutes = createdAt == null
+                ? 0
+                : DateTime.now()
+                    .difference(createdAt)
+                    .inMinutes
+                    .clamp(0, 240);
+            final summary = await generateSessionSummary(
+              durationMinutes: minutes,
+              pendingTask: null,
+              sessionId: id,
+              history: history,
+            );
+            summaryText = summary ?? '';
+          }
+
+          await _firebaseService.closeSession(id);
+          closedSessions.add({
+            'id': id,
+            'createdAt': s['createdAt'],
+            'messageCount': history.length,
+            'summary': summaryText,
+          });
+        } catch (e) {
+          dev.log('⚠️ Stale session summary failed ($id): $e');
+          // Memory fail ho to bhi session leak na ho — close to karo.
+          try {
+            await _firebaseService.closeSession(id);
+          } catch (_) {}
+        }
+      }
+      dev.log('🧹 Swept ${staleList.length} stale chat session(s)');
+    } catch (e) {
+      dev.log('⚠️ Stale chat sweep error: $e');
+    }
+    return closedSessions;
   }
 
   Future<void> _updateOverallSummary({

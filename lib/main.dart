@@ -14,6 +14,7 @@ import 'providers/garden_provider.dart';
 import 'providers/journal_provider.dart';
 import 'providers/routine_provider.dart';
 import 'providers/chat_provider.dart';
+import 'services/notification_service.dart';
 
 import 'screens/auth_gate.dart';
 
@@ -33,6 +34,9 @@ void main() async {
       sslEnabled: true,
     );
   }
+
+  // Routine reminder notifications plugin init
+  await NotificationService.instance.init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -77,7 +81,7 @@ class PeaceMindApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: gardenProvider),
 
          ChangeNotifierProvider(
-          create: (_) => ChatProvider(),
+          create: (_) => ChatProvider(routineProvider: routineProvider),
         ),
       ],
       child: MaterialApp(

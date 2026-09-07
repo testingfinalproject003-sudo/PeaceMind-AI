@@ -15,6 +15,7 @@ import '../providers/auth_provider.dart';
 import '../providers/daily_routine_provider.dart';
 import '../providers/garden_provider.dart';
 import '../providers/routine_provider.dart';
+import '../utils/routine_cover_resolver.dart';
 import '../widgets/garden_celebration_card.dart';
 import '../widgets/garden_widget.dart';
 
@@ -67,26 +68,11 @@ class _HomeScreenState extends State<HomeScreen>
   ];
 
   final List<HomeNavigationItem> navigationItems = const [
-    HomeNavigationItem(
-      icon: Icons.chat_bubble_outline_rounded,
-      label: 'Chat',
-    ),
-    HomeNavigationItem(
-      icon: Icons.self_improvement_rounded,
-      label: 'Exercise',
-    ),
-    HomeNavigationItem(
-      icon: Icons.home_rounded,
-      label: 'Home',
-    ),
-    HomeNavigationItem(
-      icon: Icons.phone_outlined,
-      label: 'Call',
-    ),
-    HomeNavigationItem(
-      icon: Icons.settings_outlined,
-      label: 'Settings',
-    ),
+    HomeNavigationItem(icon: Icons.chat_bubble_outline_rounded, label: 'Chat'),
+    HomeNavigationItem(icon: Icons.self_improvement_rounded, label: 'Exercise'),
+    HomeNavigationItem(icon: Icons.home_rounded, label: 'Home'),
+    HomeNavigationItem(icon: Icons.phone_outlined, label: 'Call'),
+    HomeNavigationItem(icon: Icons.settings_outlined, label: 'Settings'),
   ];
 
   @override
@@ -237,7 +223,6 @@ class _HomeScreenState extends State<HomeScreen>
     return sorted.first;
   }
 
-
   _TaskMeta _metaForCategory(String category) {
     switch (category) {
       case 'morning':
@@ -257,8 +242,7 @@ class _HomeScreenState extends State<HomeScreen>
         );
       case 'night':
         return _TaskMeta(
-          subtitle:
-              'Spend a few minutes checking in with yourself.',
+          subtitle: 'Spend a few minutes checking in with yourself.',
           icon: Icons.favorite_outline_rounded,
         );
       default:
@@ -271,8 +255,11 @@ class _HomeScreenState extends State<HomeScreen>
 
   List<PendingTask> _buildPendingTasks(RoutineProvider provider) {
     final now = DateTime.now();
-    final yesterday = DateTime(now.year, now.month, now.day)
-        .subtract(const Duration(days: 1));
+    final yesterday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(const Duration(days: 1));
     final lastCompletion = <String, DateTime>{};
 
     for (final h in provider.history) {
@@ -322,7 +309,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _initializeNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings();
     const initializationSettings = InitializationSettings(
       android: androidSettings,
@@ -349,8 +338,7 @@ class _HomeScreenState extends State<HomeScreen>
       android: AndroidNotificationDetails(
         'routine_channel',
         'Routine Notifications',
-        channelDescription:
-            'Notifications for your daily wellbeing routines.',
+        channelDescription: 'Notifications for your daily wellbeing routines.',
         importance: Importance.high,
         priority: Priority.high,
         enableVibration: true,
@@ -460,22 +448,22 @@ class _HomeScreenState extends State<HomeScreen>
         .where((r) => !_completedExerciseIds.contains(r.id))
         .toList();
 
-    final uncompletedRoutines =
-        allRoutines.where((r) => !r.isCompleted).toList();
+    final uncompletedRoutines = allRoutines
+        .where((r) => !r.isCompleted)
+        .toList();
 
     final allUncompleted = [...uncompletedRoutines, ...activeExercises];
 
-    final todayUserUncompleted =
-        todayRoutines.where((r) => !r.isCompleted).toList();
+    final todayUserUncompleted = todayRoutines
+        .where((r) => !r.isCompleted)
+        .toList();
 
-    final allTodayUncompleted = [
-      ...todayUserUncompleted,
-      ...activeExercises,
-    ];
+    final allTodayUncompleted = [...todayUserUncompleted, ...activeExercises];
 
     final nextRoutine = _getNextRoutine(allUncompleted);
     // Rule 5: day is "done" when all 5 daily tasks are complete
-    final dailyAllDone = dailyProvider.tasks.isNotEmpty && dailyProvider.allCompleted;
+    final dailyAllDone =
+        dailyProvider.tasks.isNotEmpty && dailyProvider.allCompleted;
     final pendingTasks = _buildPendingTasks(provider);
 
     return Scaffold(
@@ -490,21 +478,15 @@ class _HomeScreenState extends State<HomeScreen>
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader(streak)),
                   if (nextRoutine != null)
-                    SliverToBoxAdapter(
-                      child: _buildNextFocusCard(nextRoutine),
-                    ),
+                    SliverToBoxAdapter(child: _buildNextFocusCard(nextRoutine)),
                   if (allUncompleted.isNotEmpty)
                     SliverToBoxAdapter(
                       child: _buildRoutineCarousel(allUncompleted),
                     ),
                   if (allUncompleted.isEmpty && allRoutines.isEmpty)
-                    SliverToBoxAdapter(
-                      child: _buildSetRoutineCard(),
-                    ),
+                    SliverToBoxAdapter(child: _buildSetRoutineCard()),
                   SliverToBoxAdapter(child: _buildMoodTracker()),
-                  SliverToBoxAdapter(
-                    child: const GardenWidget(),
-                  ),
+                  SliverToBoxAdapter(child: const GardenWidget()),
                   // Rule 5: Today's Daily 5 auto-generated tasks
                   if (dailyProvider.tasks.isNotEmpty)
                     SliverToBoxAdapter(
@@ -520,9 +502,7 @@ class _HomeScreenState extends State<HomeScreen>
                     SliverToBoxAdapter(
                       child: _buildPendingTasksSection(pendingTasks),
                     ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 24),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
               ),
             ),
@@ -546,9 +526,7 @@ class _HomeScreenState extends State<HomeScreen>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white.withValues(alpha: 0.72),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.80),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
               boxShadow: [
                 BoxShadow(
                   color: darkBlue.withValues(alpha: 0.08),
@@ -557,10 +535,20 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            // Profile circle — first letter of the logged-in user's name
+            // (empty/null userName → AuthProvider 'Friend' fallback → 'F').
+            child: CircleAvatar(
               radius: 27,
-              backgroundImage: AssetImage(
-                'assets/images/home/profile.jpg',
+              backgroundColor: Colors.white.withValues(alpha: 0.85),
+              child: Text(
+                userName.isEmpty
+                    ? 'F'
+                    : userName.characters.first.toUpperCase(),
+                style: const TextStyle(
+                  color: darkBlue,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
@@ -609,9 +597,7 @@ class _HomeScreenState extends State<HomeScreen>
             decoration: BoxDecoration(
               color: lightLavender.withValues(alpha: 0.78),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.85)),
             ),
             child: Column(
               children: [
@@ -639,9 +625,7 @@ class _HomeScreenState extends State<HomeScreen>
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.72),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.80),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
                 boxShadow: [
                   BoxShadow(
                     color: darkBlue.withValues(alpha: 0.08),
@@ -670,6 +654,10 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildNextFocusCard(Routine nextRoutine) {
+    // Auto cover: manual URL nahi to type se matching asset (exercise/
+    // journal/morning/pray/family), warna existing gradient fallback.
+    final nextAsset = RoutineCoverResolver.resolveAsset(nextRoutine);
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -681,11 +669,7 @@ class _HomeScreenState extends State<HomeScreen>
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [
-              Color(0xFF063A5E),
-              Color(0xFF0B6FA8),
-              Color(0xFF2C9BD6),
-            ],
+            colors: [Color(0xFF063A5E), Color(0xFF0B6FA8), Color(0xFF2C9BD6)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -705,8 +689,10 @@ class _HomeScreenState extends State<HomeScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.24),
                     borderRadius: BorderRadius.circular(8),
@@ -720,10 +706,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.chevron_right,
-                  color: Colors.white70,
-                ),
+                const Icon(Icons.chevron_right, color: Colors.white70),
               ],
             ),
             const SizedBox(height: 14),
@@ -761,16 +744,19 @@ class _HomeScreenState extends State<HomeScreen>
                             image: NetworkImage(nextRoutine.coverImage!),
                             fit: BoxFit.cover,
                           )
-                        : null,
-                    color: nextRoutine.coverImage == null
+                        : (nextAsset != null
+                              ? DecorationImage(
+                                  image: AssetImage(nextAsset),
+                                  fit: BoxFit.cover,
+                                  onError: (_, _) {},
+                                )
+                              : null),
+                    color: nextRoutine.coverImage == null && nextAsset == null
                         ? Colors.white.withValues(alpha: 0.24)
                         : null,
                   ),
-                  child: nextRoutine.coverImage == null
-                      ? const Icon(
-                          Icons.self_improvement,
-                          color: Colors.white,
-                        )
+                  child: nextRoutine.coverImage == null && nextAsset == null
+                      ? const Icon(Icons.self_improvement, color: Colors.white)
                       : null,
                 ),
               ],
@@ -832,10 +818,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildRoutineCard(
-    Routine routine, {
-    bool isExercise = false,
-  }) {
+  Widget _buildRoutineCard(Routine routine, {bool isExercise = false}) {
     return GestureDetector(
       onTap: () {
         // Exercise task → seedha us exercise ka player khulta hai
@@ -845,9 +828,8 @@ class _HomeScreenState extends State<HomeScreen>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ExercisePlayerScreen(
-                exercise: info ?? boxBreathingExercise,
-              ),
+              builder: (_) =>
+                  ExercisePlayerScreen(exercise: info ?? boxBreathingExercise),
             ),
           ).then((result) {
             // Exercise done → show Yappy celebration card on home screen.
@@ -871,16 +853,58 @@ class _HomeScreenState extends State<HomeScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (routine.coverImage != null &&
-                  routine.coverImage!.isNotEmpty)
+              // Auto cover: manual URL > matching asset (exercise/journal/
+              // morning/pray/family) > category gradient fallback
+              if (routine.coverImage != null && routine.coverImage!.isNotEmpty)
                 Image.network(
                   routine.coverImage!,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
+                    // URL fail → pehle auto asset try karo, phir gradient
+                    final fallbackAsset = RoutineCoverResolver.resolveAsset(
+                      routine,
+                    );
+                    if (fallbackAsset != null) {
+                      return Image.asset(
+                        fallbackAsset,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [darkGreen, darkBlue],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
                     return Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [darkGreen, darkBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              else if (RoutineCoverResolver.resolveAsset(routine) != null)
+                Image.asset(
+                  RoutineCoverResolver.resolveAsset(routine)!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Asset missing → existing gradient fallback
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _catColor(routine.category).withValues(alpha: 0.8),
+                            _catColor(routine.category),
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -922,7 +946,9 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 9, vertical: 5),
+                            horizontal: 9,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.90),
                             borderRadius: BorderRadius.circular(10),
@@ -1082,8 +1108,7 @@ class _HomeScreenState extends State<HomeScreen>
           GestureDetector(
             onTap: _setRoutine,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(13),
@@ -1144,7 +1169,10 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: darkGreen.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(999),
@@ -1184,16 +1212,28 @@ class _HomeScreenState extends State<HomeScreen>
                       color: task.isCompleted
                           ? const Color(0xFF10B981).withValues(alpha: 0.15)
                           : (isExercise
-                              ? const Color(0xFFB39DDB).withValues(alpha: 0.18)
-                              : const Color(0xFFE3B15F).withValues(alpha: 0.18)),
+                                ? const Color(
+                                    0xFFB39DDB,
+                                  ).withValues(alpha: 0.18)
+                                : const Color(
+                                    0xFFE3B15F,
+                                  ).withValues(alpha: 0.18)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
                       child: task.isCompleted
-                          ? const Icon(Icons.check_rounded, color: Color(0xFF10B981), size: 18)
+                          ? const Icon(
+                              Icons.check_rounded,
+                              color: Color(0xFF10B981),
+                              size: 18,
+                            )
                           : Icon(
-                              isExercise ? Icons.self_improvement_rounded : Icons.menu_book_rounded,
-                              color: isExercise ? const Color(0xFF7E57C2) : const Color(0xFFE3B15F),
+                              isExercise
+                                  ? Icons.self_improvement_rounded
+                                  : Icons.menu_book_rounded,
+                              color: isExercise
+                                  ? const Color(0xFF7E57C2)
+                                  : const Color(0xFFE3B15F),
                               size: 18,
                             ),
                     ),
@@ -1208,29 +1248,43 @@ class _HomeScreenState extends State<HomeScreen>
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
-                            color: task.isCompleted ? const Color(0xFF10B981) : darkText,
-                            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                            color: task.isCompleted
+                                ? const Color(0xFF10B981)
+                                : darkText,
+                            decoration: task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
                           ),
                         ),
                         if (task.subtitle.isNotEmpty)
                           Text(
                             task.subtitle,
-                            style: const TextStyle(fontSize: 10, color: greyText),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: greyText,
+                            ),
                           ),
                       ],
                     ),
                   ),
-                  if (isExercise && !task.isCompleted && task.exerciseInfo != null)
+                  if (isExercise &&
+                      !task.isCompleted &&
+                      task.exerciseInfo != null)
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ExercisePlayerScreen(exercise: task.exerciseInfo!),
+                            builder: (_) => ExercisePlayerScreen(
+                              exercise: task.exerciseInfo!,
+                            ),
                           ),
                         ).then((result) {
                           if (result is String) {
-                            _showGardenCelebration(taskTitle: result, growTree: false);
+                            _showGardenCelebration(
+                              taskTitle: result,
+                              growTree: false,
+                            );
                           }
                           if (mounted) {
                             setState(() {});
@@ -1240,9 +1294,14 @@ class _HomeScreenState extends State<HomeScreen>
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7E57C2).withValues(alpha: 0.12),
+                          color: const Color(
+                            0xFF7E57C2,
+                          ).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
@@ -1260,7 +1319,9 @@ class _HomeScreenState extends State<HomeScreen>
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const JournalScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const JournalScreen(),
+                          ),
                         ).then((_) {
                           if (mounted) {
                             dailyProvider.ensureTodayRoutine();
@@ -1268,9 +1329,14 @@ class _HomeScreenState extends State<HomeScreen>
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE3B15F).withValues(alpha: 0.15),
+                          color: const Color(
+                            0xFFE3B15F,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
@@ -1335,7 +1401,9 @@ class _HomeScreenState extends State<HomeScreen>
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(16),
@@ -1356,8 +1424,9 @@ class _HomeScreenState extends State<HomeScreen>
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _catColor(r.category)
-                                .withValues(alpha: 0.15),
+                            color: _catColor(
+                              r.category,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
@@ -1410,7 +1479,10 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               ).then((result) {
                                 if (result is String) {
-                                  _showGardenCelebration(taskTitle: result, growTree: false);
+                                  _showGardenCelebration(
+                                    taskTitle: result,
+                                    growTree: false,
+                                  );
                                 }
                                 if (mounted) {
                                   setState(() {});
@@ -1471,16 +1543,36 @@ class _HomeScreenState extends State<HomeScreen>
               builder: (ctx, setSt) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _moodFace('😢', 20, selectedMoodScore == 20,
-                      () => setSt(() => selectedMoodScore = 20)),
-                  _moodFace('😕', 40, selectedMoodScore == 40,
-                      () => setSt(() => selectedMoodScore = 40)),
-                  _moodFace('🙂', 60, selectedMoodScore == 60,
-                      () => setSt(() => selectedMoodScore = 60)),
-                  _moodFace('😄', 80, selectedMoodScore == 80,
-                      () => setSt(() => selectedMoodScore = 80)),
-                  _moodFace('🤩', 100, selectedMoodScore == 100,
-                      () => setSt(() => selectedMoodScore = 100)),
+                  _moodFace(
+                    '😢',
+                    20,
+                    selectedMoodScore == 20,
+                    () => setSt(() => selectedMoodScore = 20),
+                  ),
+                  _moodFace(
+                    '😕',
+                    40,
+                    selectedMoodScore == 40,
+                    () => setSt(() => selectedMoodScore = 40),
+                  ),
+                  _moodFace(
+                    '🙂',
+                    60,
+                    selectedMoodScore == 60,
+                    () => setSt(() => selectedMoodScore = 60),
+                  ),
+                  _moodFace(
+                    '😄',
+                    80,
+                    selectedMoodScore == 80,
+                    () => setSt(() => selectedMoodScore = 80),
+                  ),
+                  _moodFace(
+                    '🤩',
+                    100,
+                    selectedMoodScore == 100,
+                    () => setSt(() => selectedMoodScore = 100),
+                  ),
                 ],
               ),
             ),
@@ -1489,15 +1581,13 @@ class _HomeScreenState extends State<HomeScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  final provider =
-                      context.read<RoutineProvider>();
+                  final provider = context.read<RoutineProvider>();
 
                   if (completingTaskIds.contains(routineId)) return;
 
                   completingTaskIds.add(routineId);
 
-                  final completedTitle =
-                      _getRoutineTitle(provider, routineId);
+                  final completedTitle = _getRoutineTitle(provider, routineId);
 
                   // Rule 4: Exercises complete ONLY from their own
                   // player screen (_finishSession), never from here.
@@ -1507,19 +1597,14 @@ class _HomeScreenState extends State<HomeScreen>
                   }
 
                   // Complete user routine (non-exercise)
-                  provider.completeRoutine(
-                    routineId,
-                    selectedMoodScore,
-                  );
+                  provider.completeRoutine(routineId, selectedMoodScore);
 
                   if (!mounted) return;
 
                   Navigator.pop(ctx);
 
                   // Show celebration + garden growth
-                  await _showGardenCelebration(
-                    taskTitle: completedTitle,
-                  );
+                  await _showGardenCelebration(taskTitle: completedTitle);
 
                   completingTaskIds.remove(routineId);
                 },
@@ -1544,26 +1629,17 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _moodFace(
-    String emoji,
-    int value,
-    bool selected,
-    VoidCallback onTap,
-  ) {
+  Widget _moodFace(String emoji, int value, bool selected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFFE3B15F)
-              : const Color(0xFFF1ECFA),
+          color: selected ? const Color(0xFFE3B15F) : const Color(0xFFF1ECFA),
           shape: BoxShape.circle,
         ),
-        child: Center(
-          child: Text(emoji, style: const TextStyle(fontSize: 22)),
-        ),
+        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
       ),
     );
   }
@@ -1576,11 +1652,7 @@ class _HomeScreenState extends State<HomeScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF315C53),
-            Color(0xFF4CAF50),
-            Color(0xFF8BC34A),
-          ],
+          colors: [Color(0xFF315C53), Color(0xFF4CAF50), Color(0xFF8BC34A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1620,8 +1692,10 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.20),
                         borderRadius: BorderRadius.circular(999),
@@ -1681,17 +1755,12 @@ class _HomeScreenState extends State<HomeScreen>
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFFECE8FA),
-            Color(0xFFE7F0EC),
-          ],
+          colors: [Color(0xFFECE8FA), Color(0xFFE7F0EC)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.80),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
         boxShadow: [
           BoxShadow(
             color: darkBlue.withValues(alpha: 0.07),
@@ -1720,10 +1789,7 @@ class _HomeScreenState extends State<HomeScreen>
                     SizedBox(height: 3),
                     Text(
                       'No judgement here 💚',
-                      style: TextStyle(
-                        color: greyText,
-                        fontSize: 9,
-                      ),
+                      style: TextStyle(color: greyText, fontSize: 9),
                     ),
                   ],
                 ),
@@ -1815,10 +1881,7 @@ class _HomeScreenState extends State<HomeScreen>
       fit: BoxFit.contain,
       repeat: true,
       errorBuilder: (context, error, stackTrace) {
-        return Text(
-          mood,
-          style: const TextStyle(fontSize: 40),
-        );
+        return Text(mood, style: const TextStyle(fontSize: 40));
       },
     );
   }
@@ -1859,9 +1922,7 @@ class _HomeScreenState extends State<HomeScreen>
               : Colors.transparent,
           borderRadius: BorderRadius.circular(17),
           border: isSelected
-              ? Border.all(
-                  color: darkBlue.withValues(alpha: 0.10),
-                )
+              ? Border.all(color: darkBlue.withValues(alpha: 0.10))
               : null,
         ),
         child: Column(
@@ -2000,19 +2061,12 @@ class _HomeScreenState extends State<HomeScreen>
                 const SizedBox(height: 2),
                 Text(
                   '${task.missedDay} · ${task.missedCount}',
-                  style: const TextStyle(
-                    color: greyText,
-                    fontSize: 8,
-                  ),
+                  style: const TextStyle(color: greyText, fontSize: 8),
                 ),
               ],
             ),
           ),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: greyText,
-            size: 18,
-          ),
+          const Icon(Icons.chevron_right_rounded, color: greyText, size: 18),
         ],
       ),
     );
@@ -2037,64 +2091,59 @@ class _HomeScreenState extends State<HomeScreen>
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              navigationItems.length,
-              (index) {
-                final item = navigationItems[index];
-                final selected = selectedNavigation == index;
+            children: List.generate(navigationItems.length, (index) {
+              final item = navigationItems[index];
+              final selected = selectedNavigation == index;
 
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => _selectNavigation(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: selected ? 16 : 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          selected ? royalOcean : Colors.transparent,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: selected
-                          ? [
-                              BoxShadow(
-                                color:
-                                    royalOcean.withValues(alpha: 0.35),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          item.icon,
-                          color: selected
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.55),
-                          size: 22,
-                        ),
-                        if (selected) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            item.label,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _selectNavigation(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOutCubic,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: selected ? 16 : 12,
+                    vertical: 8,
                   ),
-                );
-              },
-            ),
+                  decoration: BoxDecoration(
+                    color: selected ? royalOcean : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: royalOcean.withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        item.icon,
+                        color: selected
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.55),
+                        size: 22,
+                      ),
+                      if (selected) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          item.label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -2173,18 +2222,12 @@ class HomeNavigationItem {
   final IconData icon;
   final String label;
 
-  const HomeNavigationItem({
-    required this.icon,
-    required this.label,
-  });
+  const HomeNavigationItem({required this.icon, required this.label});
 }
 
 class _TaskMeta {
   final String subtitle;
   final IconData icon;
 
-  _TaskMeta({
-    required this.subtitle,
-    required this.icon,
-  });
+  _TaskMeta({required this.subtitle, required this.icon});
 }

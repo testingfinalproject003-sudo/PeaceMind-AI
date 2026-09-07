@@ -1,44 +1,76 @@
 import 'package:flutter/material.dart';
 
 import '../data/exercises.dart';
+import '../models/exercise_models.dart';
+import '../widgets/glass_widgets.dart';
 import 'exercise_player_screen.dart';
 
-class ExerciseScreen extends StatelessWidget {
+class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({super.key});
+
+  @override
+  State<ExerciseScreen> createState() => _ExerciseScreenState();
+}
+
+class _ExerciseScreenState extends State<ExerciseScreen> {
+  AppLang _lang = AppLang.en;
+  bool _showLangMenu = false;
 
   static const Color background = Color(0xFFF3F6E8);
   static const Color darkBlue = Color(0xFF202952);
   static const Color darkText = Color(0xFF303450);
   static const Color greyText = Color(0xFF777B94);
 
-  static final List<_ExerciseData> _exercises = [
+  // ── Translations ──
+  static const _screenTr = {
+    'header':     {AppLang.en: 'Exercise', AppLang.ur: 'مشقیں', AppLang.urRoman: 'Mashqain', AppLang.pa: 'ਅਭਿਆਸ'},
+    'footer':     {AppLang.en: 'More exercises coming soon', AppLang.ur: 'مزید مشقیں جلد آ رہی ہیں', AppLang.urRoman: 'Mazeed mashqain jald aa rahi hain', AppLang.pa: 'ਹੋਰ ਅਭਿਆਸ ਜਲਦ ਆ ਰਹੇ ਹਨ'},
+  };
+
+  static const _tileTr = {
+    'box_breathing_title':    {AppLang.en: 'Box Breathing', AppLang.ur: 'باکس بریتھنگ', AppLang.urRoman: 'Box Breathing', AppLang.pa: 'ਬਾਕਸ ਸਾਹ'},
+    'box_breathing_subtitle': {AppLang.en: '3 cycles • Calm your mind', AppLang.ur: '3 چکر • ذہن کو سکون دیں', AppLang.urRoman: '3 chakkar • Zehn ko sukoon dein', AppLang.pa: '3 ਚੱਕਰ • ਮਨ ਨੂੰ ਸ਼ਾਂਤ ਕਰੋ'},
+    'grounding_title':        {AppLang.en: 'Grounding 5-4-3-2-1', AppLang.ur: 'گراؤنڈنگ 5-4-3-2-1', AppLang.urRoman: 'Grounding 5-4-3-2-1', AppLang.pa: 'ਗਰਾਊਂਡਿੰਗ 5-4-3-2-1'},
+    'grounding_subtitle':     {AppLang.en: 'Reconnect with senses', AppLang.ur: 'حواس سے دوبارہ جڑیں', AppLang.urRoman: 'Hawas se dobara jurein', AppLang.pa: 'ਇੰਦਰੀਆਂ ਨਾਲ ਦੁਬਾਰਾ ਜੁੜੋ'},
+    'mind_walking_title':     {AppLang.en: 'Mindful Walking', AppLang.ur: 'توجہ سے چلنا', AppLang.urRoman: 'Tawajjo Se Chalna', AppLang.pa: 'ਧਿਆਨ ਨਾਲ ਤੁਰਨਾ'},
+    'mind_walking_subtitle':  {AppLang.en: 'Walk with awareness', AppLang.ur: 'آگاہی کے ساتھ چلیں', AppLang.urRoman: 'Aagahi ke saath chalein', AppLang.pa: 'ਜਾਗਰੂਕਤਾ ਨਾਲ ਤੁਰੋ'},
+    'body_scan_title':        {AppLang.en: 'Body Scan', AppLang.ur: 'باڈی اسکین', AppLang.urRoman: 'Body Scan', AppLang.pa: 'ਸਰੀਰ ਸਕੈਨ'},
+    'body_scan_subtitle':     {AppLang.en: 'Release tension slowly', AppLang.ur: 'تناؤ آہستہ آہستہ چھوڑیں', AppLang.urRoman: 'Tanao aahista aahista chorein', AppLang.pa: 'ਤਣਾਅ ਹੌਲੀ-ਹੌਲੀ ਛੱਡੋ'},
+  };
+
+  String _t(String key, Map<String, Map<AppLang, String>> map) {
+    final entry = map[key];
+    return entry?[_lang] ?? entry?[AppLang.en] ?? key;
+  }
+
+  List<_ExerciseData> get _exercises => [
     _ExerciseData(
-      title: 'Box Breathing',
-      subtitle: '3 cycles • Calm your mind',
+      title: _t('box_breathing_title', _tileTr),
+      subtitle: _t('box_breathing_subtitle', _tileTr),
       asset: 'assets/images/box_breathing_cover.png',
       fallbackIcon: Icons.self_improvement_rounded,
       color: const Color(0xFFECE8FA),
       exerciseInfo: boxBreathingExercise,
     ),
     _ExerciseData(
-      title: 'Grounding 5-4-3-2-1',
-      subtitle: 'Reconnect with senses',
+      title: _t('grounding_title', _tileTr),
+      subtitle: _t('grounding_subtitle', _tileTr),
       asset: 'assets/images/grounding_cover.png',
       fallbackIcon: Icons.spa_rounded,
       color: const Color(0xFFE5F3EC),
       exerciseInfo: groundingExercise,
     ),
     _ExerciseData(
-      title: 'Mindful Walking',
-      subtitle: 'Walk with awareness',
+      title: _t('mind_walking_title', _tileTr),
+      subtitle: _t('mind_walking_subtitle', _tileTr),
       asset: 'assets/images/mindful_walking_cover.png',
       fallbackIcon: Icons.directions_walk_rounded,
       color: const Color(0xFFFDECE3),
       exerciseInfo: mindWalkingExercise,
     ),
     _ExerciseData(
-      title: 'Body Scan',
-      subtitle: 'Release tension slowly',
+      title: _t('body_scan_title', _tileTr),
+      subtitle: _t('body_scan_subtitle', _tileTr),
       asset: 'assets/images/body_scan_cover.png',
       fallbackIcon: Icons.accessibility_new_rounded,
       color: const Color(0xFFE8EEF7),
@@ -51,33 +83,61 @@ class ExerciseScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildHeader(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildExerciseGrid(context),
-                    const SizedBox(height: 24),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        'More exercises coming soon 🌱',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: greyText,
-                          fontSize: 12,
-                          height: 1.5,
+            Column(
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildExerciseGrid(context),
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            _t('footer', _screenTr),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: greyText,
+                              fontSize: 12,
+                              height: 1.5,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+              ],
+            ),
+            // Language menu — root (full-screen) Stack mein render hota hai:
+            // header ke chhote Stack ke bounds ke bahar hit-test fail hota
+            // tha, aur barrier menu ke NEECHE hai taaki Urdu/en tap ho sake.
+            if (_showLangMenu)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => setState(() => _showLangMenu = false),
+                  child: Container(color: Colors.transparent),
                 ),
               ),
-            ),
+            if (_showLangMenu)
+              Positioned(
+                top: 64,
+                right: 20,
+                child: LanguageMenu(
+                  current: _lang,
+                  onSelect: (lang) {
+                    setState(() {
+                      _lang = lang;
+                      _showLangMenu = false;
+                    });
+                  },
+                ),
+              ),
           ],
         ),
       ),
@@ -85,10 +145,11 @@ class ExerciseScreen extends StatelessWidget {
   }
 
   Widget _buildExerciseGrid(BuildContext context) {
+    final exercises = _exercises;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _exercises.length,
+      itemCount: exercises.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 14,
@@ -106,7 +167,7 @@ class ExerciseScreen extends StatelessWidget {
               child: Opacity(opacity: value, child: child),
             );
           },
-          child: _buildExerciseTile(context, _exercises[index]),
+          child: _buildExerciseTile(context, exercises[index]),
         );
       },
     );
@@ -258,13 +319,34 @@ class ExerciseScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 13),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Exercise',
-              style: TextStyle(
+              _t('header', _screenTr),
+              style: const TextStyle(
                 color: darkText,
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          // Language button — menu build() ke root Stack mein render hota hai
+          // (header ke chhote Stack ke bounds ke BAHAR tap register nahi hota).
+          GestureDetector(
+            onTap: () => setState(() => _showLangMenu = !_showLangMenu),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFF202952),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: .85),
+                ),
+              ),
+              child: const Icon(
+                Icons.language_rounded,
+                color: background,
+                size: 18,
               ),
             ),
           ),

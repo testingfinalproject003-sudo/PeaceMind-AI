@@ -1,0 +1,683 @@
+﻿Launching lib\main.dart on Sparx Neo 7 Ultra in debug mode...
+Running Gradle task 'assembleDebug'...                          
+flutter : Warning: Flutter support for your project's Android Gradle Plugin 
+version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please 
+upgrade your Android Gradle Plugin version to a version of at least Android 
+Gradle Plugin version 9.0.1 soon.
+At line:1 char:30
++ ... d d:\Flutter\PeaceMind-AI; flutter run -d neo7U230914699 2>&1 | Out-F ...
++                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: Flutte...ion 9.0.1 soon. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Alternatively, use the flag "--android-skip-build-dependency-validation" to 
+bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins 
+block of the `settings.gradle` file 
+(D:\Flutter\PeaceMind-AI\android/settings.gradle), by a plugin with the id of 
+com.android.application. 
+If you don't see a plugins block, your project was likely created with an 
+older template version. In this case it is most likely defined in the 
+top-level build.gradle file (D:\Flutter\PeaceMind-AI\android/build.gradle) by 
+the following line in the dependencies block of the buildscript: "classpath 
+'com.android.tools.build:gradle:<version>'".
+
+Warning: Flutter support for your project's Kotlin version (2.2.20) will soon 
+be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 
+soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to 
+bypass this check.
+
+Potential fix: Your project's KGP version is typically defined in the plugins 
+block of the `settings.gradle` file 
+(D:\Flutter\PeaceMind-AI\android/settings.gradle), by a plugin with the id of 
+org.jetbrains.kotlin.android. 
+If you don't see a plugins block, your project was likely created with an 
+older template version, in which case it is most likely defined in the 
+top-level build.gradle file (D:\Flutter\PeaceMind-AI\android/build.gradle) by 
+the ext.kotlin_version property.
+
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+E/flutter ( 6049): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+E/flutter ( 6049): #0      ChatProvider._restartMessageListener.<anonymous closure> (package:peace_mind_ai/providers/chat_provider.dart:621:9)
+E/flutter ( 6049): #1      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #2      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #3      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #4      _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #5      _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #6      _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #10     _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #11     _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #12     _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #13     _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #14     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #15     _DelayedData.perform (dart:async/stream_impl.dart:573:14)
+E/flutter ( 6049): #16     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)
+E/flutter ( 6049): #17     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)
+E/flutter ( 6049): #18     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter ( 6049): #19     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter ( 6049): 
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+E/flutter ( 6049): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+E/flutter ( 6049): #0      ChatProvider._restartMessageListener.<anonymous closure> (package:peace_mind_ai/providers/chat_provider.dart:621:9)
+E/flutter ( 6049): #1      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #2      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #3      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #4      _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #5      _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #6      _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #10     _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #11     _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #12     _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #13     _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #14     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #15     _DelayedData.perform (dart:async/stream_impl.dart:573:14)
+E/flutter ( 6049): #16     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)
+E/flutter ( 6049): #17     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)
+E/flutter ( 6049): #18     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter ( 6049): #19     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter ( 6049): 
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+D/FlutterJNI( 6049): Sending viewport metrics to the engine.
+E/flutter ( 6049): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+E/flutter ( 6049): #0      ChatProvider._restartMessageListener.<anonymous closure> (package:peace_mind_ai/providers/chat_provider.dart:621:9)
+E/flutter ( 6049): #1      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #2      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #3      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #4      _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #5      _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #6      _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #10     _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #11     _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #12     _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #13     _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #14     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #15     _DelayedData.perform (dart:async/stream_impl.dart:573:14)
+E/flutter ( 6049): #16     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)
+E/flutter ( 6049): #17     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)
+E/flutter ( 6049): #18     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter ( 6049): #19     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter ( 6049): 
+E/flutter ( 6049): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+E/flutter ( 6049): #0      ChatProvider._restartMessageListener.<anonymous closure> (package:peace_mind_ai/providers/chat_provider.dart:621:9)
+E/flutter ( 6049): #1      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #2      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #3      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #4      _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #5      _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #6      _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #10     _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #11     _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #12     _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #13     _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #14     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #15     _DelayedData.perform (dart:async/stream_impl.dart:573:14)
+E/flutter ( 6049): #16     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)
+E/flutter ( 6049): #17     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)
+E/flutter ( 6049): #18     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter ( 6049): #19     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter ( 6049): 
+E/flutter ( 6049): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+E/flutter ( 6049): #0      ChatProvider._restartMessageListener.<anonymous closure> (package:peace_mind_ai/providers/chat_provider.dart:621:9)
+E/flutter ( 6049): #1      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #2      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #3      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #4      _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #5      _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #6      _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+E/flutter ( 6049): #10     _ForwardingStreamSubscription._add (dart:async/stream_pipe.dart:154:11)
+E/flutter ( 6049): #11     _MapStream._handleData (dart:async/stream_pipe.dart:252:10)
+E/flutter ( 6049): #12     _ForwardingStreamSubscription._handleData (dart:async/stream_pipe.dart:184:13)
+E/flutter ( 6049): #13     _RootZone.runUnaryGuarded (dart:async/zone.dart:963:10)
+E/flutter ( 6049): #14     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+E/flutter ( 6049): #15     _DelayedData.perform (dart:async/stream_impl.dart:573:14)
+E/flutter ( 6049): #16     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)
+E/flutter ( 6049): #17     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)
+E/flutter ( 6049): #18     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter ( 6049): #19     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter ( 6049): 
+Running Gradle task 'assembleDebug'...                             53.4s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...           6.0s
+I/FlutterActivityAndFragmentDelegate( 6758): If you are attempting to set --enable-dart-profiling via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set --enable-dart-profiling or any other flags specified via Intent extras on the command line instead or see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.
+D/FlutterJNI( 6758): Beginning load of flutter...
+D/FlutterJNI( 6758): flutter (null) was loaded normally!
+I/flutter ( 6758): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+D/FlutterRenderer( 6758): Width is zero. 0,0
+D/FlutterRenderer( 6758): Width is zero. 0,0
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/Choreographer( 6758): Skipped 34 frames!  The application may be doing too much work on its main thread.
+Syncing files to device Sparx Neo 7 Ultra...                    
+I/TextToSpeech( 6758): Connected to TTS engine
+Syncing files to device Sparx Neo 7 Ultra...                       298ms
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on Sparx Neo 7 Ultra is available at: http://127.0.0.1:60575/W2HrgPEnDV0=/
+The Flutter DevTools debugger and profiler on Sparx Neo 7 Ultra is available at: http://127.0.0.1:60575/W2HrgPEnDV0=/devtools/?uri=ws://127.0.0.1:60575/W2HrgPEnDV0=/ws
+I/TextToSpeech( 6758): Setting up the connection to TTS engine...
+I/Choreographer( 6758): Skipped 227 frames!  The application may be doing too much work on its main thread.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/Choreographer( 6758): Skipped 73 frames!  The application may be doing too much work on its main thread.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/gralloc4( 6758): register: id=25a00001dab, vaddr=0x76e200a000
+I/OpenGLRenderer( 6758): Davey! duration=870ms; Flags=1, FrameTimelineVsyncId=1590794, IntendedVsync=24152219583444, Vsync=24153030694547, InputEventId=0, HandleInputStart=24153038627953, AnimationStart=24153038632415, PerformTraversalsStart=24153038635953, DrawStart=24153048784145, FrameDeadline=24152240805666, FrameInterval=24153038510184, FrameStartTime=11111111, SyncQueued=24153049811799, SyncStart=24153049870145, IssueDrawCommandsStart=24153064792069, SwapBuffers=24153085881838, FrameCompleted=24153089663376, DequeueBufferDuration=2401269, QueueBufferDuration=1206500, GpuCompleted=24153089663376, SwapBuffersCompleted=24153088978107, DisplayPresentTime=0, 
+D/ProfileInstaller( 6758): Installing profile for com.example.peace_mind_ai
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F....ID 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/gralloc4( 6758): register: id=25a00001dac, vaddr=0x7a40d90000
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/gralloc4( 6758): register: id=25a00001db1, vaddr=0x7a40919000
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/FirebaseAuth( 6758): Logging in as noorkhan738484748@gmail.com with empty reCAPTCHA token
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+W/System  ( 6758): Ignoring header X-Firebase-Locale because its value was null.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+I/gralloc4( 6758): register: id=25a00001db2, vaddr=0x7a3d08f000
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+W/FeatureFlagsImplExport( 6758): java.lang.NoClassDefFoundError: Class not found using the boot class loader; no stack trace available
+W/System  ( 6758): Ignoring header X-Firebase-Locale because its value was null.
+D/FirebaseAuth( 6758): Notifying id token listeners about user ( re0spKCNWdbH6Ispw6i3ZEPtNYI2 ).
+D/FirebaseAuth( 6758): Notifying auth state listeners about user ( re0spKCNWdbH6Ispw6i3ZEPtNYI2 ).
+W/DynamiteModule( 6758): Local module descriptor class for com.google.android.gms.providerinstaller.dynamite not found.
+I/DynamiteModule( 6758): Considering local module com.google.android.gms.providerinstaller.dynamite:0 and remote module com.google.android.gms.providerinstaller.dynamite:0
+W/ProviderInstaller( 6758): Failed to load providerinstaller module: No acceptable module com.google.android.gms.providerinstaller.dynamite found. Local version is 0 and remote version is 0.
+D/nativeloader( 6758): Configuring clns-5 for other apk /system/framework/org.apache.http.legacy.jar. target_sdk_version=37, uses_libraries=ALL, library_path=/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/lib/arm64:/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+D/nativeloader( 6758): Configuring clns-6 for other apk /apex/com.android.extservices/javalib/android.ext.adservices.jar. target_sdk_version=37, uses_libraries=ALL, library_path=/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/lib/arm64:/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+D/nativeloader( 6758): InitApexLibraries:
+D/nativeloader( 6758):   com_android_appsearch: libicing.so
+D/nativeloader( 6758):   com_android_art: libartservice.so
+D/nativeloader( 6758):   com_android_conscrypt: libjavacrypto.so
+D/nativeloader( 6758):   com_android_extservices: libtflite_support_classifiers_native.so
+D/nativeloader( 6758):   com_android_mediaprovider: libpdfclient.so
+D/nativeloader( 6758):   com_android_os_statsd: libstats_jni.so
+D/nativeloader( 6758):   com_android_tethering: libandroid_net_connectivity_com_android_net_module_util_jni.so:libandroid_net_connectivity_com_android_net_module_util_jni_CommonConnectivityJni.so:libcrypto_httpengine.so:libframework-connectivity-jni.so:libframework-connectivity-tiramisu-jni.so:libhttpengine.so:libservice-connectivity.so:libservice-thread-jni.so
+D/nativeloader( 6758): Configuring clns-7 for other apk /system/framework/com.android.location.provider.jar. target_sdk_version=37, uses_libraries=ALL, library_path=/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/lib/arm64:/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+D/nativeloader( 6758): Configuring clns-8 for other apk /system/framework/com.android.media.remotedisplay.jar. target_sdk_version=37, uses_libraries=ALL, library_path=/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/lib/arm64:/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+D/nativeloader( 6758): Configuring clns-9 for other apk /data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk. target_sdk_version=37, uses_libraries=, library_path=/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/lib/arm64:/data/app/~~YHIVjy5nFD1AfqUW2VSvOw==/com.google.android.gms-_Ly6rWzA9mcnEus_NvU5MQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+I/e.peace_mind_a( 6758): hiddenapi: Accessing hidden method Ldalvik/system/VMStack;->getStackClass2()Ljava/lang/Class; (runtime_flags=0, domain=core-platform, api=unsupported) from Lhokn; (domain=app, TargetSdkVersion=36) using reflection: allowed
+E/GoogleApiManager( 6758): Failed to get service from broker. 
+E/GoogleApiManager( 6758): java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
+E/GoogleApiManager( 6758): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:2448)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.createException(Parcel.java:2432)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.readException(Parcel.java:2415)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.readException(Parcel.java:2357)
+E/GoogleApiManager( 6758): 	at blon.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):36)
+E/GoogleApiManager( 6758): 	at blmg.y(:com.google.android.gms@263330029@26.33.30 (190400-965716001):143)
+E/GoogleApiManager( 6758): 	at bksb.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):42)
+E/GoogleApiManager( 6758): 	at android.os.Handler.handleCallback(Handler.java:938)
+E/GoogleApiManager( 6758): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+E/GoogleApiManager( 6758): 	at devb.mu(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+E/GoogleApiManager( 6758): 	at devb.dispatchMessage(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+E/GoogleApiManager( 6758): 	at android.os.Looper.loopOnce(Looper.java:201)
+E/GoogleApiManager( 6758): 	at android.os.Looper.loop(Looper.java:288)
+E/GoogleApiManager( 6758): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+W/GoogleApiManager( 6758): Not showing notification since connectionResult is not user-facing: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagRegistrar( 6758): Failed to register com.google.android.gms.providerinstaller#com.example.peace_mind_ai
+W/FlagRegistrar( 6758): gsyl: 17: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagRegistrar( 6758): 	at gsyn.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):13)
+W/FlagRegistrar( 6758): 	at htwr.d(:com.google.android.gms@263330029@26.33.30 (190400-965716001):3)
+W/FlagRegistrar( 6758): 	at htwt.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):139)
+W/FlagRegistrar( 6758): 	at htzb.execute(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagRegistrar( 6758): 	at htxb.f(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagRegistrar( 6758): 	at htxb.m(:com.google.android.gms@263330029@26.33.30 (190400-965716001):101)
+W/FlagRegistrar( 6758): 	at htxb.q(:com.google.android.gms@263330029@26.33.30 (190400-965716001):16)
+W/FlagRegistrar( 6758): 	at gmhj.kb(:com.google.android.gms@263330029@26.33.30 (190400-965716001):35)
+W/FlagRegistrar( 6758): 	at fyfw.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):12)
+W/FlagRegistrar( 6758): 	at htzb.execute(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagRegistrar( 6758): 	at fyfx.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):18)
+W/FlagRegistrar( 6758): 	at fygm.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):34)
+W/FlagRegistrar( 6758): 	at fygo.c(:com.google.android.gms@263330029@26.33.30 (190400-965716001):23)
+W/FlagRegistrar( 6758): 	at bkpj.e(:com.google.android.gms@263330029@26.33.30 (190400-965716001):9)
+W/FlagRegistrar( 6758): 	at bkrz.r(:com.google.android.gms@263330029@26.33.30 (190400-965716001):48)
+W/FlagRegistrar( 6758): 	at bkrz.d(:com.google.android.gms@263330029@26.33.30 (190400-965716001):10)
+W/FlagRegistrar( 6758): 	at bkrz.g(:com.google.android.gms@263330029@26.33.30 (190400-965716001):191)
+W/FlagRegistrar( 6758): 	at bksb.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):74)
+W/FlagRegistrar( 6758): 	at android.os.Handler.handleCallback(Handler.java:938)
+W/FlagRegistrar( 6758): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+W/FlagRegistrar( 6758): 	at devb.mu(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagRegistrar( 6758): 	at devb.dispatchMessage(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+W/FlagRegistrar( 6758): 	at android.os.Looper.loopOnce(Looper.java:201)
+W/FlagRegistrar( 6758): 	at android.os.Looper.loop(Looper.java:288)
+W/FlagRegistrar( 6758): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+W/FlagRegistrar( 6758): Caused by: bknn: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagRegistrar( 6758): 	at blls.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):15)
+W/FlagRegistrar( 6758): 	at bkpm.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagRegistrar( 6758): 	at bkpj.e(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+W/FlagRegistrar( 6758): 	... 11 more
+W/FlagStore( 6758): Unable to update local snapshot for com.google.android.gms.providerinstaller#com.example.peace_mind_ai, may result in stale flags.
+W/FlagStore( 6758): java.util.concurrent.ExecutionException: gsyl: 17: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagStore( 6758): 	at htxb.j(:com.google.android.gms@263330029@26.33.30 (190400-965716001):21)
+W/FlagStore( 6758): 	at htxj.t(:com.google.android.gms@263330029@26.33.30 (190400-965716001):24)
+W/FlagStore( 6758): 	at htxb.get(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at hubq.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):2)
+W/FlagStore( 6758): 	at huag.s(:com.google.android.gms@263330029@26.33.30 (190400-965716001):10)
+W/FlagStore( 6758): 	at gtdt.d(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at gtcx.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+W/FlagStore( 6758): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)
+W/FlagStore( 6758): 	at java.util.concurrent.FutureTask.run(FutureTask.java:328)
+W/FlagStore( 6758): 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:323)
+W/FlagStore( 6758): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+W/FlagStore( 6758): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+W/FlagStore( 6758): 	at java.lang.Thread.run(Thread.java:1572)
+W/FlagStore( 6758): Caused by: gsyl: 17: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagStore( 6758): 	at gsyn.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):13)
+W/FlagStore( 6758): 	at htwr.d(:com.google.android.gms@263330029@26.33.30 (190400-965716001):3)
+W/FlagStore( 6758): 	at htwt.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):139)
+W/FlagStore( 6758): 	at htzb.execute(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at htxb.f(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at htxb.m(:com.google.android.gms@263330029@26.33.30 (190400-965716001):101)
+W/FlagStore( 6758): 	at htxb.q(:com.google.android.gms@263330029@26.33.30 (190400-965716001):16)
+W/FlagStore( 6758): 	at gmhj.kb(:com.google.android.gms@263330029@26.33.30 (190400-965716001):35)
+W/FlagStore( 6758): 	at fyfw.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):12)
+W/FlagStore( 6758): 	at htzb.execute(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at fyfx.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):18)
+W/FlagStore( 6758): 	at fygm.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):34)
+W/FlagStore( 6758): 	at fygt.B(:com.google.android.gms@263330029@26.33.30 (190400-965716001):17)
+W/FlagStore( 6758): 	at fyfo.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):60)
+W/FlagStore( 6758): 	at htzb.execute(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at fyfp.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):8)
+W/FlagStore( 6758): 	at fygm.b(:com.google.android.gms@263330029@26.33.30 (190400-965716001):34)
+W/FlagStore( 6758): 	at fygo.c(:com.google.android.gms@263330029@26.33.30 (190400-965716001):23)
+W/FlagStore( 6758): 	at bkpj.e(:com.google.android.gms@263330029@26.33.30 (190400-965716001):9)
+W/FlagStore( 6758): 	at bkrz.r(:com.google.android.gms@263330029@26.33.30 (190400-965716001):48)
+W/FlagStore( 6758): 	at bkrz.d(:com.google.android.gms@263330029@26.33.30 (190400-965716001):10)
+W/FlagStore( 6758): 	at bkrz.g(:com.google.android.gms@263330029@26.33.30 (190400-965716001):191)
+W/FlagStore( 6758): 	at bksb.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):74)
+W/FlagStore( 6758): 	at android.os.Handler.handleCallback(Handler.java:938)
+W/FlagStore( 6758): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+W/FlagStore( 6758): 	at devb.mu(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at devb.dispatchMessage(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+W/FlagStore( 6758): 	at android.os.Looper.loopOnce(Looper.java:201)
+W/FlagStore( 6758): 	at android.os.Looper.loop(Looper.java:288)
+W/FlagStore( 6758): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+W/FlagStore( 6758): Caused by: bknn: 17: API: Phenotype.API is not available on this device. Connection failed with: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+W/FlagStore( 6758): 	at blls.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):15)
+W/FlagStore( 6758): 	at bkpm.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+W/FlagStore( 6758): 	at bkpj.e(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+W/FlagStore( 6758): 	... 11 more
+I/ProviderInstaller( 6758): Installed default security provider AndroidOpenSSL (via CompatProvider)
+E/GoogleApiManager( 6758): Failed to get service from broker. 
+E/GoogleApiManager( 6758): java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
+E/GoogleApiManager( 6758): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:2448)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.createException(Parcel.java:2432)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.readException(Parcel.java:2415)
+E/GoogleApiManager( 6758): 	at android.os.Parcel.readException(Parcel.java:2357)
+E/GoogleApiManager( 6758): 	at blon.a(:com.google.android.gms@263330029@26.33.30 (190400-965716001):36)
+E/GoogleApiManager( 6758): 	at blmg.y(:com.google.android.gms@263330029@26.33.30 (190400-965716001):143)
+E/GoogleApiManager( 6758): 	at bksb.run(:com.google.android.gms@263330029@26.33.30 (190400-965716001):42)
+E/GoogleApiManager( 6758): 	at android.os.Handler.handleCallback(Handler.java:938)
+E/GoogleApiManager( 6758): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+E/GoogleApiManager( 6758): 	at devb.mu(:com.google.android.gms@263330029@26.33.30 (190400-965716001):1)
+E/GoogleApiManager( 6758): 	at devb.dispatchMessage(:com.google.android.gms@263330029@26.33.30 (190400-965716001):5)
+E/GoogleApiManager( 6758): 	at android.os.Looper.loopOnce(Looper.java:201)
+E/GoogleApiManager( 6758): 	at android.os.Looper.loop(Looper.java:288)
+E/GoogleApiManager( 6758): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+W/GoogleApiManager( 6758): Not showing notification since connectionResult is not user-facing: ConnectionResult{statusCode=DEVELOPER_ERROR, resolution=null, message=null, clientMethodKey=null}
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 6758): Flattened final assist data: 468 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/TTS     ( 6758): Utterance ID has been stopped: 2db987ff-227d-4aaf-a3e5-61251a8b273d. Interrupted: false
+D/TTS     ( 6758): Utterance ID has started: d3e0f150-be26-4080-9885-f859c782082b
+D/TTS     ( 6758): Utterance ID has completed: d3e0f150-be26-4080-9885-f859c782082b
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/TTS     ( 6758): Utterance ID has started: 599fdc7c-66e2-4748-a73a-a42c75a97047
+D/TTS     ( 6758): Utterance ID has been stopped: 599fdc7c-66e2-4748-a73a-a42c75a97047. Interrupted: true
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: ffb5d8cc-d0f2-43fe-9698-9d309b5b7ddb
+D/TTS     ( 6758): Utterance ID has completed: ffb5d8cc-d0f2-43fe-9698-9d309b5b7ddb
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: f89e453d-4090-4211-98ee-546da2f100e0
+D/TTS     ( 6758): Utterance ID has completed: f89e453d-4090-4211-98ee-546da2f100e0
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: 59873bba-86d7-4269-aac7-2499b2bc5059
+D/TTS     ( 6758): Utterance ID has completed: 59873bba-86d7-4269-aac7-2499b2bc5059
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: 55090fe1-787e-4654-9880-aa47613525f3
+D/TTS     ( 6758): Utterance ID has completed: 55090fe1-787e-4654-9880-aa47613525f3
+D/TTS     ( 6758): Utterance ID has started: 7b3d283f-a56f-483e-bdf8-52a897df4437
+D/TTS     ( 6758): Utterance ID has been stopped: 7b3d283f-a56f-483e-bdf8-52a897df4437. Interrupted: true
+D/BluetoothAdapter( 6758): adapter = null
+D/TTS     ( 6758): Utterance ID has started: 0455bf01-b1f9-4c3d-9b82-ff0bff9239fa
+D/TTS     ( 6758): Utterance ID has been stopped: 0455bf01-b1f9-4c3d-9b82-ff0bff9239fa. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: 3de50133-dda1-4d12-8c89-3be623983806
+D/TTS     ( 6758): Utterance ID has been stopped: 3de50133-dda1-4d12-8c89-3be623983806. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: 1cd054df-31b7-4907-b235-e85d797fb108
+D/TTS     ( 6758): Utterance ID has been stopped: 1cd054df-31b7-4907-b235-e85d797fb108. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: c549f5df-4827-4221-a8d8-cf88614b2257
+D/TTS     ( 6758): Utterance ID has been stopped: c549f5df-4827-4221-a8d8-cf88614b2257. Interrupted: true
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 6758): Flattened final assist data: 492 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+I/AssistStructure( 6758): Flattened final assist data: 508 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+I/AssistStructure( 6758): Flattened final assist data: 492 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+I/AssistStructure( 6758): Flattened final assist data: 508 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+I/AssistStructure( 6758): Flattened final assist data: 508 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY IMAGE RESOURCE SERVICE Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following NetworkImageLoadException was thrown resolving an image codec:
+HTTP request failed, statusCode: 404,
+https://images.unsplash.com/photo-1515023115689-589c33041697?w=400&q=80
+
+When the exception was thrown, this was the stack:
+#0      NetworkImage._loadAsync (package:flutter/src/painting/_network_image_io.dart:131:9)
+<asynchronous suspension>
+#1      MultiFrameImageStreamCompleter._handleCodecReady (package:flutter/src/painting/image_stream.dart:1053:3)
+<asynchronous suspension>
+
+Image provider:
+  NetworkImage("https://images.unsplash.com/photo-1515023115689-589c33041697?w=400&q=80", scale:
+  1.0, webHtmlElementStrategy: never, headers: null)
+Image key: NetworkImage("https://images.unsplash.com/photo-1515023115689-589c33041697?w=400&q=80",
+  scale: 1.0, webHtmlElementStrategy: never, headers: null)
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+Another exception was thrown: HTTP request failed, statusCode: 404, https://images.unsplash.com/photo-1515023115689-589c33041697?w=400&q=80
+D/InputMethodManager( 6758): showSoftInput() view=io.flutter.embedding.android.FlutterView{1a916fb VFE...... .F...... 0,0-720,1568 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 6758): Flattened final assist data: 484 bytes, containing 1 windows, 3 views
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring on
+D/InsetsController( 6758): show(ime(), fromIme=true)
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor( 6758): The input method toggled cursor monitoring off
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/FlutterJNI( 6758): Sending viewport metrics to the engine.
+D/CompatibilityChangeReporter( 6758): Compat change id reported: 160794467; UID 10554; state: ENABLED
+I/gralloc4( 6758): unregister: id=25a00001da7, vaddr=0x76f7ba0000
+I/gralloc4( 6758): unregister: id=25a00001da8, vaddr=0x76f7740000
+I/gralloc4( 6758): unregister: id=25a00001da9, vaddr=0x76f72e0000
+I/gralloc4( 6758): unregister: id=25a00001daa, vaddr=0x76f6e80000
+I/e.peace_mind_a( 6758): Waiting for a blocking GC ProfileSaver
+I/gralloc4( 6758): unregister: id=25a00001dab, vaddr=0x76e200a000
+I/gralloc4( 6758): unregister: id=25a00001db1, vaddr=0x7a40919000
+I/gralloc4( 6758): unregister: id=25a00001db2, vaddr=0x7a3d08f000
+I/gralloc4( 6758): unregister: id=25a00001dac, vaddr=0x7a40d90000
+I/e.peace_mind_a( 6758): WaitForGcToComplete blocked ProfileSaver on CollectorTransition for 64.870ms
+I/gralloc4( 6758): register: id=25a00001e2b, vaddr=0x7a40da7000
+I/gralloc4( 6758): register: id=25a00001e2c, vaddr=0x7a40947000
+I/gralloc4( 6758): register: id=25a00001e2d, vaddr=0x7a3d2a0000
+I/gralloc4( 6758): register: id=25a00001e2e, vaddr=0x7934fd0000
+I/gralloc4( 6758): register: id=25a00001e2f, vaddr=0x7934b59000
+I/gralloc4( 6758): register: id=25a00001e30, vaddr=0x79346e2000
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/TTS     ( 6758): Utterance ID has started: 427ea005-29ae-4282-9425-c2a8bb17d948
+D/TTS     ( 6758): Utterance ID has been stopped: 427ea005-29ae-4282-9425-c2a8bb17d948. Interrupted: true
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: 22f89500-ee37-4838-a7de-d0076ca681e8
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 2
+D/sdf     ( 6758): ev.getPointerCount() 3
+D/sdf     ( 6758): ev.getPointerCount() 3
+D/sdf     ( 6758): ev.getPointerCount() 3
+D/sdf     ( 6758): ev.getPointerCount() 3
+D/sdf     ( 6758): Intercept the key Three finger to capture screen
+D/TTS     ( 6758): Utterance ID has been stopped: 22f89500-ee37-4838-a7de-d0076ca681e8. Interrupted: true
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+I/flutter ( 6758): [YourVoic] HTTP 400: {"success":false,"error":"Rapid Flash model does not support the selected voice or language 'ur-PK'. Supported languages: da-DK, de-DE, en-AU, en-GB, en-IN, en-US, es-ES, es-US, fil-PH, fr-CA, fr-FR, 
+D/TTS     ( 6758): Utterance ID has started: 14eb7df3-7fd2-4aaa-bce4-0e797fdca035
+D/TTS     ( 6758): Utterance ID has been stopped: 14eb7df3-7fd2-4aaa-bce4-0e797fdca035. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: 81f360e0-71ba-4c4c-a7e7-cad67f7e2bb9
+D/TTS     ( 6758): Utterance ID has been stopped: 81f360e0-71ba-4c4c-a7e7-cad67f7e2bb9. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: 7d1dbe7a-f80a-44a2-bcac-466a2a804d43
+D/TTS     ( 6758): Utterance ID has been stopped: 7d1dbe7a-f80a-44a2-bcac-466a2a804d43. Interrupted: true
+D/TTS     ( 6758): Utterance ID has started: d2513efe-f4f3-4e52-9004-247639ac4cc5
+D/TTS     ( 6758): Utterance ID has been stopped: d2513efe-f4f3-4e52-9004-247639ac4cc5. Interrupted: true
+I/gralloc4( 6758): unregister: id=25a00001e2b, vaddr=0x7a40da7000
+I/gralloc4( 6758): unregister: id=25a00001e2d, vaddr=0x7a3d2a0000
+I/gralloc4( 6758): unregister: id=25a00001e2e, vaddr=0x7934fd0000
+I/gralloc4( 6758): unregister: id=25a00001e2c, vaddr=0x7a40947000
+I/gralloc4( 6758): unregister: id=25a00001e2f, vaddr=0x7934b59000
+I/gralloc4( 6758): unregister: id=25a00001e30, vaddr=0x79346e2000
+Lost connection to device.

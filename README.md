@@ -52,6 +52,8 @@ Natural AI conversation — no forms, no questionnaires, no clinical intake. Jus
 - **Urdu replies auto-spoken via TTS**: when the user speaks Urdu, NOVA's reply is automatically spoken aloud using the `[SPEAK:true]` tag — no tap required.
 - **English replies are text-only**: the manual play button appears for English responses, giving users control over audio playback.
 - **Session summary on end**: when a chat session concludes, NOVA generates a summary that is saved to Firestore history — building a record of progress over time.
+- **Daily session lifecycle**: the same day's chat session is automatically resumed on app restart (no lost conversations), auto-closes at midnight rollover (summary + memory saved), and abandoned sessions from previous days are swept — summarized, closed, and recorded into Report history.
+- **Progressive history loading**: chat history loads newest-first in pages of 50; older messages stream in on scroll with the view position held stable — fast open even for long sessions.
 
 ---
 
@@ -82,6 +84,18 @@ Four fully animated, CBT-based exercises — each with step-by-step narration, a
 | **Grounding 5-4-3-2-1** | Sensory awareness across five senses | Sense orbs, ripple effects, and floating motes per stage |
 | **Body Scan** | Progressive body awareness from head to toe | Body-node glow animation traveling across a body silhouette |
 | **Mindful Walking** | Attentive walking meditation | Animated path with footstep markers and ambient scene |
+
+Exercises are fully localized — the player runs in **English or Urdu** (switchable via the in-player language menu), with narration delivered through cloud TTS in a natural Urdu voice.
+
+#### Exercise in Urdu
+
+![Box Breathing exercise running in Urdu](assets/screenshots/ex_urdu.jpeg)
+
+When the language is set to Urdu, the entire guided session runs in Urdu — voice and text together:
+
+- **Urdu step labels** — each step of the progress indicator is displayed in Urdu script, with completed / current / upcoming states preserved.
+- **Urdu voice-guided narration** — the AI Therapist speaks every step aloud in a natural Urdu voice (YourVoic cloud TTS), with the spoken script shown live on screen.
+- **Everything stays in sync** — cycle counter, per-step timer, total session time, and progress bar track the Urdu narration exactly as they do in English.
 
 Each exercise ends with a **completion overlay** showing time spent, cycles completed, calm/focus scores, and garden progress gained.
 
@@ -120,7 +134,7 @@ Auto-generates a fresh set of **exactly 5 tasks per day**: 4 exercises + 1 journ
 The Garden replaces a meaningless login streak with a **visual growth system driven only by real task completion**. Meaningless taps do not count.
 
 - **12-slot visual garden** displayed on the home screen.
-- **Exercise completed** (all steps finished in the player) → **+1 tree**
+- **Exercise completed** (all steps finished in the player) → **+1 tree** — grown slots render a static garden-tree asset for a consistent look.
 - **Journal entry saved** → **+1 tree**
 - **Full garden (12 trees)** → `gardenStreak++` and all slots reset to 0 — marking one completed "garden cycle," not a daily login.
 - **NOT a login streak**: opening the app without doing anything earns nothing.
@@ -151,6 +165,7 @@ All charts and metrics are powered by **real session data only** — no fake or 
 | **Chat path** | Model hardcoded in `services/api_chat_service.dart` |
 | **Voice path** | Model loaded from `.env` → `OPENROUTER_MODEL` |
 | **Conversation approach** | CBT-based (Cognitive Behavioral Therapy) |
+| **Credit usage** | Minimal — chat replies capped at `max_tokens: 400`, session summaries at `max_tokens: 350` |
 
 Every AI reply is parsed for hidden control tags:
 
@@ -255,13 +270,15 @@ This flag is **never deleted** — it persists across all future sessions to ens
 | Local storage | SharedPreferences | All providers and services |
 | AI — Chat | OpenRouter REST, `qwen/qwen-plus` | `services/api_chat_service.dart` |
 | AI — Voice | OpenRouter REST, `qwen/qwen-plus` | `services/audio_call_service.dart` |
-| STT | `speech_to_text` plugin | `services/speech_to_text_service.dart` |
-| TTS | `flutter_tts` (on-device voices) | `services/speech_to_text_service.dart` |
+| STT | `speech_to_text` plugin (SpeechListenOptions API) | `services/speech_to_text_service.dart` |
+| TTS — chat & voice calls | `flutter_tts` (on-device voices) | `widgets/audio_player_widget.dart`, call pipeline |
+| TTS — exercise narration | **YourVoic cloud TTS** (natural Urdu/English voices) | `services/yourvoice_tts_service.dart` |
+| Notifications | `flutter_local_notifications` | `services/notification_service.dart` |
 | Charts | `fl_chart` | `screens/history_screen.dart` |
 | Animations | Lottie + `AnimationController` | `assets/animations/`, `lib/widgets/stage/` |
 | Config | `flutter_dotenv` (`.env` file) | `.env`, `main.dart` |
 
-> **Note:** `.env` contains `TTS_MODEL` and `YOUR_VOICE_API_KEY` fields, but no code reads them yet. Current TTS uses on-device `flutter_tts` voices. Cloud TTS integration is planned for a future release.
+> **Note:** Cloud TTS is live for exercise narration via **YourVoic** (`YOUR_VOICE_API_KEY` in `.env`); chat and voice calls still use on-device `flutter_tts` voices.
 
 ---
 
@@ -311,7 +328,8 @@ PeaceMind-AI/
 │   ├── images/                   # splash.png, exercise covers, home backgrounds
 │   └── screenshots/              # signup.jpeg, signin.jpeg, home.jpeg, exercise.jpeg,
 │                                   setting.jpeg, report.jpeg, journal.jpeg, routine.jpeg,
-│                                   chat1.jpeg, chat2.jpeg, call1.jpeg, call2.jpeg
+│                                   chat1.jpeg, chat2.jpeg, call1.jpeg, call2.jpeg,
+│                                   ex_urdu.jpeg
 └── lib/
     ├── main.dart                 # Entry: dotenv + Firebase init + MultiProvider + AuthGate
     ├── firebase_options.dart
@@ -349,7 +367,7 @@ PeaceMind-AI/
 - One-tap emergency helpline screen with local numbers
 - Real doctor / psychiatrist booking flow (Premium tier)
 - Flagged-issue tiering: trauma, eating disorders, substance use → **coping-only mode** with mandatory referral to a real professional
-- Cloud TTS integration — replace on-device `flutter_tts` voices with high-quality API-based voices
+- Extend cloud TTS (YourVoic) from exercise narration to chat and voice calls
 - Session quota enforcement per tier with upgrade prompts at limits
 - Data-usage explanation screen — transparent disclosure of what is stored and why
 - Clinical review and CBT certification from a qualified mental health professional
